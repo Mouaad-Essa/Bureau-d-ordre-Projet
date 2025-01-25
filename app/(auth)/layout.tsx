@@ -5,7 +5,6 @@ export default async function AuthLayout({
 }) {
   return (
     <div>
-      Login layouy
       {children}
     </div>
   );
