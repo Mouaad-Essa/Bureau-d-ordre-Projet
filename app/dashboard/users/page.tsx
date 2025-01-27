@@ -28,6 +28,7 @@ import * as XLSX from 'xlsx';
 import { EditUserSheet } from "./EditUserSheet"; // Import the new component
 import { AddUserSheet } from "./AddUserSheet";
 import { ConfirmDeleteDialog } from "./DeleteDialog";
+import { useRouter } from "next/navigation";
 
 const users = [
     {
@@ -325,7 +326,6 @@ const users = [
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
-    const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<{
     id: number;
     nom: string;
@@ -333,6 +333,8 @@ const users = [
     email: string;
     telephone: string;
     } | null>(null);
+
+    const router = useRouter();
 
     // Handle edit button click
     const handleEditClick = (user: any) => {
@@ -342,7 +344,7 @@ const users = [
 
     //handle add button click
     const handleAddclick = () => {
-        setIsAddSheetOpen(true);
+        router.push("/dashboard/users/add");
     };
 
     const handleDeleteClick = (user: any) => {
@@ -524,8 +526,6 @@ const users = [
 
             {/* Edit User Sheet */}
             {selectedUser && <EditUserSheet user={selectedUser} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} onSave={() => alert("saved")} />}
-            {/* Add User Sheet */}
-            {<AddUserSheet isOpen={isAddSheetOpen} onOpenChange={setIsAddSheetOpen} onSave={() => alert("saved")} />}
 
             {selectedUser && (
             <ConfirmDeleteDialog
