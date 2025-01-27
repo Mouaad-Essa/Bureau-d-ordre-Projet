@@ -21,10 +21,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"; // Dropdown menu components
 import DataTable from 'react-data-table-component';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { EditUserSheet } from "./EditUserSheet"; // Import the new component
+import { AddUserSheet } from "./AddUserSheet";
+import { ConfirmDeleteDialog } from "./DeleteDialog";
 
 const users = [
     {
@@ -308,44 +311,6 @@ const users = [
         telephone: "+212537654360",
       },
   ];
-
-  // Column definitions (in French)
-const columns = [
-    {
-      name: 'ID',
-      selector: (row: { id: any; }) => row.id,
-      sortable: true,
-    },
-    {
-      name: 'Nom',
-      selector: (row: { nom: any; }) => row.nom,
-      sortable: true,
-    },
-    {
-      name: 'Prénom',
-      selector: (row: { prenom: any; }) => row.prenom,
-      sortable: true,
-    },
-    {
-      name: 'Email',
-      selector: (row: { email: any; }) => row.email,
-      sortable: true,
-    },
-    {
-        name: 'Téléphone',
-        selector: (row: { telephone: any; }) => row.telephone,
-        sortable: true,
-    },
-    {
-        name: "Actions",
-        cell: (row: any) => (
-            <div className="space-x-2">
-                <Button variant="update" onClick={() => alert(row.id)}><Edit /></Button>
-                <Button variant="delete" onClick={() => alert(row.id)}><Trash /></Button>
-            </div>
-        )
-    }
-  ];
   
   // Custom French translations for pagination
   const paginationComponentOptions = {
@@ -357,6 +322,71 @@ const columns = [
   };
   
   export default function Page() {
+
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [isAddSheetOpen, setIsAddSheetOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<{
+    id: number;
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone: string;
+    } | null>(null);
+
+    // Handle edit button click
+    const handleEditClick = (user: any) => {
+        setSelectedUser(user);
+        setIsSheetOpen(true);
+    };
+
+    //handle add button click
+    const handleAddclick = () => {
+        setIsAddSheetOpen(true);
+    };
+
+    const handleDeleteClick = (user: any) => {
+        setSelectedUser(user);
+        setIsDialogOpen(true);
+    };
+
+    // Column definitions (in French)
+    const columns = [
+        {
+        name: 'ID',
+        selector: (row: { id: any; }) => row.id,
+        sortable: true,
+        },
+        {
+        name: 'Nom',
+        selector: (row: { nom: any; }) => row.nom,
+        sortable: true,
+        },
+        {
+        name: 'Prénom',
+        selector: (row: { prenom: any; }) => row.prenom,
+        sortable: true,
+        },
+        {
+        name: 'Email',
+        selector: (row: { email: any; }) => row.email,
+        sortable: true,
+        },
+        {
+            name: 'Téléphone',
+            selector: (row: { telephone: any; }) => row.telephone,
+            sortable: true,
+        },
+        {
+            name: "Actions",
+            cell: (row: any) => (
+                <div className="space-x-2">
+                    <Button variant="update" onClick={() => handleEditClick(row)}><Edit /></Button>
+                    <Button variant="delete" onClick={() => handleDeleteClick(row)}><Trash /></Button>
+                </div>
+            )
+        }
+    ];
 
     const [searchText, setSearchText] = useState('');
     const [filteredData, setFilteredData] = useState(users);
@@ -408,6 +438,16 @@ const columns = [
         XLSX.writeFile(workbook, 'utilisateurs.xlsx');
     };
 
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) {
+        return <div>Chargement...</div>; // Show a loading state to avoid hydration errors
+    }
+
     return (
       <>
           <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -448,7 +488,7 @@ const columns = [
           </div>
 
             {/* Add New Button */}
-            <Button className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleAddclick} className="bg-green-600 hover:bg-green-700">
                 <Plus className="mr-2 h-4 w-4" /> Ajouter
             </Button>
                 </div>
@@ -481,6 +521,20 @@ const columns = [
                     />
                 </div>
             </div>
+
+            {/* Edit User Sheet */}
+            {selectedUser && <EditUserSheet user={selectedUser} isOpen={isSheetOpen} onOpenChange={setIsSheetOpen} onSave={() => alert("saved")} />}
+            {/* Add User Sheet */}
+            {<AddUserSheet isOpen={isAddSheetOpen} onOpenChange={setIsAddSheetOpen} onSave={() => alert("saved")} />}
+
+            {selectedUser && (
+            <ConfirmDeleteDialog
+                isOpen={isDialogOpen}
+                onClose={setIsDialogOpen}
+                onConfirm={() => alert("Yes")}
+                user={selectedUser}
+            />
+            )}
         </>
     )
   }

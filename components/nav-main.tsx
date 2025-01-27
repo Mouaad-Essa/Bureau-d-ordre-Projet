@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
-
 import {
   Collapsible,
   CollapsibleContent,
@@ -18,7 +16,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export function NavMain({
   items,
@@ -28,7 +26,6 @@ export function NavMain({
     title: string;
     url: string;
     icon?: LucideIcon;
-    isActive?: boolean;
     items?: {
       title: string;
       url: string;
@@ -36,15 +33,13 @@ export function NavMain({
   }[];
   menuName?: string;
 }) {
-  // Track the active menu item
-  const [activeMenu, setActiveMenu] = useState<string | null>(
-    items.find((item) => item.isActive)?.title || null
-  );
-
   const router = useRouter();
+  const pathname = usePathname(); // Get current path from Next.js router
 
-  const handleMenuClick = (title: string, url: string) => {
-    setActiveMenu(title);
+  // Function to check if the current menu item matches the active URL
+  const isActive = (url: string) => pathname === url;
+
+  const handleMenuClick = (url: string) => {
     router.push(url);
   };
 
@@ -56,7 +51,7 @@ export function NavMain({
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={activeMenu === item.title}
+            defaultOpen={pathname.startsWith(item.url)}
             className="group/collapsible"
           >
             <SidebarMenuItem>
@@ -64,11 +59,11 @@ export function NavMain({
                 <SidebarMenuButton
                   tooltip={item.title}
                   className={`flex items-center gap-2 rounded-lg px-2 py-2 ${
-                    activeMenu === item.title
+                    isActive(item.url)
                       ? "bg-[#333] text-[#FFF]" // Active state styles
                       : "text-gray-700 hover:bg-gray-100 hover:text-gray-900" // Default and hover styles
                   }`}
-                  onClick={() => handleMenuClick(item.title, item.url)} // Update active state
+                  onClick={() => handleMenuClick(item.url)}
                 >
                   {item.icon && <item.icon />}
                   <span>{item.title}</span>
@@ -83,7 +78,10 @@ export function NavMain({
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <a href={subItem.url}>
+                          <a
+                            href={subItem.url}
+                            className={pathname === subItem.url ? "text-blue-500" : ""}
+                          >
                             <span>{subItem.title}</span>
                           </a>
                         </SidebarMenuSubButton>
