@@ -32,33 +32,24 @@ interface EditUserSheetProps {
 }
 
 export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSheetProps) {
-  const [nom, setNom] = useState(user.nom);
-  const [prenom, setPrenom] = useState(user.prenom);
-  const [email, setEmail] = useState(user.email);
-  const [telephone, setTelephone] = useState(user.telephone);
-  const [password, setPassword] = useState('');
+
 
   // Sync state with the selected user whenever it changes
-  useEffect(() => {
-    setNom(user.nom);
-    setPrenom(user.prenom);
-    setEmail(user.email);
-    setTelephone(user.telephone);
-    setPassword('');
-  }, [user]); // Trigger the effect when `user` prop changes
+  const [updatedUser,setUser]=useState({
+      id: user.id,
+      nom: user.nom,
+      prenom: user.prenom,
+      email:user.email,
+      telephone:user.telephone,
+      password:''
+  });
 
   const handleSave = () => {
-    const updatedUser = {
-      id: user.id,
-      nom,
-      prenom,
-      email,
-      telephone,
-      password,
-    };
     onSave(updatedUser);
     onOpenChange(false); // Close the sheet after saving
   };
+
+
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -69,28 +60,28 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
         <div className="space-y-4 py-4">
           <Input
             placeholder="Nom"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
+            value={updatedUser.nom}
+            onChange={(e) => setUser({...updatedUser,nom:e.target.value}) }
           />
           <Input
             placeholder="Prénom"
-            value={prenom}
-            onChange={(e) => setPrenom(e.target.value)}
+            value={updatedUser.prenom}
+            onChange={(e) => setUser({...updatedUser,prenom:e.target.value}) }
           />
           <Input
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={updatedUser.email}
+            onChange={(e) => setUser({...updatedUser,email:e.target.value}) }
           />
           <Input
             placeholder="Téléphone"
-            value={telephone}
-            onChange={(e) => setTelephone(e.target.value)}
+            value={updatedUser.telephone}
+            onChange={(e) => setUser({...updatedUser,telephone:e.target.value}) }
           />
           <Input
             type="password"
             placeholder="Mot de passe"
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => setUser({...updatedUser,password:e.target.value}) }
           />
         </div>
         <SheetFooter>

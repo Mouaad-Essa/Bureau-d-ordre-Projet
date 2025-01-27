@@ -332,6 +332,7 @@ const users = [
     prenom: string;
     email: string;
     telephone: string;
+    password: string;
     } | null>(null);
 
     // Handle edit button click
