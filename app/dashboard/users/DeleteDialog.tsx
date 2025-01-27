@@ -15,8 +15,6 @@ interface ConfirmDeleteDialogProps {
 
 export function ConfirmDeleteDialog({ isOpen, onClose, onConfirm, user }: ConfirmDeleteDialogProps) {
 
-    console.log(user);
-
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>

@@ -11,50 +11,50 @@ import {
 } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 
+interface User {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+}
+
 interface EditUserSheetProps {
-  user: {
-    id: number;
-    nom: string;
-    prenom: string;
-    email: string;
-    telephone: string;
-  };
+  user: User;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedUser: {
-    id: number;
-    nom: string;
-    prenom: string;
-    email: string;
-    telephone: string;
-    password: string
-  }) => void;
+  onSave: (updatedUser: User & { password: string }) => void;
 }
 
 export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSheetProps) {
-  const [nom, setNom] = useState(user.nom);
-  const [prenom, setPrenom] = useState(user.prenom);
-  const [email, setEmail] = useState(user.email);
-  const [telephone, setTelephone] = useState(user.telephone);
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    telephone: user.telephone,
+    password: "",
+  });
 
   // Sync state with the selected user whenever it changes
   useEffect(() => {
-    setNom(user.nom);
-    setPrenom(user.prenom);
-    setEmail(user.email);
-    setTelephone(user.telephone);
-    setPassword('');
-  }, [user]); // Trigger the effect when `user` prop changes
+    setFormData({
+      nom: user.nom,
+      prenom: user.prenom,
+      email: user.email,
+      telephone: user.telephone,
+      password: "",
+    });
+  }, [user]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSave = () => {
     const updatedUser = {
       id: user.id,
-      nom,
-      prenom,
-      email,
-      telephone,
-      password,
+      ...formData,
     };
     onSave(updatedUser);
     onOpenChange(false); // Close the sheet after saving
@@ -69,28 +69,29 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
         <div className="space-y-4 py-4">
           <Input
             placeholder="Nom"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
+            value={formData.nom}
+            onChange={handleInputChange}
           />
           <Input
             placeholder="Prénom"
-            value={prenom}
-            onChange={(e) => setPrenom(e.target.value)}
+            value={formData.prenom}
+            onChange={handleInputChange}
           />
           <Input
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleInputChange}
           />
           <Input
             placeholder="Téléphone"
-            value={telephone}
-            onChange={(e) => setTelephone(e.target.value)}
+            value={formData.telephone}
+            onChange={handleInputChange}
           />
           <Input
             type="password"
             placeholder="Mot de passe"
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleInputChange}
           />
         </div>
         <SheetFooter>

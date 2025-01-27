@@ -14,40 +14,44 @@ import { useState, useEffect } from "react";
 interface AddUserSheetProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedUser: {
+  onSave: (newUser: {
     nom: string;
     prenom: string;
     email: string;
     telephone: string;
-    password: string
+    password: string;
   }) => void;
 }
 
 export function AddUserSheet({ isOpen, onOpenChange, onSave }: AddUserSheetProps) {
-  const [nom, setNom] = useState("");
-  const [prenom, setPrenom] = useState("");
-  const [email, setEmail] = useState("");
-  const [telephone, setTelephone] = useState("");
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    nom: "",
+    prenom: "",
+    email: "",
+    telephone: "",
+    password: "",
+  });
 
-  // Sync state with the selected user whenever it changes
+  // Reset form when the sheet is opened
   useEffect(() => {
-    setNom("");
-    setPrenom("");
-    setEmail("");
-    setTelephone("");
-    setPassword('');
-  }, []); // Trigger the effect when `user` prop changes
+    if (isOpen) {
+      setFormData({
+        nom: "",
+        prenom: "",
+        email: "",
+        telephone: "",
+        password: "",
+      });
+    }
+  }, [isOpen]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSave = () => {
-    const addedUser = {
-      nom,
-      prenom,
-      email,
-      telephone,
-      password,
-    };
-    onSave(addedUser);
+    onSave(formData);
     onOpenChange(false); // Close the sheet after saving
   };
 
@@ -59,25 +63,35 @@ export function AddUserSheet({ isOpen, onOpenChange, onSave }: AddUserSheetProps
         </SheetHeader>
         <div className="space-y-4 py-4">
           <Input
+            name="nom"
             placeholder="Nom"
-            onChange={(e) => setNom(e.target.value)}
+            value={formData.nom}
+            onChange={handleInputChange}
           />
           <Input
+            name="prenom"
             placeholder="Prénom"
-            onChange={(e) => setPrenom(e.target.value)}
+            value={formData.prenom}
+            onChange={handleInputChange}
           />
           <Input
+            name="email"
             placeholder="Email"
-            onChange={(e) => setEmail(e.target.value)}
+            value={formData.email}
+            onChange={handleInputChange}
           />
           <Input
+            name="telephone"
             placeholder="Téléphone"
-            onChange={(e) => setTelephone(e.target.value)}
+            value={formData.telephone}
+            onChange={handleInputChange}
           />
           <Input
+            name="password"
             type="password"
             placeholder="Mot de passe"
-            onChange={(e) => setPassword(e.target.value)}
+            value={formData.password}
+            onChange={handleInputChange}
           />
         </div>
         <SheetFooter>
