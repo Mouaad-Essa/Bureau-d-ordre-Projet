@@ -7,7 +7,15 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Download, Edit, Trash, Building } from "lucide-react";
+import {
+  Search,
+  Plus,
+  Download,
+  Edit,
+  Trash,
+  Building,
+  Eye,
+} from "lucide-react";
 
 import {
   DropdownMenu,
@@ -20,14 +28,14 @@ import { updateEtablissement } from "../../actions/etablissementsActions"; // Im
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 
-interface Etablissement {
+type Etablissement = {
   id: number;
   nom: string;
   ville: string;
   contact: string;
   fax: number;
   adresse: string;
-}
+};
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -51,7 +59,7 @@ export default function Page() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api/etablissement"); // Call API route
+      const response = await fetch("/api/etablissement");
       const data = await response.json();
       setEtablissements(data);
       setFilteredData(data);
@@ -172,6 +180,10 @@ export default function Page() {
       name: "ID",
       selector: (row: Etablissement) => row.id,
       sortable: true,
+      style: {
+        minWidth: "60px",
+        maxWidth: "80px",
+      },
     },
     {
       name: "Nom",
@@ -201,11 +213,12 @@ export default function Page() {
     {
       name: "Actions",
       cell: (row: Etablissement) => (
-        <div className="space-x-2">
-          <Button variant="update" onClick={() => handleEdit(row)}>
+        <div className="space-x-2 flex">
+          <Button variant="update" size="sm" onClick={() => handleEdit(row)}>
             <Edit />
           </Button>
           <Button
+            size="sm"
             variant="delete"
             onClick={() => {
               setSelectedEtablissementId(row.id);
@@ -213,6 +226,15 @@ export default function Page() {
             }}
           >
             <Trash />
+          </Button>
+          <Button
+            size="sm"
+            variant="see"
+            onClick={() => {
+              router.push(`/etablissement/${row.id}`); // Navigate to detailed view
+            }}
+          >
+            <Eye />
           </Button>
         </div>
       ),
@@ -227,7 +249,7 @@ export default function Page() {
   };
 
   return (
-    <>
+    <div className="container">
       <div className="flex flex-col space-y-4 p-4">
         <h1
           className=" rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 
@@ -301,6 +323,6 @@ export default function Page() {
         confirmText="Continuer"
         cancelText="Annuler"
       />
-    </>
+    </div>
   );
 }

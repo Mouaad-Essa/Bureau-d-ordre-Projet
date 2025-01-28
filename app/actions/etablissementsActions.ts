@@ -101,3 +101,18 @@ export async function addEtablissement(newEtablissement: {
     return { error: "Failed to add etablissement" };
   }
 }
+
+export async function fetchEtablissementById(id: string) {
+  try {
+    const response = await fetch(
+      `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements/${id}`
+    );
+    if (!response.ok) {
+      throw new Error("Failed to fetch etablissement");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching etablissement by ID:", error);
+    throw error;
+  }
+}

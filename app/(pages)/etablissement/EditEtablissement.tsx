@@ -13,25 +13,20 @@ import {
 import { useState, useEffect } from "react";
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
 
+type Etablissement = {
+  id: number;
+  nom: string;
+  ville: string;
+  contact: string;
+  fax: number;
+  adresse: string;
+};
+
 interface EditEtablissementSheetProps {
-  etablissement: {
-    id: number;
-    nom: string;
-    ville: string;
-    contact: string;
-    fax: number;
-    adresse: string;
-  };
+  etablissement: Etablissement;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedEtablissement: {
-    id: number;
-    nom: string;
-    ville: string;
-    contact: string;
-    fax: number;
-    adresse: string;
-  }) => void;
+  onSave: (updatedEtablissement: Etablissement) => void;
 }
 
 export function EditEtablissementSheet({
