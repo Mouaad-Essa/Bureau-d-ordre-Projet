@@ -1,4 +1,4 @@
-"use client"; // Ensure this runs on the client
+"use client";
 
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
@@ -7,34 +7,18 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Download, Edit, Trash } from "lucide-react";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
+import { Search, Plus, Download, Edit, Trash, Building } from "lucide-react";
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // Importing custom AlertDialog components
+import { EditEtablissementSheet } from "./EditEtablissement"; // Import your EditEtablissementSheet
+import { updateEtablissement } from "../../actions/etablissementsActions"; // Import the updateEtablissement action
+import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import { useRouter } from "next/navigation";
 
 interface Etablissement {
   id: number;
@@ -59,10 +43,12 @@ export default function Page() {
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
   const [selectedEtablissementId, setSelectedEtablissementId] = useState<
-    number | null
-  >(null); // Store selected id for deletion
+    null | number
+  >(null);
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
+  const [selectedEtablissement, setSelectedEtablissement] =
+    useState<Etablissement | null>(null);
 
-  // Fetch data from the server-side API route
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/etablissement"); // Call API route
@@ -117,7 +103,7 @@ export default function Page() {
   };
 
   const deleteEtablissement = async () => {
-    if (selectedEtablissementId === null) return; // If no id selected, return
+    if (selectedEtablissementId === null) return;
 
     try {
       const response = await fetch(`/api/etablissement`, {
@@ -125,23 +111,59 @@ export default function Page() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: selectedEtablissementId }), // Sending ID to delete
+        body: JSON.stringify({ id: selectedEtablissementId }),
       });
 
       if (response.ok) {
-        // Update the list after deletion
         setEtablissements((prevData) =>
           prevData.filter((item) => item.id !== selectedEtablissementId)
         );
         setFilteredData((prevData) =>
           prevData.filter((item) => item.id !== selectedEtablissementId)
         );
-        setIsDeleteDialogOpen(false); // Close dialog after deletion
+        setIsDeleteDialogOpen(false);
       } else {
         console.error("Failed to delete etablissement");
       }
     } catch (error) {
       console.error("Error deleting etablissement:", error);
+    }
+  };
+
+  const handleEdit = (etablissement: Etablissement) => {
+    setSelectedEtablissement(etablissement);
+    setIsEditSheetOpen(true); // Open the edit sheet
+  };
+
+  const handleSave = async (updatedEtablissement: Etablissement) => {
+    try {
+      const updatedEtablissementWithStringId = {
+        ...updatedEtablissement,
+        id: String(updatedEtablissement.id), // Convert id to a string
+      };
+
+      const result = await updateEtablissement(
+        updatedEtablissementWithStringId
+      );
+
+      if (result.error) {
+        console.error("Failed to update etablissement:", result.error);
+        return;
+      }
+
+      setEtablissements((prevData) =>
+        prevData.map((item) =>
+          item.id === updatedEtablissement.id ? updatedEtablissement : item
+        )
+      );
+      setFilteredData((prevData) =>
+        prevData.map((item) =>
+          item.id === updatedEtablissement.id ? updatedEtablissement : item
+        )
+      );
+      setIsEditSheetOpen(false); // Close the sheet after saving
+    } catch (error) {
+      console.error("Error updating etablissement:", error);
     }
   };
 
@@ -180,62 +202,41 @@ export default function Page() {
       name: "Actions",
       cell: (row: Etablissement) => (
         <div className="space-x-2">
-          <Button variant="update" onClick={() => console.log("update")}>
+          <Button variant="update" onClick={() => handleEdit(row)}>
             <Edit />
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                variant="delete"
-                onClick={() => {
-                  setSelectedEtablissementId(row.id); // Set selected etablissement id
-                  setIsDeleteDialogOpen(true); // Open the dialog
-                }}
-              >
-                <Trash />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              </AlertDialogHeader>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete the
-                etablissement.
-              </AlertDialogDescription>
-              <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => setIsDeleteDialogOpen(false)}>
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction onClick={deleteEtablissement}>
-                  Continue
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="delete"
+            onClick={() => {
+              setSelectedEtablissementId(row.id);
+              setIsDeleteDialogOpen(true);
+            }}
+          >
+            <Trash />
+          </Button>
         </div>
       ),
     },
   ];
 
+  // Navigate to /add using useRouter
+  const router = useRouter();
+
+  const handleClick = () => {
+    router.push("/etablissement/add");
+  };
+
   return (
     <>
-      <header className="flex h-16 items-center gap-2 px-4">
-        <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="#">Gestion</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Établissements</BreadcrumbPage>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-      </header>
-
       <div className="flex flex-col space-y-4 p-4">
+        <h1
+          className=" rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 
+         from-40% to-blue-500 text-gray-900 text-2xl 
+         font-semibold p-3 flex items-center justify-center"
+        >
+          <span>Liste des établissements</span>
+          <Building />
+        </h1>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -248,7 +249,10 @@ export default function Page() {
                 className="pl-8 w-full md:w-[300px]"
               />
             </div>
-            <Button className="bg-green-600 hover:bg-green-700">
+            <Button
+              onClick={handleClick}
+              className="bg-green-600 hover:bg-green-700"
+            >
               <Plus className="mr-2 h-4 w-4" /> Ajouter
             </Button>
           </div>
@@ -267,7 +271,6 @@ export default function Page() {
 
         <div className="w-full">
           <DataTable
-            title="Liste des établissements"
             columns={columns}
             data={filteredData}
             pagination
@@ -277,6 +280,27 @@ export default function Page() {
           />
         </div>
       </div>
+
+      {/* Edit Etablissement Sheet */}
+      {selectedEtablissement && (
+        <EditEtablissementSheet
+          etablissement={selectedEtablissement}
+          isOpen={isEditSheetOpen} // Ensure this state exists
+          onOpenChange={(open) => setIsEditSheetOpen(open)} // Pass correct handler
+          onSave={handleSave} // Implement the save logic here
+        />
+      )}
+
+      {/* Reusable AlertDialog for deletion */}
+      <ReusableAlertDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        title="Êtes-vous sûr ?"
+        description="Cette action est irréversible. Voulez-vous vraiment supprimer cet établissement ?"
+        onConfirm={deleteEtablissement}
+        confirmText="Continuer"
+        cancelText="Annuler"
+      />
     </>
   );
 }
