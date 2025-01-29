@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronRight, type LucideIcon } from "lucide-react";
+import Link from "next/link"; // Import Link from Next.js
 import {
   Collapsible,
   CollapsibleContent,
@@ -60,8 +61,8 @@ export function NavMain({
                   tooltip={item.title}
                   className={`flex items-center gap-2 rounded-lg px-2 py-2 ${
                     isActive(item.url)
-                      ? "bg-[#333] text-[#FFF]" // Active state styles
-                      : "text-gray-700 hover:bg-gray-100 hover:text-gray-900" // Default and hover styles
+                      ? "bg-[#192130] text-[#12B981]" // Active state styles
+                      : "text-gray-400 hover:bg-[#192130] hover:text-gray-200" // Default and hover styles
                   }`}
                   onClick={() => handleMenuClick(item.url)}
                 >
@@ -78,12 +79,16 @@ export function NavMain({
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton asChild>
-                          <a
+                          <Link
                             href={subItem.url}
-                            className={pathname === subItem.url ? "text-blue-500" : ""}
+                            className={`flex items-center gap-2 rounded-lg px-2 py-2 ${
+                              isActive(subItem.url)
+                                ? "bg-[#192130] text-white" // Active state styles
+                                : "text-gray-500 hover:bg-[#192130] hover:text-gray-200" // Default and hover styles
+                            }`}
                           >
                             <span>{subItem.title}</span>
-                          </a>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}

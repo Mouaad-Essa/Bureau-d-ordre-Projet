@@ -23,10 +23,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditEtablissementSheet } from "./EditEtablissement"; // Import your EditEtablissementSheet
+import { EditEtablissementSheet } from "../../\(pages\)/etablissement/EditEtablissement"; // Import your EditEtablissementSheet
 import { updateEtablissement } from "../../actions/etablissementsActions"; // Import the updateEtablissement action
-import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import ReusableAlertDialog from "../../\(pages\)/_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
 type Etablissement = {
   id: number;
@@ -180,10 +182,6 @@ export default function Page() {
       name: "ID",
       selector: (row: Etablissement) => row.id,
       sortable: true,
-      style: {
-        minWidth: "60px",
-        maxWidth: "80px",
-      },
     },
     {
       name: "Nom",
@@ -231,7 +229,7 @@ export default function Page() {
             size="sm"
             variant="see"
             onClick={() => {
-              router.push(`/etablissement/${row.id}`); // Navigate to detailed view
+              router.push(`/dashboard/etablissement/${row.id}`); // Navigate to detailed view
             }}
           >
             <Eye />
@@ -245,84 +243,97 @@ export default function Page() {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/etablissement/add");
+    router.push("/dashboard/etablissement/add");
   };
 
   return (
-    <div className="container">
-      <div className="flex flex-col space-y-4 p-4">
-        <h1
-          className=" rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 
-         from-40% to-blue-500 text-gray-900 text-2xl 
-         font-semibold p-3 flex items-center justify-center"
-        >
-          <span>Liste des établissements</span>
-          <Building />
-        </h1>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4" />
-              <Input
-                type="search"
-                placeholder="Rechercher..."
-                value={searchText}
-                onChange={handleSearch}
-                className="pl-8 w-full md:w-[300px]"
-              />
+    <>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+            <div className="flex items-center gap-2 px-4">
+                <SidebarTrigger className="-ml-1" />
+                <Breadcrumb>
+                    <BreadcrumbList>
+                    <BreadcrumbItem className="hidden md:block">
+                        <BreadcrumbLink href="#">
+                        Bureau d'ordre
+                        </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                        <BreadcrumbPage>Etablissements</BreadcrumbPage>
+                    </BreadcrumbItem>
+                    </BreadcrumbList>
+                </Breadcrumb>
             </div>
-            <Button
-              onClick={handleClick}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Ajouter
-            </Button>
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">
-                <Download className="mr-2 h-4 w-4" /> Exporter
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={exportToPDF}>PDF</DropdownMenuItem>
-              <DropdownMenuItem onClick={exportToExcel}>Excel</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        </header>
+        <div className="flex flex-col space-y-4 p-4">
+          {/* Header Section */}
+          <div className="flex items-center justify-between">
+            {/* Left Side: Search Bar and Add New Button */}
+            <div className="flex items-center space-x-4">
+              {/* Search Bar */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Rechercher..."
+                  value={searchText}
+                  onChange={handleSearch}
+                  className="pl-8 w-full md:w-[300px]" // Adjust width as needed
+                />
+              </div>
+                <Button
+                onClick={handleClick}
+                className="bg-green-600 hover:bg-green-700"
+                >
+                <Plus className="mr-2 h-4 w-4" /> Ajouter
+                </Button>
+            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                    <Download className="mr-2 h-4 w-4" /> Exporter
+                </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                <DropdownMenuItem onClick={exportToPDF}>PDF</DropdownMenuItem>
+                <DropdownMenuItem onClick={exportToExcel}>Excel</DropdownMenuItem>
+                </DropdownMenuContent>
+            </DropdownMenu>
+            </div>
+
+            <div className="w-full">
+            <DataTable
+                columns={columns}
+                data={filteredData}
+                pagination
+                paginationComponentOptions={paginationComponentOptions}
+                highlightOnHover
+                defaultSortFieldId={1}
+            />
+            </div>
         </div>
 
-        <div className="w-full">
-          <DataTable
-            columns={columns}
-            data={filteredData}
-            pagination
-            paginationComponentOptions={paginationComponentOptions}
-            highlightOnHover
-            defaultSortFieldId={1}
-          />
-        </div>
-      </div>
+        {/* Edit Etablissement Sheet */}
+        {selectedEtablissement && (
+            <EditEtablissementSheet
+            etablissement={selectedEtablissement}
+            isOpen={isEditSheetOpen} // Ensure this state exists
+            onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
+            onSave={handleSave} // Implement the save logic here
+            />
+        )}
 
-      {/* Edit Etablissement Sheet */}
-      {selectedEtablissement && (
-        <EditEtablissementSheet
-          etablissement={selectedEtablissement}
-          isOpen={isEditSheetOpen} // Ensure this state exists
-          onOpenChange={(open) => setIsEditSheetOpen(open)} // Pass correct handler
-          onSave={handleSave} // Implement the save logic here
+        {/* Reusable AlertDialog for deletion */}
+        <ReusableAlertDialog
+            isOpen={isDeleteDialogOpen}
+            onClose={() => setIsDeleteDialogOpen(false)}
+            title="Êtes-vous sûr ?"
+            description="Cette action est irréversible. Voulez-vous vraiment supprimer cet établissement ?"
+            onConfirm={deleteEtablissement}
+            confirmText="Continuer"
+            cancelText="Annuler"
         />
-      )}
-
-      {/* Reusable AlertDialog for deletion */}
-      <ReusableAlertDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        title="Êtes-vous sûr ?"
-        description="Cette action est irréversible. Voulez-vous vraiment supprimer cet établissement ?"
-        onConfirm={deleteEtablissement}
-        confirmText="Continuer"
-        cancelText="Annuler"
-      />
-    </div>
+    </>
   );
 }
