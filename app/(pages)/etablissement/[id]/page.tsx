@@ -1,81 +1,88 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import { useParams } from "next/navigation";
 
-type Etablissement = {
+type Division = {
   id: string;
   nom: string;
-  ville: string;
-  contact: string;
-  fax: string;
-  adresse: string;
+  description: string;
+  responsableId: string;
+  bureauId: string;
+  statut: string;
 };
 
-const EtablissementPage = () => {
+const DivisionPage = () => {
   const { id } = useParams<{ id: string }>();
 
-  const [etablissement, setEtablissement] = useState<Etablissement | null>(
-    null
-  );
+  const [division, setDivision] = useState<Division | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchEtablissement = async () => {
+    const fetchDivision = async () => {
       try {
-        const response = await fetch(`/api/etablissement/${id}`);
+        const response = await fetch(`/api/divisions/${id}`);
         if (response.ok) {
           const data = await response.json();
-          setEtablissement(data);
+          setDivision(data);
         } else {
-          console.error("Failed to fetch etablissement details");
+          console.error("Failed to fetch division details");
         }
       } catch (error) {
-        console.error("Error fetching etablissement:", error);
+        console.error("Error fetching division:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchEtablissement();
+    fetchDivision();
   }, [id]);
 
   if (loading) {
-    return <p>Chargement des détails...</p>;
+    return (
+      <p className="text-center text-gray-500">Chargement des détails...</p>
+    );
   }
 
-  if (!etablissement) {
-    return <p>Aucun établissement trouvé pour cet ID.</p>;
+  if (!division) {
+    return (
+      <p className="text-center text-red-500">
+        Aucune division trouvée pour cet ID.
+      </p>
+    );
   }
 
   return (
-    <div className=" container min-h-screen  px-8 py-16 ">
-      <h1 className="text-2xl font-bold mb-4">Détails de l'Établissement</h1>
-      <div className="space-y-2 w-fit">
+    <div className="container min-h-screen px-8 py-16 bg-gray-100 rounded-lg shadow-lg">
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+        Détails de la Division
+      </h1>
+      <div className="space-y-4 text-lg text-gray-700">
         <p>
-          <span className="font-medium">ID:</span> {etablissement.id}
+          <span className="font-medium">ID:</span> {division.id}
         </p>
         <p>
-          <span className="font-medium">Nom:</span> {etablissement.nom}
+          <span className="font-medium">Nom:</span> {division.nom}
         </p>
         <p>
-          <span className="font-medium">Ville:</span> {etablissement.ville}
+          <span className="font-medium">Description:</span>{" "}
+          {division.description}
         </p>
         <p>
-          <span className="font-medium">Contact:</span> {etablissement.contact}
+          <span className="font-medium">Responsable ID:</span>{" "}
+          {division.responsableId}
         </p>
         <p>
-          <span className="font-medium">Fax:</span> {etablissement.fax}
+          <span className="font-medium">Bureau ID:</span> {division.bureauId}
         </p>
         <p>
-          <span className="font-medium">Adresse:</span> {etablissement.adresse}
+          <span className="font-medium">Statut:</span> {division.statut}
         </p>
       </div>
     </div>
   );
 };
 
-export default EtablissementPage;
+export default DivisionPage;

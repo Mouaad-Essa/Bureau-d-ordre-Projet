@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as Lucide from "lucide-react"
+import * as React from "react";
+import * as Lucide from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -14,8 +14,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
-import { title } from "process"
+} from "@/components/ui/sidebar";
+import { title } from "process";
 
 // This is sample data.
 const data = {
@@ -95,11 +95,11 @@ const data = {
       items: [
         {
           title: "Divisions",
-          url: "#",
+          url: "/dashboard/division",
         },
         {
           title: "Créer",
-          url: "#",
+          url: "/dashboard/division/add",
         },
       ],
     },
@@ -134,27 +134,26 @@ const data = {
       icon: Lucide.LucideChartNoAxesCombined,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton size="lg" asChild>
-                <a href="#">
-                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-sidebar-primary-foreground">
-                  
-                    <img src="/assets/img/logo.png" className="size-7" />
-                  </div>
-                  <div className="flex flex-col gap-0.5 leading-none">
-                    <span className="font-semibold">Bureau d'ordre</span>
-                    <span className="">UCD</span>
-                  </div>
-                </a>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="#">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-sidebar-primary-foreground">
+                  <img src="/assets/img/logo.png" className="size-7" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                  <span className="font-semibold">Bureau d'ordre</span>
+                  <span className="">UCD</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
@@ -165,5 +164,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

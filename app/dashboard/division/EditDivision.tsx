@@ -13,53 +13,50 @@ import {
 import { useState, useEffect } from "react";
 import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
 
-type Etablissement = {
-  id: number;
+type Division = {
+  id: string;
   nom: string;
-  ville: string;
-  contact: string;
-  fax: number;
-  adresse: string;
+  description: string;
+  responsableId: string;
+  bureauId: string;
+  statut: string;
 };
 
-interface EditEtablissementSheetProps {
-  etablissement: Etablissement;
+interface EditDivisionSheetProps {
+  division: Division;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedEtablissement: Etablissement) => void;
+  onSave: (updatedDivision: Division) => void;
 }
 
-export function EditEtablissementSheet({
-  etablissement,
+export function EditDivisionSheet({
+  division,
   isOpen,
   onOpenChange,
   onSave,
-}: EditEtablissementSheetProps) {
+}: EditDivisionSheetProps) {
   const [formData, setFormData] = useState({
-    nom: etablissement.nom,
-    ville: etablissement.ville,
-    contact: etablissement.contact,
-    fax: etablissement.fax,
-    adresse: etablissement.adresse,
+    nom: division.nom,
+    description: division.description,
+    responsableId: division.responsableId,
+    bureauId: division.bureauId,
+    statut: division.statut,
   });
 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
-  // Sync state with the selected etablissement whenever it changes
+  // Sync state with the selected division whenever it changes
   useEffect(() => {
     setFormData({
-      nom: etablissement.nom,
-      ville: etablissement.ville,
-      contact: etablissement.contact,
-      fax: etablissement.fax,
-      adresse: etablissement.adresse,
+      nom: division.nom,
+      description: division.description,
+      responsableId: division.responsableId,
+      bureauId: division.bureauId,
+      statut: division.statut,
     });
-  }, [etablissement]);
+  }, [division]);
 
-  const handleChange = (
-    field: keyof typeof formData,
-    value: string | number
-  ) => {
+  const handleChange = (field: keyof typeof formData, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [field]: value,
@@ -71,8 +68,8 @@ export function EditEtablissementSheet({
   };
 
   const handleConfirmUpdate = () => {
-    const updatedEtablissement = { id: etablissement.id, ...formData };
-    onSave(updatedEtablissement); // Save the changes
+    const updatedDivision = { id: division.id, ...formData };
+    onSave(updatedDivision); // Save the changes
     setIsConfirmDialogOpen(false); // Close the confirmation dialog
     onOpenChange(false); // Close the sheet
   };
@@ -81,8 +78,10 @@ export function EditEtablissementSheet({
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Modifier l'établissement</SheetTitle>
-          <SheetDescription>desc</SheetDescription>
+          <SheetTitle>Modifier la division</SheetTitle>
+          <SheetDescription>
+            Veuillez mettre à jour les informations de la division.
+          </SheetDescription>
         </SheetHeader>
         <div className="space-y-4 py-4">
           <Input
@@ -91,25 +90,24 @@ export function EditEtablissementSheet({
             onChange={(e) => handleChange("nom", e.target.value)}
           />
           <Input
-            placeholder="Ville"
-            value={formData.ville}
-            onChange={(e) => handleChange("ville", e.target.value)}
+            placeholder="Description"
+            value={formData.description}
+            onChange={(e) => handleChange("description", e.target.value)}
           />
           <Input
-            placeholder="Contact"
-            value={formData.contact}
-            onChange={(e) => handleChange("contact", e.target.value)}
+            placeholder="Responsable ID"
+            value={formData.responsableId}
+            onChange={(e) => handleChange("responsableId", e.target.value)}
           />
           <Input
-            type="number"
-            placeholder="Fax"
-            value={formData.fax.toString()}
-            onChange={(e) => handleChange("fax", Number(e.target.value))}
+            placeholder="Bureau ID"
+            value={formData.bureauId}
+            onChange={(e) => handleChange("bureauId", e.target.value)}
           />
           <Input
-            placeholder="Adresse"
-            value={formData.adresse}
-            onChange={(e) => handleChange("adresse", e.target.value)}
+            placeholder="Statut"
+            value={formData.statut}
+            onChange={(e) => handleChange("statut", e.target.value)}
           />
         </div>
         <SheetFooter>
@@ -122,7 +120,7 @@ export function EditEtablissementSheet({
         isOpen={isConfirmDialogOpen}
         onClose={() => setIsConfirmDialogOpen(false)}
         title="Confirmer la modification"
-        description="Êtes-vous sûr de vouloir enregistrer les modifications apportées à cet établissement ?"
+        description="Êtes-vous sûr de vouloir enregistrer les modifications apportées à cette division ?"
         onConfirm={handleConfirmUpdate}
         confirmText="Confirmer"
         cancelText="Annuler"

@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { EditEtablissementSheet } from "./EditEtablissement"; // Import your EditEtablissementSheet
 import { updateEtablissement } from "../../actions/etablissementsActions"; // Import the updateEtablissement action
-import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 
 type Etablissement = {
