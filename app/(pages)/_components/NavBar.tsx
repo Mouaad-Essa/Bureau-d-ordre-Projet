@@ -1,20 +1,35 @@
+"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NavBar = () => {
+  const pathname = usePathname();
+
+  // Function to check if the link is active
+  const isActive = (path: string) => pathname === path;
+
+  // Navigation links
   const navLinks = [
-    { href: "/", label: "Arrivée" },
-    { href: "/", label: "Départ" },
+    { href: "/", label: "Home" },
+    { href: "/arrivee", label: "Arrivée" },
+    { href: "/depart", label: "Départ" },
     { href: "/statistique", label: "Statistiques" },
     { href: "/etablissement", label: "Etablissement" },
-    { href: "/", label: "Recherche" },
+    { href: "/recherche", label: "Recherche" },
   ];
 
   return (
-    <header className="flex p-6  items-center shadow-xl  w-full bg-gray-900 text-white">
-      <span className="">LOGO</span>
+    <header className="flex p-4 shadow-xl items-center w-full justify-center bg-blue-600 text-white">
+      <span className="font-bold text-lg">LOGO</span>
       <nav className="flex justify-end items-center gap-10 container font-semibold">
         {navLinks.map((link, index) => (
-          <Link className="text-lg" key={index} href={link.href}>
+          <Link
+            key={index}
+            href={link.href}
+            className={`p-2 rounded ${
+              isActive(link.href) ? "text-gray-800 font-bold" : "text-gray-300"
+            }`}
+          >
             {link.label}
           </Link>
         ))}
