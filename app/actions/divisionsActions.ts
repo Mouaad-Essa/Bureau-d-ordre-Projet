@@ -2,18 +2,20 @@ import { NextResponse } from "next/server";
 
 const API_URL = "https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/division";
 
-// Fetch all divisions
+// server action fetching
 export async function fetchDivisions() {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(
+      API_URL // Replace with your actual API URL
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch divisions");
     }
     const data = await response.json();
-    return data; // Return the data directly for client-side use
+    return NextResponse.json(data); // Return data to client
   } catch (error) {
     console.error(error);
-    return { error: "Failed to fetch divisions" }; // Return error if fetch fails
+    return NextResponse.json({ error: "Failed to fetch divisions" });
   }
 }
 

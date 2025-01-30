@@ -24,13 +24,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { EditEtablissementSheet } from "./EditEtablissement";
-import {
-  updateEtablissement,
-  deleteEtablissement,
-  fetchEtablissements,
-} from "../../actions/etablissementsActions";
-
-import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
+import ReusableAlertDialog from "../../_components/AlertDialog";
 import { useRouter } from "next/navigation";
 import AlertDialogDetail from "@/app/(pages)/_components/EtabDetailDialog";
 
@@ -65,24 +59,19 @@ export default function Page() {
 
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false); // State for detail dialog
 
+  //fetch logic
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const result = await fetchEtablissements();
-        if (result.error) {
-          console.error(result.error);
-          return;
-        }
-        setEtablissements(result); // Set the fetched data
-        setFilteredData(result); // Set the filtered data for searching
-      } catch (error) {
-        console.error("Error fetching etablissements:", error);
-      }
+      const response = await fetch("/api/etablissement");
+      const data = await response.json();
+      setEtablissements(data);
+      setFilteredData(data);
     };
 
     fetchData();
   }, []);
 
+  //search logic
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
@@ -97,6 +86,7 @@ export default function Page() {
     setFilteredData(filtered);
   };
 
+  // export logic
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Liste des établissements", 10, 10);
@@ -130,10 +120,14 @@ export default function Page() {
     if (selectedEtablissementId === null) return;
 
     try {
-      const result = await deleteEtablissement(String(selectedEtablissementId)); // Convert ID to string
-
-      if (result.message) {
-        // Check if deletion was successful based on message
+      const response = await fetch(`/api/etablissement`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: selectedEtablissementId }),
+      });
+      if (response.ok) {
         setEtablissements((prevData) =>
           prevData.filter((item) => item.id !== selectedEtablissementId)
         );
@@ -156,33 +150,35 @@ export default function Page() {
     setIsEditSheetOpen(true);
   };
 
+  // update logic
   const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
-      const updatedEtablissementWithStringId = {
-        ...updatedEtablissement,
-        id: String(updatedEtablissement.id),
-      };
+      const response = await fetch(`/api/etablissement`, {
+        method: "PUT", // Use PUT for updating
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedEtablissement),
+      });
 
-      const result = await updateEtablissement(
-        updatedEtablissementWithStringId
-      );
+      const data = await response.json();
 
-      if (result.error) {
-        console.error("Failed to update etablissement:", result.error);
-        return;
+      if (response.ok) {
+        // Update the state
+        setEtablissements((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedEtablissement.id ? updatedEtablissement : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedEtablissement.id ? updatedEtablissement : item
+          )
+        );
+        setIsEditSheetOpen(false);
+      } else {
+        console.error("Failed to update etablissement:", data.message);
       }
-
-      setEtablissements((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedEtablissement.id ? updatedEtablissement : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedEtablissement.id ? updatedEtablissement : item
-        )
-      );
-      setIsEditSheetOpen(false);
     } catch (error) {
       console.error("Error updating etablissement:", error);
     }

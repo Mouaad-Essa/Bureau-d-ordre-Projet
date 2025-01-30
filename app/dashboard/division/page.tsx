@@ -23,13 +23,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditDivisionSheet } from "./EditDivision"; // Import your EditDivisionSheet
-import {
-  updateDivision,
-  fetchDivisions,
-  deleteDivision,
-} from "../../actions/divisionsActions"; // Import the updateDivision action
-import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
+import { EditDivisionSheet } from "./EditDivision";
+import ReusableAlertDialog from "../../_components/AlertDialog";
 import { useRouter } from "next/navigation";
 import AlertDialogDetail from "../_components/DivisionDetailDialog";
 
@@ -67,24 +62,19 @@ export default function Page() {
 
   const router = useRouter();
 
+  // fetching data logic
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const result = await fetchDivisions();
-        if (result.error) {
-          console.error(result.error);
-          return;
-        }
-        setDivisions(result); // Set the fetched data
-        setFilteredData(result); // Set the filtered data for searching
-      } catch (error) {
-        console.error("Error fetching divisions:", error);
-      }
+      const response = await fetch("/api/division");
+      const data = await response.json();
+      setDivisions(data);
+      setFilteredData(data);
     };
 
     fetchData();
   }, []);
 
+  //search logic
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
@@ -100,6 +90,7 @@ export default function Page() {
     setFilteredData(filtered);
   };
 
+  //export logic
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Liste des divisions", 10, 10);
@@ -128,14 +119,22 @@ export default function Page() {
     XLSX.writeFile(workbook, "divisions.xlsx");
   };
 
+  //delete logic
   const deleteDivisionHandler = async () => {
     if (selectedDivisionId === null) return;
 
     try {
-      const result = await deleteDivision(String(selectedDivisionId)); // Convert ID to string
+      const response = await fetch("/api/division", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: selectedDivisionId }),
+      });
 
-      if (result.message) {
-        // Check if deletion was successful based on message
+      const result = await response.json();
+
+      if (response.ok) {
         setDivisions((prevData) =>
           prevData.filter((item) => item.id !== selectedDivisionId)
         );
@@ -144,48 +143,54 @@ export default function Page() {
         );
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete division");
+        console.error("Failed to delete division:", result.message);
       }
     } catch (error) {
       console.error("Error deleting division:", error);
     }
   };
 
+  //set state
   const handleEdit = (division: Division) => {
     setSelectedDivision(division);
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
+  // this is update logic
   const handleSave = async (updatedDivision: Division) => {
     try {
-      const updatedDivisionWithStringId = {
-        ...updatedDivision,
-        id: String(updatedDivision.id), // Convert id to a string
-      };
+      const response = await fetch(`/api/division`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedDivision),
+      });
 
-      const result = await updateDivision(updatedDivisionWithStringId);
+      const data = await response.json();
 
-      if (result.error) {
-        console.error("Failed to update division:", result.error);
-        return;
+      if (response.ok) {
+        //update state
+        setDivisions((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedDivision.id ? updatedDivision : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedDivision.id ? updatedDivision : item
+          )
+        );
+        setIsEditSheetOpen(false);
+      } else {
+        console.error("Failed to update division:", data.message);
       }
-
-      setDivisions((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedDivision.id ? updatedDivision : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedDivision.id ? updatedDivision : item
-        )
-      );
-      setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
       console.error("Error updating division:", error);
     }
   };
 
+  // show details logic
   const handleShowDetails = (division: Division) => {
     setSelectedDivision(division);
     setIsDetailDialogOpen(true); // Open the dialog
