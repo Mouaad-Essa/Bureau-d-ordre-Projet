@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-dropdown-menu";
+
 
 export default function AddDivisionPage() {
   const router = useRouter();
@@ -81,6 +83,7 @@ export default function AddDivisionPage() {
   };
 
   return (
+
     <>
     <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
@@ -106,6 +109,7 @@ export default function AddDivisionPage() {
             </Breadcrumb>
           </div>
         </header>
+
     <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Ajouter une division</h1>
@@ -216,6 +220,8 @@ export default function AddDivisionPage() {
         </div>
       </form>
     </div>
+
     </>
   );
 }
+

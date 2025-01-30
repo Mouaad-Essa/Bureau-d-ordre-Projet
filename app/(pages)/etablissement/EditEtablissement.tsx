@@ -11,7 +11,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
-import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
 
 type Etablissement = {
   id: number;

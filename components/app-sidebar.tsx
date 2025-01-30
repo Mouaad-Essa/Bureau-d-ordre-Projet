@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import * as Lucide from "lucide-react"
+import * as React from "react";
+import * as Lucide from "lucide-react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -14,9 +14,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+
 } from "@/components/ui/sidebar"
 import { title } from "process"
 import Link from "next/link"
+
 
 // This is sample data.
 const data = {
@@ -135,12 +137,13 @@ const data = {
       icon: Lucide.LucideChartNoAxesCombined,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
+
         <SidebarMenu className="bg-[#192130] rounded-md text-white">
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
@@ -156,6 +159,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
@@ -166,5 +170,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
-  )
+  );
 }

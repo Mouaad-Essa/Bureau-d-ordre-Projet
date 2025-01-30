@@ -19,7 +19,7 @@ const NavBar = () => {
   ];
 
   return (
-    <header className="flex p-4 shadow-xl items-center w-full justify-center bg-blue-600 text-white">
+    <header className="flex px-4 py-2 shadow-xl items-center w-full justify-center bg-blue-600/90 text-white">
       <span className="font-bold text-lg">LOGO</span>
       <nav className="flex justify-end items-center gap-10 container font-semibold">
         {navLinks.map((link, index) => (

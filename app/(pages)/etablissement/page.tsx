@@ -23,10 +23,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditEtablissementSheet } from "./EditEtablissement"; // Import your EditEtablissementSheet
-import { updateEtablissement } from "../../actions/etablissementsActions"; // Import the updateEtablissement action
-import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import { EditEtablissementSheet } from "./EditEtablissement";
+import ReusableAlertDialog from "../../_components/AlertDialog";
 import { useRouter } from "next/navigation";
+import AlertDialogDetail from "@/app/(pages)/_components/EtabDetailDialog";
 
 type Etablissement = {
   id: number;
@@ -49,14 +49,17 @@ export default function Page() {
   const [etablissements, setEtablissements] = useState<Etablissement[]>([]);
   const [filteredData, setFilteredData] = useState<Etablissement[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEtablissementId, setSelectedEtablissementId] = useState<
     null | number
   >(null);
-  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
+  const [isEditSheetOpen, setIsEditSheetOpen] = useState(false);
   const [selectedEtablissement, setSelectedEtablissement] =
     useState<Etablissement | null>(null);
 
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false); // State for detail dialog
+
+  //fetch logic
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/etablissement");
@@ -68,6 +71,7 @@ export default function Page() {
     fetchData();
   }, []);
 
+  //search logic
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
@@ -82,6 +86,7 @@ export default function Page() {
     setFilteredData(filtered);
   };
 
+  // export logic
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Liste des établissements", 10, 10);
@@ -110,7 +115,8 @@ export default function Page() {
     XLSX.writeFile(workbook, "etablissements.xlsx");
   };
 
-  const deleteEtablissement = async () => {
+  //delete logic
+  const deleteEtablissementHandler = async () => {
     if (selectedEtablissementId === null) return;
 
     try {
@@ -121,7 +127,6 @@ export default function Page() {
         },
         body: JSON.stringify({ id: selectedEtablissementId }),
       });
-
       if (response.ok) {
         setEtablissements((prevData) =>
           prevData.filter((item) => item.id !== selectedEtablissementId)
@@ -138,41 +143,50 @@ export default function Page() {
     }
   };
 
+  //*************************** */
+
   const handleEdit = (etablissement: Etablissement) => {
     setSelectedEtablissement(etablissement);
-    setIsEditSheetOpen(true); // Open the edit sheet
+    setIsEditSheetOpen(true);
   };
 
+  // update logic
   const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
-      const updatedEtablissementWithStringId = {
-        ...updatedEtablissement,
-        id: String(updatedEtablissement.id), // Convert id to a string
-      };
+      const response = await fetch(`/api/etablissement`, {
+        method: "PUT", // Use PUT for updating
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedEtablissement),
+      });
 
-      const result = await updateEtablissement(
-        updatedEtablissementWithStringId
-      );
+      const data = await response.json();
 
-      if (result.error) {
-        console.error("Failed to update etablissement:", result.error);
-        return;
+      if (response.ok) {
+        // Update the state
+        setEtablissements((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedEtablissement.id ? updatedEtablissement : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedEtablissement.id ? updatedEtablissement : item
+          )
+        );
+        setIsEditSheetOpen(false);
+      } else {
+        console.error("Failed to update etablissement:", data.message);
       }
-
-      setEtablissements((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedEtablissement.id ? updatedEtablissement : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedEtablissement.id ? updatedEtablissement : item
-        )
-      );
-      setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
       console.error("Error updating etablissement:", error);
     }
+  };
+
+  const handleShowDetails = (etablissement: Etablissement) => {
+    setSelectedEtablissement(etablissement);
+    setIsDetailDialogOpen(true); // Open the dialog
   };
 
   const columns = [
@@ -230,9 +244,7 @@ export default function Page() {
           <Button
             size="sm"
             variant="see"
-            onClick={() => {
-              router.push(`/etablissement/${row.id}`); // Navigate to detailed view
-            }}
+            onClick={() => handleShowDetails(row)} // Open dialog on click
           >
             <Eye />
           </Button>
@@ -307,9 +319,9 @@ export default function Page() {
       {selectedEtablissement && (
         <EditEtablissementSheet
           etablissement={selectedEtablissement}
-          isOpen={isEditSheetOpen} // Ensure this state exists
-          onOpenChange={(open) => setIsEditSheetOpen(open)} // Pass correct handler
-          onSave={handleSave} // Implement the save logic here
+          isOpen={isEditSheetOpen}
+          onOpenChange={(open) => setIsEditSheetOpen(open)}
+          onSave={handleSave}
         />
       )}
 
@@ -319,9 +331,16 @@ export default function Page() {
         onClose={() => setIsDeleteDialogOpen(false)}
         title="Êtes-vous sûr ?"
         description="Cette action est irréversible. Voulez-vous vraiment supprimer cet établissement ?"
-        onConfirm={deleteEtablissement}
+        onConfirm={deleteEtablissementHandler} // Trigger delete action on confirmation
         confirmText="Continuer"
         cancelText="Annuler"
+      />
+
+      {/* Dialog for displaying details */}
+      <AlertDialogDetail
+        isOpen={isDetailDialogOpen}
+        onClose={() => setIsDetailDialogOpen(false)}
+        establishment={selectedEtablissement}
       />
     </div>
   );

@@ -22,13 +22,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditDivisionSheet } from "./EditDivision"; // Import your EditDivisionSheet
-import { updateDivision } from "../../actions/divisionsActions"; // Import the updateDivision action
-import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
+
+import { EditDivisionSheet } from "./EditDivision";
+import ReusableAlertDialog from "../../_components/AlertDialog";
 import { useRouter } from "next/navigation";
+import AlertDialogDetail from "../_components/DivisionDetailDialog";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-dropdown-menu";
+
 
 type Division = {
   id: string;
@@ -50,7 +52,9 @@ const paginationComponentOptions = {
 export default function Page() {
   const [divisions, setDivisions] = useState<Division[]>([]);
   const [filteredData, setFilteredData] = useState<Division[]>([]);
+
   const [loaded, setLoaded] = useState(false);
+
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
   const [selectedDivisionId, setSelectedDivisionId] = useState<string | null>(
@@ -61,18 +65,29 @@ export default function Page() {
     null
   );
 
+
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  const router = useRouter();
+
+  // fetching data logic
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/division");
       const data = await response.json();
       setDivisions(data);
       setFilteredData(data);
+
       setLoaded(true);
+
     };
 
     fetchData();
   }, []);
 
+
+  //search logic
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
@@ -87,6 +102,9 @@ export default function Page() {
 
     setFilteredData(filtered);
   };
+
+
+  //export logic
 
   const exportToPDF = () => {
     const doc = new jsPDF();
@@ -116,17 +134,24 @@ export default function Page() {
     XLSX.writeFile(workbook, "divisions.xlsx");
   };
 
-  const deleteDivision = async () => {
+
+  //delete logic
+  const deleteDivisionHandler = async () => {
     if (selectedDivisionId === null) return;
 
     try {
-      const response = await fetch(`/api/division`, {
+      const response = await fetch("/api/division", {
+
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ id: selectedDivisionId }),
       });
+
+
+      const result = await response.json();
+
 
       if (response.ok) {
         setDivisions((prevData) =>
@@ -137,53 +162,78 @@ export default function Page() {
         );
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete division");
+
+        console.error("Failed to delete division:", result.message);
+
       }
     } catch (error) {
       console.error("Error deleting division:", error);
     }
   };
 
+
+  //set state
+
   const handleEdit = (division: Division) => {
     setSelectedDivision(division);
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
+
+  // this is update logic
   const handleSave = async (updatedDivision: Division) => {
     try {
-      const updatedDivisionWithStringId = {
-        ...updatedDivision,
-        id: String(updatedDivision.id), // Convert id to a string
-      };
+      const response = await fetch(`/api/division`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedDivision),
+      });
 
-      const result = await updateDivision(updatedDivisionWithStringId);
+      const data = await response.json();
 
-      if (result.error) {
-        console.error("Failed to update division:", result.error);
-        return;
+      if (response.ok) {
+        //update state
+        setDivisions((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedDivision.id ? updatedDivision : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedDivision.id ? updatedDivision : item
+          )
+        );
+        setIsEditSheetOpen(false);
+      } else {
+        console.error("Failed to update division:", data.message);
       }
 
-      setDivisions((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedDivision.id ? updatedDivision : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedDivision.id ? updatedDivision : item
-        )
-      );
-      setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
       console.error("Error updating division:", error);
     }
   };
+
+
+  // show details logic
+  const handleShowDetails = (division: Division) => {
+    setSelectedDivision(division);
+    setIsDetailDialogOpen(true); // Open the dialog
+  };
+
 
   const columns = [
     {
       name: "ID",
       selector: (row: Division) => row.id,
       sortable: true,
+
+      style: {
+        minWidth: "60px",
+        maxWidth: "80px",
+      },
+
     },
     {
       name: "Nom",
@@ -230,9 +280,9 @@ export default function Page() {
           <Button
             size="sm"
             variant="see"
-            onClick={() => {
-              router.push(`/dashboard/division/${row.id}`); // Navigate to detailed view
-            }}
+
+            onClick={() => handleShowDetails(row)}
+
           >
             <Eye />
           </Button>
@@ -241,14 +291,13 @@ export default function Page() {
     },
   ];
 
-  // Navigate to /add using useRouter
-  const router = useRouter();
 
   const handleClick = () => {
     router.push("/dashboard/division/add");
   };
 
   return (
+
     <>
     {!loaded ? (
       <div className="flex items-center justify-center min-h-screen">
@@ -297,6 +346,7 @@ export default function Page() {
                   className="pl-8 w-full md:w-[300px]" // Adjust width as needed
                 />
               </div>
+
             <Button
               onClick={handleClick}
               className="bg-green-600 hover:bg-green-700"
@@ -334,7 +384,9 @@ export default function Page() {
         <EditDivisionSheet
           division={selectedDivision}
           isOpen={isEditSheetOpen} // Ensure this state exists
+
           onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
+
           onSave={handleSave} // Implement the save logic here
         />
       )}
@@ -345,12 +397,19 @@ export default function Page() {
         onClose={() => setIsDeleteDialogOpen(false)}
         title="Êtes-vous sûr ?"
         description="Cette action est irréversible. Voulez-vous vraiment supprimer cette division ?"
-        onConfirm={deleteDivision}
+
+        onConfirm={deleteDivisionHandler} // Trigger delete action on confirmation
         confirmText="Continuer"
         cancelText="Annuler"
       />
-    </>
-    )}
-    </>
+
+      {/* Dialog for displaying details */}
+      <AlertDialogDetail
+        isOpen={isDetailDialogOpen}
+        onClose={() => setIsDetailDialogOpen(false)}
+        division={selectedDivision}
+      />
+    </div>
   );
 }
+

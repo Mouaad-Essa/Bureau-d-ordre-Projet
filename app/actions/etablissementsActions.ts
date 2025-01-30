@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
+const API_URL =
+  "https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements";
 // server action fetching
 export async function fetchEtablissements() {
   try {
-    const response = await fetch(
-      "https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements"
-    );
+    const response = await fetch(API_URL);
     if (!response.ok) {
       throw new Error("Failed to fetch data");
     }
@@ -20,12 +20,9 @@ export async function fetchEtablissements() {
 // server action delete etab
 export async function deleteEtablissement(id: string) {
   try {
-    const response = await fetch(
-      `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: "DELETE",
+    });
 
     if (!response.ok) {
       throw new Error("Failed to delete etablissement");
@@ -47,16 +44,13 @@ export async function updateEtablissement(updatedEtablissement: {
   adresse: string;
 }) {
   try {
-    const response = await fetch(
-      `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements/${updatedEtablissement.id}`,
-      {
-        method: "PUT", // Use PUT to update
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedEtablissement),
-      }
-    );
+    const response = await fetch(`${API_URL}/${updatedEtablissement.id}`, {
+      method: "PUT", // Use PUT to update
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedEtablissement),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to update etablissement");
@@ -79,16 +73,13 @@ export async function addEtablissement(newEtablissement: {
   adresse: string;
 }) {
   try {
-    const response = await fetch(
-      "https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements",
-      {
-        method: "POST", // Use POST to add
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newEtablissement),
-      }
-    );
+    const response = await fetch(API_URL, {
+      method: "POST", // Use POST to add
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newEtablissement),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to add etablissement");
@@ -102,11 +93,11 @@ export async function addEtablissement(newEtablissement: {
   }
 }
 
+// fetch etabById if needed
+
 export async function fetchEtablissementById(id: string) {
   try {
-    const response = await fetch(
-      `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements/${id}`
-    );
+    const response = await fetch(`${API_URL}/${id}`);
     if (!response.ok) {
       throw new Error("Failed to fetch etablissement");
     }
