@@ -10,10 +10,10 @@ export async function fetchDivisions() {
       throw new Error("Failed to fetch divisions");
     }
     const data = await response.json();
-    return NextResponse.json(data);
+    return data; // Return the data directly for client-side use
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to fetch division" });
+    return { error: "Failed to fetch divisions" }; // Return error if fetch fails
   }
 }
 

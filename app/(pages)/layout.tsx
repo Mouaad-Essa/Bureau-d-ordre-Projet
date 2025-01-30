@@ -6,7 +6,7 @@ export default function PagesgLayout({ children }: { children: ReactNode }) {
   return (
     <div>
       <NavBar />
-      {children}
+      <main className="min-h-screen container mx-auto p-4">{children}</main>
       <Footer />
     </div>
   );

@@ -24,9 +24,14 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { EditDivisionSheet } from "./EditDivision"; // Import your EditDivisionSheet
-import { updateDivision } from "../../actions/divisionsActions"; // Import the updateDivision action
+import {
+  updateDivision,
+  fetchDivisions,
+  deleteDivision,
+} from "../../actions/divisionsActions"; // Import the updateDivision action
 import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
+import AlertDialogDetail from "../_components/DivisionDetailDialog";
 
 type Division = {
   id: string;
@@ -58,12 +63,23 @@ export default function Page() {
     null
   );
 
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
+  const router = useRouter();
+
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api/division");
-      const data = await response.json();
-      setDivisions(data);
-      setFilteredData(data);
+      try {
+        const result = await fetchDivisions();
+        if (result.error) {
+          console.error(result.error);
+          return;
+        }
+        setDivisions(result); // Set the fetched data
+        setFilteredData(result); // Set the filtered data for searching
+      } catch (error) {
+        console.error("Error fetching divisions:", error);
+      }
     };
 
     fetchData();
@@ -112,19 +128,14 @@ export default function Page() {
     XLSX.writeFile(workbook, "divisions.xlsx");
   };
 
-  const deleteDivision = async () => {
+  const deleteDivisionHandler = async () => {
     if (selectedDivisionId === null) return;
 
     try {
-      const response = await fetch(`/api/division`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: selectedDivisionId }),
-      });
+      const result = await deleteDivision(String(selectedDivisionId)); // Convert ID to string
 
-      if (response.ok) {
+      if (result.message) {
+        // Check if deletion was successful based on message
         setDivisions((prevData) =>
           prevData.filter((item) => item.id !== selectedDivisionId)
         );
@@ -173,6 +184,11 @@ export default function Page() {
     } catch (error) {
       console.error("Error updating division:", error);
     }
+  };
+
+  const handleShowDetails = (division: Division) => {
+    setSelectedDivision(division);
+    setIsDetailDialogOpen(true); // Open the dialog
   };
 
   const columns = [
@@ -230,9 +246,7 @@ export default function Page() {
           <Button
             size="sm"
             variant="see"
-            onClick={() => {
-              router.push(`/dashboard/division/${row.id}`); // Navigate to detailed view
-            }}
+            onClick={() => handleShowDetails(row)}
           >
             <Eye />
           </Button>
@@ -241,9 +255,6 @@ export default function Page() {
     },
   ];
 
-  // Navigate to /add using useRouter
-  const router = useRouter();
-
   const handleClick = () => {
     router.push("/dashboard/division/add");
   };
@@ -251,11 +262,7 @@ export default function Page() {
   return (
     <div className="container">
       <div className="flex flex-col space-y-4 p-4">
-        <h1
-          className=" rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 
-         from-40% to-blue-500 text-gray-900 text-2xl 
-         font-semibold p-3 flex items-center justify-center"
-        >
+        <h1 className="rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 from-40% to-blue-500 text-gray-900 text-2xl font-semibold p-3 flex items-center justify-center">
           <span>Liste des divisions</span>
           <Building />
         </h1>
@@ -319,9 +326,16 @@ export default function Page() {
         onClose={() => setIsDeleteDialogOpen(false)}
         title="Êtes-vous sûr ?"
         description="Cette action est irréversible. Voulez-vous vraiment supprimer cette division ?"
-        onConfirm={deleteDivision}
+        onConfirm={deleteDivisionHandler} // Trigger delete action on confirmation
         confirmText="Continuer"
         cancelText="Annuler"
+      />
+
+      {/* Dialog for displaying details */}
+      <AlertDialogDetail
+        isOpen={isDetailDialogOpen}
+        onClose={() => setIsDetailDialogOpen(false)}
+        division={selectedDivision}
       />
     </div>
   );

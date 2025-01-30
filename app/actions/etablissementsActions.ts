@@ -1,5 +1,3 @@
-import { NextResponse } from "next/server";
-
 // server action fetching
 export async function fetchEtablissements() {
   try {
@@ -10,10 +8,10 @@ export async function fetchEtablissements() {
       throw new Error("Failed to fetch data");
     }
     const data = await response.json();
-    return NextResponse.json(data); // Return data to client
+    return data; // Return the data directly for client-side use
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Failed to fetch data" });
+    return { error: "Failed to fetch data" }; // Return error if fetch fails
   }
 }
 
@@ -101,6 +99,8 @@ export async function addEtablissement(newEtablissement: {
     return { error: "Failed to add etablissement" };
   }
 }
+
+// fetch etabById if needed
 
 export async function fetchEtablissementById(id: string) {
   try {
