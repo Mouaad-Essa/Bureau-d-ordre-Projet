@@ -13,7 +13,6 @@ import {
   Download,
   Edit,
   Trash,
-  Eye,
 } from "lucide-react";
 
 import {
@@ -22,20 +21,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditUserSheet } from "./EditUserSheet"; 
-import { updateUser } from "../../actions/usersActions"; 
+import { EditRoleSheet } from "./EditRoleSheet"; 
+import { updateRole } from "../../actions/rolesActions"; 
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
-type user = {
+type role = {
   id: number;
+  role: string;
   nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  service: string;
+  description: string;
 };
 
 const paginationComponentOptions = {
@@ -47,28 +44,28 @@ const paginationComponentOptions = {
 };
 
 export default function Page() {
-  const [users, setUsers] = useState<user[]>([]);
-  const [filteredData, setFilteredData] = useState<user[]>([]);
+  const [Roles, setRoles] = useState<role[]>([]);
+  const [filteredData, setFilteredData] = useState<role[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
-  const [selectedUserId, setSelectedUserId] = useState<
+  const [selectedRoleId, setSelectedRoleId] = useState<
     null | number
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
-  const [selectedUser, setSelectedUser] =
-    useState<user | null>(null);
+  const [selectedRole, setSelectedRole] =
+    useState<role | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/users");
+        const response = await fetch("/api/role");
         const data = await response.json();
         setLoaded(true); // Set loaded to true after data is fetched
-        setUsers(data);
+        setRoles(data);
         setFilteredData(data);
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching roles:", error);
       }
     };
 
@@ -79,13 +76,11 @@ export default function Page() {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
 
-    const filtered = users.filter(
+    const filtered = Roles.filter(
       (item) =>
-        item.nom.toLowerCase().includes(searchValue) ||
-        item.prenom.toLowerCase().includes(searchValue)
-        || item.email.toLowerCase().includes(searchValue)
-        || item.telephone.toLowerCase().includes(searchValue)
-        || item.service.toLowerCase().includes(searchValue)
+        item.role.toLowerCase().includes(searchValue) ||
+        item.nom.toLowerCase().includes(searchValue)
+        || item.description.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -93,132 +88,120 @@ export default function Page() {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    doc.text("Liste des utilisateurs", 10, 10);
+    doc.text("Liste des rôles", 10, 10);
 
     const tableData = filteredData.map((row) => [
       row.id,
+      row.role,
       row.nom,
-      row.prenom,
-      row.email,
-      row.telephone,
-      row.service,
+      row.description,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service"]],
+      head: [["ID", "Role", "Nom", "Description"]],
       body: tableData,
     });
 
-    doc.save("users.pdf");
+    doc.save("Roles.pdf");
   };
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "users");
-    XLSX.writeFile(workbook, "users.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Roles");
+    XLSX.writeFile(workbook, "Roles.xlsx");
   };
 
-  const deleteUser = async () => {
-    if (selectedUserId === null) return;
+  const deleteRole = async () => {
+    if (selectedRoleId === null) return;
 
     try {
-      const response = await fetch(`/api/users`, {
+      const response = await fetch(`/api/role`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: selectedUserId }),
+        body: JSON.stringify({ id: selectedRoleId }),
       });
 
       if (response.ok) {
-        setUsers((prevData) =>
-          prevData.filter((item) => item.id !== selectedUserId)
+        setRoles((prevData) =>
+          prevData.filter((item) => item.id !== selectedRoleId)
         );
         setFilteredData((prevData) =>
-          prevData.filter((item) => item.id !== selectedUserId)
+          prevData.filter((item) => item.id !== selectedRoleId)
         );
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete user");
+        console.error("Failed to delete role");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting role:", error);
     }
   };
 
-  const handleEdit = (user: user) => {
-    setSelectedUser(user);
+  const handleEdit = (Role: role) => {
+    setSelectedRole(Role);
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
-  const handleSave = async (updatedUser: user) => {
+  const handleSave = async (updatedRole: role) => {
     try {
-      const updatedUserWithStringId = {
-        ...updatedUser,
-        id: String(updatedUser.id), // Convert id to a string
+      const updatedRoleWithStringId = {
+        ...updatedRole,
+        id: String(updatedRole.id), // Convert id to a string
       };
 
-      const result = await updateUser(
-        updatedUserWithStringId
+      const result = await updateRole(
+        updatedRoleWithStringId
       );
 
       if (result.error) {
-        console.error("Failed to update user:", result.error);
+        console.error("Failed to update Role:", result.error);
         return;
       }
 
-      setUsers((prevData) =>
+      setRoles((prevData) =>
         prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
+          item.id === updatedRole.id ? updatedRole : item
         )
       );
       setFilteredData((prevData) =>
         prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
+          item.id === updatedRole.id ? updatedRole : item
         )
       );
       setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Error updating role:", error);
     }
   };
 
   const columns = [
     {
       name: "ID",
-      selector: (row: user) => row.id,
+      selector: (row: role) => row.id,
       sortable: true,
 
     },
     {
+      name: "Rôle",
+      selector: (row: role) => row.role,
+      sortable: true,
+    },
+    {
       name: "Nom",
-      selector: (row: user) => row.nom,
+      selector: (row: role) => row.nom,
       sortable: true,
     },
     {
-      name: "Prénom",
-      selector: (row: user) => row.prenom,
-      sortable: true,
-    },
-    {
-      name: "Email",
-      selector: (row: user) => row.email,
-      sortable: true,
-    },
-    {
-      name: "Téléphone",
-      selector: (row: user) => row.telephone,
-      sortable: true,
-    },
-    {
-      name: "Service",
-      selector: (row: user) => row.service,
+      name: "Description",
+      selector: (row: role) => row.description,
       sortable: true,
     },
     {
       name: "Actions",
-      cell: (row: user) => (
+      cell: (row: role) => (
         <div className="space-x-2 flex">
           <Button variant="update" size="sm" onClick={() => handleEdit(row)}>
             <Edit />
@@ -227,7 +210,7 @@ export default function Page() {
             size="sm"
             variant="delete"
             onClick={() => {
-              setSelectedUserId(row.id);
+              setSelectedRoleId(row.id);
               setIsDeleteDialogOpen(true);
             }}
           >
@@ -238,11 +221,11 @@ export default function Page() {
     },
   ];
 
-  // Navigate to /add using useRouter
+  // Navigate to /add using Roleouter
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/dashboard/users/add");
+    router.push("/dashboard/roles/create");
   };
 
   return (
@@ -271,7 +254,7 @@ export default function Page() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Utilisateurs</BreadcrumbPage>
+                        <BreadcrumbPage>Rôles</BreadcrumbPage>
                     </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -325,10 +308,10 @@ export default function Page() {
             </div>
         </div>
 
-        {/* Edit user Sheet */}
-        {selectedUser && (
-            <EditUserSheet
-            user={selectedUser}
+        {/* Edit Role Sheet */}
+        {selectedRole && (
+            <EditRoleSheet
+            role={selectedRole}
             isOpen={isEditSheetOpen} // Ensure this state exists
             onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
             onSave={handleSave} // Implement the save logic here
@@ -340,8 +323,8 @@ export default function Page() {
             isOpen={isDeleteDialogOpen}
             onClose={() => setIsDeleteDialogOpen(false)}
             title="Êtes-vous sûr ?"
-            description="Cette action est irréversible. Voulez-vous vraiment supprimer cet utilisateur ?"
-            onConfirm={deleteUser}
+            description="Cette action est irréversible. Voulez-vous vraiment supprimer ce rôle ?"
+            onConfirm={deleteRole}
             confirmText="Continuer"
             cancelText="Annuler"
         />

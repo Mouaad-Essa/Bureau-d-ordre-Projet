@@ -66,12 +66,12 @@ export default {
           "5": "hsl(var(--chart-5))",
         },
         sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          DEFAULT: "#101827",  // Change sidebar background color
+          foreground: "#BBB",  // Set text color to white
+          primary: "#192130", // Primary color for sidebar elements
+          "primary-foreground": "#ffffff", // Text color for primary items
+          accent: "#2A2E3D", // Accent color for sidebar items
+          "accent-foreground": "#ffffff", // Accent text color
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },

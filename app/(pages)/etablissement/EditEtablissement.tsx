@@ -82,31 +82,51 @@ export function EditEtablissementSheet({
       <SheetContent>
         <SheetHeader>
           <SheetTitle>Modifier l'établissement</SheetTitle>
-          <SheetDescription>desc</SheetDescription>
+          <SheetDescription></SheetDescription>
         </SheetHeader>
         <div className="space-y-4 py-4">
+          <label htmlFor="nom" className="block text-sm font-medium mb-1">
+            Nom
+          </label>
           <Input
+            name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={(e) => handleChange("nom", e.target.value)}
           />
+          <label htmlFor="ville" className="block text-sm font-medium mb-1">
+            Ville
+          </label>
           <Input
+            name="ville"
             placeholder="Ville"
             value={formData.ville}
             onChange={(e) => handleChange("ville", e.target.value)}
           />
+          <label htmlFor="contact" className="block text-sm font-medium mb-1">
+            Contact
+          </label>
           <Input
+            name="contact"
             placeholder="Contact"
             value={formData.contact}
             onChange={(e) => handleChange("contact", e.target.value)}
           />
+          <label htmlFor="fax" className="block text-sm font-medium mb-1">
+            Fax
+          </label>
           <Input
-            type="number"
+            name="fax"
+            type="text"
             placeholder="Fax"
             value={formData.fax.toString()}
-            onChange={(e) => handleChange("fax", Number(e.target.value))}
+            onChange={(e) => handleChange("fax", e.target.value)}
           />
+          <label htmlFor="adresse" className="block text-sm font-medium mb-1">
+            Adresse
+          </label>
           <Input
+            name="adresse"
             placeholder="Adresse"
             value={formData.adresse}
             onChange={(e) => handleChange("adresse", e.target.value)}
