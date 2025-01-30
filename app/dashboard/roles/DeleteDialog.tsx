@@ -6,14 +6,13 @@ interface ConfirmDeleteDialogProps {
   isOpen: boolean;
   onClose: (open: boolean) => void;
   onConfirm: () => void;
-  user: {
+  role: {
     id: number;
-    nom: string;
-    prenom: string;
+    role: string;
   };
 }
 
-export function ConfirmDeleteDialog({ isOpen, onClose, onConfirm, user }: ConfirmDeleteDialogProps) {
+export function ConfirmDeleteDialog({ isOpen, onClose, onConfirm, role }: ConfirmDeleteDialogProps) {
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -21,8 +20,8 @@ export function ConfirmDeleteDialog({ isOpen, onClose, onConfirm, user }: Confir
         <AlertDialogHeader>
           <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
           <AlertDialogDescription>
-            Êtes-vous sûr de vouloir supprimer l'utilisateur{" "}
-            <strong>{user.nom} {user.prenom}</strong> ?
+            Êtes-vous sûr de vouloir supprimer le rôle{" "}
+            <strong>{role.role}</strong> ?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

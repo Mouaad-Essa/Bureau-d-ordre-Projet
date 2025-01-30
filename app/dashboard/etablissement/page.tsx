@@ -13,6 +13,7 @@ import {
   Download,
   Edit,
   Trash,
+  Building,
   Eye,
 } from "lucide-react";
 
@@ -22,20 +23,20 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditUserSheet } from "./EditUserSheet"; 
-import { updateUser } from "../../actions/usersActions"; 
-import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import { EditEtablissementSheet } from "../../\(pages\)/etablissement/EditEtablissement"; // Import your EditEtablissementSheet
+import { updateEtablissement } from "../../actions/etablissementsActions"; // Import the updateEtablissement action
+import ReusableAlertDialog from "../../\(pages\)/_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
-type user = {
+type Etablissement = {
   id: number;
   nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  service: string;
+  ville: string;
+  contact: string;
+  fax: number;
+  adresse: string;
 };
 
 const paginationComponentOptions = {
@@ -47,29 +48,25 @@ const paginationComponentOptions = {
 };
 
 export default function Page() {
-  const [users, setUsers] = useState<user[]>([]);
-  const [filteredData, setFilteredData] = useState<user[]>([]);
+  const [etablissements, setEtablissements] = useState<Etablissement[]>([]);
+  const [filteredData, setFilteredData] = useState<Etablissement[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
-  const [selectedUserId, setSelectedUserId] = useState<
+  const [selectedEtablissementId, setSelectedEtablissementId] = useState<
     null | number
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
-  const [selectedUser, setSelectedUser] =
-    useState<user | null>(null);
+  const [selectedEtablissement, setSelectedEtablissement] =
+    useState<Etablissement | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await fetch("/api/users");
-        const data = await response.json();
-        setLoaded(true); // Set loaded to true after data is fetched
-        setUsers(data);
-        setFilteredData(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
+      const response = await fetch("/api/etablissement");
+      const data = await response.json();
+      setEtablissements(data);
+      setFilteredData(data);
+      setLoaded(true);
     };
 
     fetchData();
@@ -79,13 +76,11 @@ export default function Page() {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
 
-    const filtered = users.filter(
+    const filtered = etablissements.filter(
       (item) =>
         item.nom.toLowerCase().includes(searchValue) ||
-        item.prenom.toLowerCase().includes(searchValue)
-        || item.email.toLowerCase().includes(searchValue)
-        || item.telephone.toLowerCase().includes(searchValue)
-        || item.service.toLowerCase().includes(searchValue)
+        item.ville.toLowerCase().includes(searchValue) ||
+        item.contact.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -93,132 +88,131 @@ export default function Page() {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    doc.text("Liste des utilisateurs", 10, 10);
+    doc.text("Liste des établissements", 10, 10);
 
     const tableData = filteredData.map((row) => [
       row.id,
       row.nom,
-      row.prenom,
-      row.email,
-      row.telephone,
-      row.service,
+      row.ville,
+      row.contact,
+      row.fax,
+      row.adresse,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service"]],
+      head: [["ID", "Nom", "Ville", "Contact", "Fax", "Adresse"]],
       body: tableData,
     });
 
-    doc.save("users.pdf");
+    doc.save("etablissements.pdf");
   };
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "users");
-    XLSX.writeFile(workbook, "users.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Établissements");
+    XLSX.writeFile(workbook, "etablissements.xlsx");
   };
 
-  const deleteUser = async () => {
-    if (selectedUserId === null) return;
+  const deleteEtablissement = async () => {
+    if (selectedEtablissementId === null) return;
 
     try {
-      const response = await fetch(`/api/users`, {
+      const response = await fetch(`/api/etablissement`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: selectedUserId }),
+        body: JSON.stringify({ id: selectedEtablissementId }),
       });
 
       if (response.ok) {
-        setUsers((prevData) =>
-          prevData.filter((item) => item.id !== selectedUserId)
+        setEtablissements((prevData) =>
+          prevData.filter((item) => item.id !== selectedEtablissementId)
         );
         setFilteredData((prevData) =>
-          prevData.filter((item) => item.id !== selectedUserId)
+          prevData.filter((item) => item.id !== selectedEtablissementId)
         );
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete user");
+        console.error("Failed to delete etablissement");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting etablissement:", error);
     }
   };
 
-  const handleEdit = (user: user) => {
-    setSelectedUser(user);
+  const handleEdit = (etablissement: Etablissement) => {
+    setSelectedEtablissement(etablissement);
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
-  const handleSave = async (updatedUser: user) => {
+  const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
-      const updatedUserWithStringId = {
-        ...updatedUser,
-        id: String(updatedUser.id), // Convert id to a string
+      const updatedEtablissementWithStringId = {
+        ...updatedEtablissement,
+        id: String(updatedEtablissement.id), // Convert id to a string
       };
 
-      const result = await updateUser(
-        updatedUserWithStringId
+      const result = await updateEtablissement(
+        updatedEtablissementWithStringId
       );
 
       if (result.error) {
-        console.error("Failed to update user:", result.error);
+        console.error("Failed to update etablissement:", result.error);
         return;
       }
 
-      setUsers((prevData) =>
+      setEtablissements((prevData) =>
         prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
+          item.id === updatedEtablissement.id ? updatedEtablissement : item
         )
       );
       setFilteredData((prevData) =>
         prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
+          item.id === updatedEtablissement.id ? updatedEtablissement : item
         )
       );
       setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Error updating etablissement:", error);
     }
   };
 
   const columns = [
     {
       name: "ID",
-      selector: (row: user) => row.id,
+      selector: (row: Etablissement) => row.id,
       sortable: true,
-
     },
     {
       name: "Nom",
-      selector: (row: user) => row.nom,
+      selector: (row: Etablissement) => row.nom,
       sortable: true,
     },
     {
-      name: "Prénom",
-      selector: (row: user) => row.prenom,
+      name: "Ville",
+      selector: (row: Etablissement) => row.ville,
       sortable: true,
     },
     {
-      name: "Email",
-      selector: (row: user) => row.email,
+      name: "Contact",
+      selector: (row: Etablissement) => row.contact,
       sortable: true,
     },
     {
-      name: "Téléphone",
-      selector: (row: user) => row.telephone,
+      name: "Fax",
+      selector: (row: Etablissement) => row.fax,
       sortable: true,
     },
     {
-      name: "Service",
-      selector: (row: user) => row.service,
+      name: "Adresse",
+      selector: (row: Etablissement) => row.adresse,
       sortable: true,
     },
     {
       name: "Actions",
-      cell: (row: user) => (
+      cell: (row: Etablissement) => (
         <div className="space-x-2 flex">
           <Button variant="update" size="sm" onClick={() => handleEdit(row)}>
             <Edit />
@@ -227,11 +221,20 @@ export default function Page() {
             size="sm"
             variant="delete"
             onClick={() => {
-              setSelectedUserId(row.id);
+              setSelectedEtablissementId(row.id);
               setIsDeleteDialogOpen(true);
             }}
           >
             <Trash />
+          </Button>
+          <Button
+            size="sm"
+            variant="see"
+            onClick={() => {
+              router.push(`/dashboard/etablissement/${row.id}`); // Navigate to detailed view
+            }}
+          >
+            <Eye />
           </Button>
         </div>
       ),
@@ -242,7 +245,7 @@ export default function Page() {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/dashboard/users/add");
+    router.push("/dashboard/etablissement/add");
   };
 
   return (
@@ -266,12 +269,12 @@ export default function Page() {
                     <BreadcrumbList>
                     <BreadcrumbItem className="hidden md:block">
                         <BreadcrumbLink href="#">
-                            Bureau d'ordre
+                        Bureau d'ordre
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Utilisateurs</BreadcrumbPage>
+                        <BreadcrumbPage>Etablissements</BreadcrumbPage>
                     </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -325,10 +328,10 @@ export default function Page() {
             </div>
         </div>
 
-        {/* Edit user Sheet */}
-        {selectedUser && (
-            <EditUserSheet
-            user={selectedUser}
+        {/* Edit Etablissement Sheet */}
+        {selectedEtablissement && (
+            <EditEtablissementSheet
+            etablissement={selectedEtablissement}
             isOpen={isEditSheetOpen} // Ensure this state exists
             onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
             onSave={handleSave} // Implement the save logic here
@@ -340,13 +343,13 @@ export default function Page() {
             isOpen={isDeleteDialogOpen}
             onClose={() => setIsDeleteDialogOpen(false)}
             title="Êtes-vous sûr ?"
-            description="Cette action est irréversible. Voulez-vous vraiment supprimer cet utilisateur ?"
-            onConfirm={deleteUser}
+            description="Cette action est irréversible. Voulez-vous vraiment supprimer cet établissement ?"
+            onConfirm={deleteEtablissement}
             confirmText="Continuer"
             cancelText="Annuler"
         />
-        </>
-      )}
+    </>
+    )}
     </>
   );
 }

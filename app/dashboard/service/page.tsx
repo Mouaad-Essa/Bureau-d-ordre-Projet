@@ -22,20 +22,18 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { EditUserSheet } from "./EditUserSheet"; 
-import { updateUser } from "../../actions/usersActions"; 
+import { EditServiceSheet } from "./EditService"; // Import your EditServiceSheet
+import { updateService } from "../../actions/servicesActions"; // Import the updateService action
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
-type user = {
+type Service = {
   id: number;
   nom: string;
-  prenom: string;
-  email: string;
-  telephone: string;
-  service: string;
+  division: string;
+  description: string;
 };
 
 const paginationComponentOptions = {
@@ -47,29 +45,25 @@ const paginationComponentOptions = {
 };
 
 export default function Page() {
-  const [users, setUsers] = useState<user[]>([]);
-  const [filteredData, setFilteredData] = useState<user[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [filteredData, setFilteredData] = useState<Service[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
-  const [selectedUserId, setSelectedUserId] = useState<
+  const [selectedServiceId, setSelectedServiceId] = useState<
     null | number
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
-  const [selectedUser, setSelectedUser] =
-    useState<user | null>(null);
+  const [selectedService, setSelectedService] =
+    useState<Service | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await fetch("/api/users");
-        const data = await response.json();
-        setLoaded(true); // Set loaded to true after data is fetched
-        setUsers(data);
-        setFilteredData(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
+      const response = await fetch("/api/service");
+      const data = await response.json();
+      setServices(data);
+      setFilteredData(data);
+      setLoaded(true);
     };
 
     fetchData();
@@ -79,13 +73,10 @@ export default function Page() {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
 
-    const filtered = users.filter(
+    const filtered = services.filter(
       (item) =>
         item.nom.toLowerCase().includes(searchValue) ||
-        item.prenom.toLowerCase().includes(searchValue)
-        || item.email.toLowerCase().includes(searchValue)
-        || item.telephone.toLowerCase().includes(searchValue)
-        || item.service.toLowerCase().includes(searchValue)
+        item.description.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -93,132 +84,120 @@ export default function Page() {
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    doc.text("Liste des utilisateurs", 10, 10);
+    doc.text("Liste des services", 10, 10);
 
     const tableData = filteredData.map((row) => [
       row.id,
       row.nom,
-      row.prenom,
-      row.email,
-      row.telephone,
-      row.service,
+      row.division,
+      row.description,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service"]],
+      head: [["ID", "Nom", "Division", "Description"]],
       body: tableData,
     });
 
-    doc.save("users.pdf");
+    doc.save("Services.pdf");
   };
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "users");
-    XLSX.writeFile(workbook, "users.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Services");
+    XLSX.writeFile(workbook, "Services.xlsx");
   };
 
-  const deleteUser = async () => {
-    if (selectedUserId === null) return;
+  const deleteService = async () => {
+    if (selectedServiceId === null) return;
 
     try {
-      const response = await fetch(`/api/users`, {
+      const response = await fetch(`/api/service`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: selectedUserId }),
+        body: JSON.stringify({ id: selectedServiceId }),
       });
 
       if (response.ok) {
-        setUsers((prevData) =>
-          prevData.filter((item) => item.id !== selectedUserId)
+        setServices((prevData) =>
+          prevData.filter((item) => item.id !== selectedServiceId)
         );
         setFilteredData((prevData) =>
-          prevData.filter((item) => item.id !== selectedUserId)
+          prevData.filter((item) => item.id !== selectedServiceId)
         );
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete user");
+        console.error("Failed to delete service");
       }
     } catch (error) {
-      console.error("Error deleting user:", error);
+      console.error("Error deleting service:", error);
     }
   };
 
-  const handleEdit = (user: user) => {
-    setSelectedUser(user);
+  const handleEdit = (service: Service) => {
+    setSelectedService(service);
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
-  const handleSave = async (updatedUser: user) => {
+  const handleSave = async (updatedService: Service) => {
     try {
-      const updatedUserWithStringId = {
-        ...updatedUser,
-        id: String(updatedUser.id), // Convert id to a string
+      const updatedServiceWithStringId = {
+        ...updatedService,
+        id: String(updatedService.id), // Convert id to a string
       };
 
-      const result = await updateUser(
-        updatedUserWithStringId
+      const result = await updateService(
+        updatedServiceWithStringId
       );
 
       if (result.error) {
-        console.error("Failed to update user:", result.error);
+        console.error("Failed to update service:", result.error);
         return;
       }
 
-      setUsers((prevData) =>
+      setServices((prevData) =>
         prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
+          item.id === updatedService.id ? updatedService : item
         )
       );
       setFilteredData((prevData) =>
         prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
+          item.id === updatedService.id ? updatedService : item
         )
       );
       setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("Error updating service:", error);
     }
   };
 
   const columns = [
     {
       name: "ID",
-      selector: (row: user) => row.id,
+      selector: (row: Service) => row.id,
       sortable: true,
 
     },
     {
       name: "Nom",
-      selector: (row: user) => row.nom,
+      selector: (row: Service) => row.nom,
       sortable: true,
     },
     {
-      name: "Prénom",
-      selector: (row: user) => row.prenom,
+      name: "Division",
+      selector: (row: Service) => row.division,
       sortable: true,
     },
     {
-      name: "Email",
-      selector: (row: user) => row.email,
-      sortable: true,
-    },
-    {
-      name: "Téléphone",
-      selector: (row: user) => row.telephone,
-      sortable: true,
-    },
-    {
-      name: "Service",
-      selector: (row: user) => row.service,
+      name: "Description",
+      selector: (row: Service) => row.description,
       sortable: true,
     },
     {
       name: "Actions",
-      cell: (row: user) => (
+      cell: (row: Service) => (
         <div className="space-x-2 flex">
           <Button variant="update" size="sm" onClick={() => handleEdit(row)}>
             <Edit />
@@ -227,11 +206,20 @@ export default function Page() {
             size="sm"
             variant="delete"
             onClick={() => {
-              setSelectedUserId(row.id);
+              setSelectedServiceId(row.id);
               setIsDeleteDialogOpen(true);
             }}
           >
             <Trash />
+          </Button>
+          <Button
+            size="sm"
+            variant="see"
+            onClick={() => {
+              router.push(`/dashboard/service/${row.id}`); // Navigate to detailed view
+            }}
+          >
+            <Eye />
           </Button>
         </div>
       ),
@@ -242,7 +230,7 @@ export default function Page() {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push("/dashboard/users/add");
+    router.push("/dashboard/service/add");
   };
 
   return (
@@ -271,7 +259,7 @@ export default function Page() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
-                        <BreadcrumbPage>Utilisateurs</BreadcrumbPage>
+                        <BreadcrumbPage>Services</BreadcrumbPage>
                     </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>
@@ -325,10 +313,10 @@ export default function Page() {
             </div>
         </div>
 
-        {/* Edit user Sheet */}
-        {selectedUser && (
-            <EditUserSheet
-            user={selectedUser}
+        {/* Edit Service Sheet */}
+        {selectedService && (
+            <EditServiceSheet
+            service={selectedService}
             isOpen={isEditSheetOpen} // Ensure this state exists
             onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
             onSave={handleSave} // Implement the save logic here
@@ -340,13 +328,13 @@ export default function Page() {
             isOpen={isDeleteDialogOpen}
             onClose={() => setIsDeleteDialogOpen(false)}
             title="Êtes-vous sûr ?"
-            description="Cette action est irréversible. Voulez-vous vraiment supprimer cet utilisateur ?"
-            onConfirm={deleteUser}
+            description="Cette action est irréversible. Voulez-vous vraiment supprimer ce service ?"
+            onConfirm={deleteService}
             confirmText="Continuer"
             cancelText="Annuler"
         />
-        </>
-      )}
+    </>
+    )}
     </>
   );
 }

@@ -10,51 +10,60 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+interface User {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone: string;
+  service: string;
+}
 
 interface EditUserSheetProps {
-  user: {
-    id: number;
-    nom: string;
-    prenom: string;
-    email: string;
-    telephone: string;
-  };
+  user: User;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedUser: {
-    id: number;
-    nom: string;
-    prenom: string;
-    email: string;
-    telephone: string;
-    password: string
-  }) => void;
+  onSave: (updatedUser: User & { password: string }) => void;
 }
 
 export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSheetProps) {
-  const [nom, setNom] = useState(user.nom);
-  const [prenom, setPrenom] = useState(user.prenom);
-  const [email, setEmail] = useState(user.email);
-  const [telephone, setTelephone] = useState(user.telephone);
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    nom: user.nom,
+    prenom: user.prenom,
+    email: user.email,
+    telephone: user.telephone,
+    service: user.service,
+    password: "",
+  });
 
   // Sync state with the selected user whenever it changes
   useEffect(() => {
-    setNom(user.nom);
-    setPrenom(user.prenom);
-    setEmail(user.email);
-    setTelephone(user.telephone);
-    setPassword('');
-  }, [user]); // Trigger the effect when `user` prop changes
+    setFormData({
+      nom: user.nom,
+      prenom: user.prenom,
+      email: user.email,
+      telephone: user.telephone,
+      service: user.service,
+      password: "",
+    });
+  }, [user]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle Select changes
+  const handleServiceChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, service: value }));
+  };
 
   const handleSave = () => {
     const updatedUser = {
       id: user.id,
-      nom,
-      prenom,
-      email,
-      telephone,
-      password,
+      ...formData,
     };
     onSave(updatedUser);
     onOpenChange(false); // Close the sheet after saving
@@ -67,30 +76,64 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
           <SheetTitle>Modifier l'utilisateur</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 py-4">
+          <label htmlFor="nom" className="block text-sm font-medium mb-1">
+            Nom
+          </label>
           <Input
-            placeholder="Nom"
-            value={nom}
-            onChange={(e) => setNom(e.target.value)}
+            name="nom"
+            placeholder="Nom..."
+            value={formData.nom}
+            onChange={handleInputChange}
           />
+          <label htmlFor="prenom" className="block text-sm font-medium mb-1">
+            Prénom
+          </label>
           <Input
-            placeholder="Prénom"
-            value={prenom}
-            onChange={(e) => setPrenom(e.target.value)}
+            name="prenom"
+            placeholder="Prénom..."
+            value={formData.prenom}
+            onChange={handleInputChange}
           />
+          <label htmlFor="email" className="block text-sm font-medium mb-1">
+            Email
+          </label>
           <Input
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
+            placeholder="Email..."
+            value={formData.email}
+            onChange={handleInputChange}
           />
+          <label htmlFor="telephone" className="block text-sm font-medium mb-1">
+            Téléphone
+          </label>
           <Input
-            placeholder="Téléphone"
-            value={telephone}
-            onChange={(e) => setTelephone(e.target.value)}
+            name="telephone"
+            placeholder="Téléphone..."
+            value={formData.telephone}
+            onChange={handleInputChange}
           />
+          <label htmlFor="service" className="block text-sm font-medium mb-1">
+            Service
+          </label>
+          <Select value={formData.service} onValueChange={handleServiceChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="-- Séléctionner le service --" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Informatique">Informatique</SelectItem>
+              <SelectItem value="Recherche">Recherche</SelectItem>
+              <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+            </SelectContent>
+          </Select>
+          <label htmlFor="pass" className="block text-sm font-medium mb-1">
+            Mot de passe
+          </label>
           <Input
             type="password"
-            placeholder="Mot de passe"
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
+            placeholder="Mot de passe..."
+            value={formData.password}
+            onChange={handleInputChange}
           />
         </div>
         <SheetFooter>
