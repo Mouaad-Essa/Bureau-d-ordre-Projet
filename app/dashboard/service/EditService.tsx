@@ -84,18 +84,27 @@ export function EditServiceSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-4 py-4">
+          <label htmlFor="nom" className="block text-sm font-medium mb-1">
+            Nom
+          </label>
           <Input
             name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={(e) => handleChange("nom", e.target.value)}
           />
+          <label htmlFor="description" className="block text-sm font-medium mb-1">
+            Description
+          </label>
           <Input
             name="description"
             placeholder="Description"
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
           />
+          <label htmlFor="division" className="block text-sm font-medium mb-1">
+            Division
+          </label>
           <Select value={formData.division} onValueChange={handleDivisionChange}>
             <SelectTrigger>
               <SelectValue placeholder="-- Séléctionner la division --" />

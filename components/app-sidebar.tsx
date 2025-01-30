@@ -81,11 +81,11 @@ const data = {
       items: [
         {
           title: "Pôles",
-          url: "#",
+          url: "/dashboard/poles",
         },
         {
           title: "Créer",
-          url: "#",
+          url: "/dashboard/poles/add",
         },
       ],
     },

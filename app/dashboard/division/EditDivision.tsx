@@ -84,26 +84,41 @@ export function EditDivisionSheet({
           </SheetDescription>
         </SheetHeader>
         <div className="space-y-4 py-4">
+          <label htmlFor="nom" className="block text-sm font-medium mb-1">
+            Nom
+          </label>
           <Input
             placeholder="Nom"
             value={formData.nom}
             onChange={(e) => handleChange("nom", e.target.value)}
           />
+          <label htmlFor="description" className="block text-sm font-medium mb-1">
+            Description
+          </label>
           <Input
             placeholder="Description"
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
           />
+          <label htmlFor="responsable" className="block text-sm font-medium mb-1">
+            Responsable
+          </label>
           <Input
             placeholder="Responsable ID"
             value={formData.responsableId}
             onChange={(e) => handleChange("responsableId", e.target.value)}
           />
+          <label htmlFor="bureau" className="block text-sm font-medium mb-1">
+            Bureau
+          </label>
           <Input
             placeholder="Bureau ID"
             value={formData.bureauId}
             onChange={(e) => handleChange("bureauId", e.target.value)}
           />
+          <label htmlFor="statut" className="block text-sm font-medium mb-1">
+            Statut
+          </label>
           <Input
             placeholder="Statut"
             value={formData.statut}

@@ -62,18 +62,27 @@ export function EditRoleSheet({ role, isOpen, onOpenChange, onSave }: EditRoleSh
           <SheetTitle>Modifier un role</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 py-4">
+          <label htmlFor="role" className="block text-sm font-medium mb-1">
+            Rôle
+          </label>
           <Input
             name="role"
             placeholder="Role"
             value={formData.role}
             onChange={handleInputChange}
           />
+          <label htmlFor="nom" className="block text-sm font-medium mb-1">
+            Nom
+          </label>
           <Input
             name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={handleInputChange}
           />
+          <label htmlFor="description" className="block text-sm font-medium mb-1">
+            Description
+          </label>
           <Input
             name="description"
             placeholder="Description"

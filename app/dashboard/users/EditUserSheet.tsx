@@ -76,30 +76,45 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
           <SheetTitle>Modifier l'utilisateur</SheetTitle>
         </SheetHeader>
         <div className="space-y-4 py-4">
+          <label htmlFor="nom" className="block text-sm font-medium mb-1">
+            Nom
+          </label>
           <Input
             name="nom"
-            placeholder="Nom"
+            placeholder="Nom..."
             value={formData.nom}
             onChange={handleInputChange}
           />
+          <label htmlFor="prenom" className="block text-sm font-medium mb-1">
+            Prénom
+          </label>
           <Input
             name="prenom"
-            placeholder="Prénom"
+            placeholder="Prénom..."
             value={formData.prenom}
             onChange={handleInputChange}
           />
+          <label htmlFor="email" className="block text-sm font-medium mb-1">
+            Email
+          </label>
           <Input
             name="email"
-            placeholder="Email"
+            placeholder="Email..."
             value={formData.email}
             onChange={handleInputChange}
           />
+          <label htmlFor="telephone" className="block text-sm font-medium mb-1">
+            Téléphone
+          </label>
           <Input
             name="telephone"
-            placeholder="Téléphone"
+            placeholder="Téléphone..."
             value={formData.telephone}
             onChange={handleInputChange}
           />
+          <label htmlFor="service" className="block text-sm font-medium mb-1">
+            Service
+          </label>
           <Select value={formData.service} onValueChange={handleServiceChange}>
             <SelectTrigger>
               <SelectValue placeholder="-- Séléctionner le service --" />
@@ -110,10 +125,13 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
               <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
             </SelectContent>
           </Select>
+          <label htmlFor="pass" className="block text-sm font-medium mb-1">
+            Mot de passe
+          </label>
           <Input
             type="password"
             name="password"
-            placeholder="Mot de passe"
+            placeholder="Mot de passe..."
             value={formData.password}
             onChange={handleInputChange}
           />
