@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function AddServicePage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function AddServicePage() {
   // State to manage form inputs
   const [formData, setFormData] = useState({
     nom: "",
+    division: "",
     description: "",
   });
 
@@ -22,6 +24,11 @@ export default function AddServicePage() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle Select changes
+  const handleDivisionChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, division: value }));
   };
 
   // Handle form submission
@@ -64,6 +71,7 @@ export default function AddServicePage() {
     // Reset the form after submission
     setFormData({
         nom: "",
+        division: "",
         description: "",
     });
   };
@@ -122,7 +130,22 @@ export default function AddServicePage() {
                 />
             </div>
             <div className="w-full sm:w-[48%]">
-                <label htmlFor="ville" className="block text-sm font-medium mb-1">
+                <label htmlFor="division" className="block text-sm font-medium mb-1">
+                Division
+                </label>
+                <Select value={formData.division} onValueChange={handleDivisionChange} >
+                  <SelectTrigger>
+                    <SelectValue placeholder="-- Séléctionner la division --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Informatique">Informatique</SelectItem>
+                    <SelectItem value="Recherche">Recherche</SelectItem>
+                    <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+                  </SelectContent>
+                </Select>
+            </div>
+            <div className="w-full sm:w-[48%]">
+                <label htmlFor="description" className="block text-sm font-medium mb-1">
                 Description
                 </label>
                 <Input

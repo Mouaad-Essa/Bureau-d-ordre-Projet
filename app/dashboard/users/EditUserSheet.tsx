@@ -10,6 +10,7 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface User {
   id: number;
@@ -17,6 +18,7 @@ interface User {
   prenom: string;
   email: string;
   telephone: string;
+  service: string;
 }
 
 interface EditUserSheetProps {
@@ -32,6 +34,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
     prenom: user.prenom,
     email: user.email,
     telephone: user.telephone,
+    service: user.service,
     password: "",
   });
 
@@ -42,6 +45,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
       prenom: user.prenom,
       email: user.email,
       telephone: user.telephone,
+      service: user.service,
       password: "",
     });
   }, [user]);
@@ -49,6 +53,11 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // Handle Select changes
+  const handleServiceChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, service: value }));
   };
 
   const handleSave = () => {
@@ -87,6 +96,16 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
             value={formData.telephone}
             onChange={handleInputChange}
           />
+          <Select value={formData.service} onValueChange={handleServiceChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="-- Séléctionner le service --" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Informatique">Informatique</SelectItem>
+              <SelectItem value="Recherche">Recherche</SelectItem>
+              <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+            </SelectContent>
+          </Select>
           <Input
             type="password"
             placeholder="Mot de passe"

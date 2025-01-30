@@ -12,10 +12,12 @@ import {
 } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Service = {
   id: number;
   nom: string;
+  division: string;
   description: string;
 };
 
@@ -34,6 +36,7 @@ export function EditServiceSheet({
 }: EditServiceSheetProps) {
   const [formData, setFormData] = useState({
     nom: service.nom,
+    division: service.division,
     description: service.description,
   });
 
@@ -43,6 +46,7 @@ export function EditServiceSheet({
   useEffect(() => {
     setFormData({
       nom: service.nom,
+      division: service.division,
       description: service.description,
     });
   }, [service]);
@@ -52,6 +56,11 @@ export function EditServiceSheet({
       ...prev,
       [field]: value,
     }));
+  };
+
+  // Handle Select changes
+  const handleDivisionChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, division: value }));
   };
 
   const handleSave = () => {
@@ -81,10 +90,25 @@ export function EditServiceSheet({
             onChange={(e) => handleChange("nom", e.target.value)}
           />
           <Input
+            placeholder="Division"
+            value={formData.nom}
+            onChange={(e) => handleChange("division", e.target.value)}
+          />
+          <Input
             placeholder="Description"
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}
           />
+          <Select value={formData.division} onValueChange={handleDivisionChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="-- Séléctionner la division --" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Informatique">Informatique</SelectItem>
+              <SelectItem value="Recherche">Recherche</SelectItem>
+              <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <SheetFooter>
           <Button onClick={handleSave}>Modifier</Button>

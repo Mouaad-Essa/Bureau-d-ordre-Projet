@@ -7,6 +7,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 
 export default function AddUserPage() {
   const router = useRouter(); // Initialize the router
@@ -17,6 +19,7 @@ export default function AddUserPage() {
     prenom: "",
     email: "",
     telephone: "",
+    service: "",
     password: "",
     repeatPassword: "",
   });
@@ -27,40 +30,58 @@ export default function AddUserPage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Handle Select changes
+  const handleServiceChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, service: value }));
+  };
+
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Prepare the user data to be saved
+    const newUser = { ...formData };
 
     // Validate passwords match
     if (formData.password !== formData.repeatPassword) {
-      alert("Les mots de passe ne correspondent pas.");
+      toast({
+        title: "Erreur",
+        description: "Les mots de passe ne correspondent pas.",
+        variant: "destructive",
+      });
       return;
     }
 
-    // Prepare the user data to be saved
-    const newUser = {
-      nom: formData.nom,
-      prenom: formData.prenom,
-      email: formData.email,
-      telephone: formData.telephone,
-      password: formData.password,
-    };
+    try {
+      // Call the addUser API to add the new user
+      const response = await fetch("/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUser),
+      });
 
-    // Log the new user (replace this with your actual save logic)
-    console.log("New User:", newUser);
-
-    // Reset the form after submission
-    setFormData({
-      nom: "",
-      prenom: "",
-      email: "",
-      telephone: "",
-      password: "",
-      repeatPassword: "",
-    });
-
-    alert("Utilisateur ajouté avec succès!");
-  };
+      if (response.ok) {
+        // Show success toast
+        toast({
+          title: "Utilisateur ajouté",
+          description: "l'utilisateur' a été ajouté avec succès.",
+        });
+        //redirect
+        router.push("/dashboard/users");
+      } else {
+        throw new Error("Failed to add user");
+      }
+    } catch (error) {
+      // Show error toast
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'ajout de l'utilisateur.",
+        variant: "destructive",
+      });
+    }
+  }
 
   // Handle cancel button click
   const handleCancel = () => {
@@ -193,6 +214,22 @@ export default function AddUserPage() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="w-full sm:w-[48%]">
+                <label htmlFor="division" className="block text-sm font-medium mb-1">
+                Division
+                </label>
+                <Select value={formData.service} onValueChange={handleServiceChange} >
+                  <SelectTrigger>
+                    <SelectValue placeholder="-- Séléctionner le service --" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Informatique">Informatique</SelectItem>
+                    <SelectItem value="Recherche">Recherche</SelectItem>
+                    <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+                  </SelectContent>
+                </Select>
             </div>
 
             {/* Buttons */}

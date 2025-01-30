@@ -9,6 +9,7 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbS
 type service = {
   id: string;
   nom: string;
+  division: string;
   description: string;
 };
 
@@ -94,6 +95,9 @@ const ServicePage = () => {
             </p>
             <p>
             <span className="font-medium">Nom:</span> {service.nom}
+            </p>
+            <p>
+            <span className="font-medium">Division:</span> {service.division}
             </p>
             <p>
             <span className="font-medium">Description:</span> {service.description}
