@@ -84,7 +84,7 @@ const data = {
         },
         {
           title: "Créer",
-          url: "/dashboard/poles/ajouterpole",
+          url: "/dashboard/poles/add",
         },
       ],
     },
@@ -105,16 +105,16 @@ const data = {
     },
     {
       title: "Services",
-      url: "/dashboard/users",
+      url: "#",
       icon: Lucide.Building2,
       items: [
         {
           title: "Services",
-          url: "#",
+          url: "/dashboard/services",
         },
         {
           title: "Créer",
-          url: "#",
+          url: "/dashboard/services/add",
         },
       ],
     },
