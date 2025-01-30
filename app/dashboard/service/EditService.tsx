@@ -85,16 +85,13 @@ export function EditServiceSheet({
         </SheetHeader>
         <div className="space-y-4 py-4">
           <Input
+            name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={(e) => handleChange("nom", e.target.value)}
           />
           <Input
-            placeholder="Division"
-            value={formData.nom}
-            onChange={(e) => handleChange("division", e.target.value)}
-          />
-          <Input
+            name="description"
             placeholder="Description"
             value={formData.description}
             onChange={(e) => handleChange("description", e.target.value)}

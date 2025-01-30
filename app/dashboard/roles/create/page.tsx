@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation"; // Import useRouter
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
 
 export default function AddUserPage() {
   const router = useRouter(); // Initialize the router
@@ -26,25 +27,42 @@ export default function AddUserPage() {
   };
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Prepare the user data to be saved
-    const newUser = {
-      role: formData.role,
-      nom: formData.nom,
-      description: formData.description,
-    };
+    // Prepare the Service data to be saved
+    const newService = { ...formData };
 
-    // Reset the form after submission
-    setFormData({
-      role: "",
-      nom: "",
-      description: "",
-    });
+    try {
+      // Call the addService API to add the new Service
+      const response = await fetch("/api/role", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newService),
+      });
 
-    alert("Rôle ajouté avec succès!");
-  };
+      if (response.ok) {
+        // Show success toast
+        toast({
+          title: "Service ajouté",
+          description: "le rôle a été ajouté avec succès.",
+        });
+        //redirect
+        router.push("/dashboard/roles");
+      } else {
+        throw new Error("Failed to add rôle");
+      }
+    } catch (error) {
+      // Show error toast
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'ajout du rôle.",
+        variant: "destructive",
+      });
+    }
+  }
 
   // Handle cancel button click
   const handleCancel = () => {

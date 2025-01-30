@@ -77,21 +77,25 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
         </SheetHeader>
         <div className="space-y-4 py-4">
           <Input
+            name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={handleInputChange}
           />
           <Input
+            name="prenom"
             placeholder="Prénom"
             value={formData.prenom}
             onChange={handleInputChange}
           />
           <Input
+            name="email"
             placeholder="Email"
             value={formData.email}
             onChange={handleInputChange}
           />
           <Input
+            name="telephone"
             placeholder="Téléphone"
             value={formData.telephone}
             onChange={handleInputChange}
@@ -108,6 +112,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
           </Select>
           <Input
             type="password"
+            name="password"
             placeholder="Mot de passe"
             value={formData.password}
             onChange={handleInputChange}

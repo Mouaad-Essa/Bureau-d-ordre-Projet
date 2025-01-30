@@ -86,27 +86,32 @@ export function EditEtablissementSheet({
         </SheetHeader>
         <div className="space-y-4 py-4">
           <Input
+            name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={(e) => handleChange("nom", e.target.value)}
           />
           <Input
+            name="ville"
             placeholder="Ville"
             value={formData.ville}
             onChange={(e) => handleChange("ville", e.target.value)}
           />
           <Input
+            name="contact"
             placeholder="Contact"
             value={formData.contact}
             onChange={(e) => handleChange("contact", e.target.value)}
           />
           <Input
-            type="number"
+            name="fax"
+            type="text"
             placeholder="Fax"
             value={formData.fax.toString()}
             onChange={(e) => handleChange("fax", Number(e.target.value))}
           />
           <Input
+            name="adresse"
             placeholder="Adresse"
             value={formData.adresse}
             onChange={(e) => handleChange("adresse", e.target.value)}

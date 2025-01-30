@@ -18,14 +18,14 @@ interface Role {
   description: string;
 }
 
-interface EditUserSheetProps {
+interface EditRoleSheetProps {
   role: Role;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (updatedRole: Role) => void;
 }
 
-export function EditUserSheet({ role, isOpen, onOpenChange, onSave }: EditUserSheetProps) {
+export function EditRoleSheet({ role, isOpen, onOpenChange, onSave }: EditRoleSheetProps) {
   const [formData, setFormData] = useState({
     role: role.role,
     nom: role.nom,
@@ -63,16 +63,19 @@ export function EditUserSheet({ role, isOpen, onOpenChange, onSave }: EditUserSh
         </SheetHeader>
         <div className="space-y-4 py-4">
           <Input
+            name="role"
             placeholder="Role"
             value={formData.role}
             onChange={handleInputChange}
           />
           <Input
+            name="nom"
             placeholder="Nom"
             value={formData.nom}
             onChange={handleInputChange}
           />
           <Input
+            name="description"
             placeholder="Description"
             value={formData.description}
             onChange={handleInputChange}
