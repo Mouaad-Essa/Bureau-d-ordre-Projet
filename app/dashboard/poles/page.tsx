@@ -28,15 +28,8 @@ import * as XLSX from 'xlsx';
 import EditPole from "./EditPole";
 import { useRouter } from "next/navigation";
 import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
-<<<<<<< HEAD
-import { updatePole } from "@/app/actions/polesActions";
-
-
-
-=======
 import { fetchPoles, updatePole } from "@/app/actions/polesActions";
 import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
->>>>>>> ayoub_branch
 
   type Pole={
     id:string;
@@ -57,11 +50,7 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
   };
   
 
-<<<<<<< HEAD
-export default function Page(){
-=======
   export default function Page(){
->>>>>>> ayoub_branch
    const [poles, setPoles] = useState<Pole[]>([]);
      const [filteredData, setFilteredData] = useState<Pole[]>([]);
      const [searchText, setSearchText] = useState("");
@@ -69,25 +58,12 @@ export default function Page(){
      const [selectedPoleId, setSelectedPoleId] = useState<string | null>(
        null
      );
-<<<<<<< HEAD
-=======
      const [loaded, setLoaded] = useState(false);
->>>>>>> ayoub_branch
      const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
      const [selectedPole, setSelectedPole] = useState<Pole | null>(
        null
      );
 
-<<<<<<< HEAD
-
-
-     useEffect(() => {
-      const fetchData = async () => {
-        const response = await fetch("/api/poles");
-        const data = await response.json();
-        setPoles(data);
-        setFilteredData(data);
-=======
      useEffect(() => {
       const fetchData = async () => {
         const response = await fetchPoles();
@@ -96,32 +72,16 @@ export default function Page(){
         setFilteredData(data);
         setLoaded(true);
 
->>>>>>> ayoub_branch
       };
   
       fetchData();
     }, []);
-<<<<<<< HEAD
-  
-
-    // Handle edit button click
-    const handleEditClick = (pole: any) => {
-        setSelectedPole(pole);
-    };
-
-    
-=======
->>>>>>> ayoub_branch
 
      //Export 
   
      const exportToPDF = () => {
       const doc = new jsPDF();
-<<<<<<< HEAD
-      doc.text("Liste des divisions", 10, 10);
-=======
       doc.text("Liste des pôles", 10, 10);
->>>>>>> ayoub_branch
   
       const tableData = filteredData.map((row) => [
         row.id,
@@ -137,11 +97,7 @@ export default function Page(){
         body: tableData,
       });
   
-<<<<<<< HEAD
-      doc.save("divisions.pdf");
-=======
       doc.save("poles.pdf");
->>>>>>> ayoub_branch
     };
   
     const exportToExcel = () => {
@@ -151,23 +107,6 @@ export default function Page(){
       XLSX.writeFile(workbook, "poles.xlsx");
     };
 
-<<<<<<< HEAD
-
-
-
-  
-    useEffect(() => {
-      const fetchData = async () => {
-        const response = await fetch("/api/poles");
-        const data = await response.json();
-        setPoles(data);
-        setFilteredData(data);
-      };
-  
-      fetchData();
-    }, []);
-=======
->>>>>>> ayoub_branch
   
     //Search
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -250,15 +189,6 @@ export default function Page(){
         console.error("Error updating pole:", error);
       }
     };
-<<<<<<< HEAD
-
-
-
-
-
-
-
-=======
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
 
@@ -266,7 +196,6 @@ export default function Page(){
       setSelectedPole(pole);
       setIsDetailDialogOpen(true);
     };
->>>>>>> ayoub_branch
 
     // Column definitions (in French)
     const columns = [
@@ -317,32 +246,14 @@ export default function Page(){
               >
                 <Trash />
               </Button>
-<<<<<<< HEAD
-              <Button
-                size="sm"
-                variant="see"
-                onClick={() => {
-                  router.push(`/dashboard/poles/${row.id}`); // Navigate to detailed view
-                }}
-              >
-                <Eye />
-              </Button>
-=======
               <Button variant="see" size="sm" onClick={() => handleShowDetails(row)}>
             <Eye />
           </Button>
->>>>>>> ayoub_branch
             </div>
           ),
         },
     ];
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> ayoub_branch
     const router = useRouter();
     
     //handle add button click
@@ -351,12 +262,6 @@ export default function Page(){
 
     };
 
-<<<<<<< HEAD
-  
-  
-    return (
-        <>
-=======
     return (
         <>
          {!loaded ? (
@@ -371,7 +276,6 @@ export default function Page(){
         </div>
       ) : (
       <>
->>>>>>> ayoub_branch
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -445,11 +349,7 @@ export default function Page(){
             </div>
 
             {/* Edit User Sheet */}
-<<<<<<< HEAD
- {selectedPole && (
-=======
       {selectedPole && (
->>>>>>> ayoub_branch
         <EditPole
           pole={selectedPole}
           isOpen={isEditSheetOpen} // Ensure this state exists
@@ -457,14 +357,6 @@ export default function Page(){
           onSave={handleSave} // Implement the save logic here
         />
       )}      
-<<<<<<< HEAD
-
-<ReusableAlertDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        title="Êtes-vous sûr ?"
-        description="Cette action est irréversible. Voulez-vous vraiment supprimer cette division ?"
-=======
             {/* Dialogues */}
             <AlertDialogDetail isOpen={isDetailDialogOpen} onClose={() => setIsDetailDialogOpen(false)} pole={selectedPole} />
 
@@ -474,16 +366,12 @@ export default function Page(){
         onClose={() => setIsDeleteDialogOpen(false)}
         title="Êtes-vous sûr ?"
         description="Cette action est irréversible. Voulez-vous vraiment supprimer ce pôle ?"
->>>>>>> ayoub_branch
         onConfirm={deletePole}
         confirmText="Continuer"
         cancelText="Annuler"
       />
         </>
-<<<<<<< HEAD
-=======
     )}
         </>
->>>>>>> ayoub_branch
     );
 }
