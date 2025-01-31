@@ -120,7 +120,7 @@ const data = {
     },
     {
       title: "Arrivées",
-      url: "#",
+      url: "/dashboard/arrivees",
       icon: Lucide.Mail,
     },
     {

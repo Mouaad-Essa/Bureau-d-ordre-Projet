@@ -189,7 +189,7 @@ export default function Page() {
           <h1 className="rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 from-40% to-blue-500 text-gray-900 text-2xl font-semibold p-3 flex items-center justify-center">
             <span>Liste des départs</span>
             <Building />
-          </h1>{" "}
+          </h1>
           <div className="flex items-center justify-between">
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />

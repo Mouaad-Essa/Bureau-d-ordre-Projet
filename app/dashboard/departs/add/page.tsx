@@ -50,8 +50,11 @@ import {
     CardHeader,
     CardTitle,
   } from "@/components/ui/card"
+import { toast, useToast } from "@/hooks/use-toast";
 
 export default function Page() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     signePar: "",
     traitepar: "",
@@ -63,9 +66,43 @@ export default function Page() {
     nombreFichiers: "",
   });
 
-  const handleSubmit = () => {};
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch("/api/depart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Départs ajouté",
+          description: "Le pôle a été ajouté avec succès.",
+        });
+        router.push("/dashboard/departs");
+      } else {
+        throw new Error("Échec de l'ajout du pôle");
+      }
+    } catch (error) {
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'ajout du pôle.",
+        variant: "destructive",
+      });
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log(value);
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -108,19 +145,15 @@ export default function Page() {
             {/* Nom and Description */}
             <div className="flex gap-4 w-full">
               <div className="w-full sm:w-[48%]">
-                <label htmlFor="nom" className="block text-sm font-medium mb-1">
+                <label htmlFor="signePar" className="block text-sm font-medium mb-1">
                   Signé Par * :
-                </label>
-            <Select>
-            <SelectTrigger className="">
-                <SelectValue placeholder="Sélectionner signé par" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-            </Select>
+                </label >
+                <select onChange={handleSelectChange} id="small" name="signePar" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="FR">France</option>
+                  <option value="DE">Germany</option>
+                </select>
 
               </div>
               <div className="w-full sm:w-[48%]">
@@ -130,23 +163,19 @@ export default function Page() {
                 >
                   Traité par * :
                 </label>
-                <Select>
-            <SelectTrigger >
-                <SelectValue placeholder="Sélectionner traiter par " />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-            </Select>
+                <select onChange={handleSelectChange} id="small" name="traitePar" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="FR">France</option>
+                  <option value="DE">Germany</option>
+                </select>
               </div>
             </div>
 
             <div className="flex gap-4 w-full">
               <div className="w-full sm:w-[48%]">
                 <label
-                  htmlFor="responsableId"
+                  htmlFor="numeroOrdre"
                   className="block text-sm font-medium mb-1"
                 >
                   Numéro d'ordre *
@@ -205,16 +234,13 @@ export default function Page() {
                 >
                   Destination *
                 </label>
-                <Select>
-            <SelectTrigger >
-                <SelectValue placeholder="Theme" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-            </Select>
+                <select onChange={handleSelectChange} id="small" name="destination" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option disabled >Sélectionner une Destination :</option>
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="FR">France</option>
+                  <option value="DE">Germany</option>
+                </select>
               </div>
             </div>
             <div className="flex gap-4 w-full">
