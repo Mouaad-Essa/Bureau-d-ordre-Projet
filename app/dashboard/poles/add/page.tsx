@@ -5,7 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Separator } from "@/components/ui/separator";
+import { Card, CardHeader } from "@/components/ui/card";
+import { Building } from "lucide-react";
 export default function AddPolePage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -73,19 +84,42 @@ export default function AddPolePage() {
 
   return (
 
+<>
 
+<div className="bddepart">
+      <Card className="mycard">
 
-
+<header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+            <div className="flex items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden md:block">
+                    <BreadcrumbLink href="#">
+                      Bureau d'ordre
+                    </BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage></BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </header>
 
 
 
 
     
     <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Ajouter un Pôle</h1>
-      </div>
-
+    <CardHeader>
+          <h1 className="rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 from-40% to-blue-500 text-gray-900 text-2xl font-semibold p-3 flex items-center justify-center">
+            <span>Ajouter Pole</span>
+            <Building />
+          </h1>
+          </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4 w-full">
 
 
@@ -191,5 +225,10 @@ export default function AddPolePage() {
         </div>
       </form>
     </div>
+    </Card>
+</div>
+</>
+
+
   );
 }

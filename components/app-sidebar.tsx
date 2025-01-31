@@ -125,8 +125,18 @@ const data = {
     },
     {
       title: "Départs",
-      url: "#",
+      url: "",
       icon: Lucide.Send,
+      items: [
+        {
+          title: "Départs",
+          url: "/dashboard/departs",
+        },
+        {
+          title: "Créer un Départ",
+          url: "/dashboard/departs/add",
+        },
+      ],
     },
     {
       title: "Statistiques",
