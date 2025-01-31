@@ -120,8 +120,18 @@ const data = {
     },
     {
       title: "Arrivées",
-      url: "/dashboard/arrivees",
+      url: "",
       icon: Lucide.Mail,
+      items: [
+        {
+          title: "Arrivées",
+          url: "/dashboard/arrivees",
+        },
+        {
+          title: "Créer une Arrivée",
+          url: "/dashboard/arrivees/add",
+        },
+      ],
     },
     {
       title: "Départs",
