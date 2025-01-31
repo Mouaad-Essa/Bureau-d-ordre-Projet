@@ -130,10 +130,20 @@ const data = {
       title: "Départs",
       url: "#",
       icon: Lucide.Send,
+      items: [
+        {
+          title: "Départs",
+          url: "/dashboard/departs",
+        },
+        {
+          title: "Créer un Départ",
+          url: "/dashboard/departs/add",
+        },
+      ],
     },
     {
       title: "Statistiques",
-      url: "#",
+      url: "/dashboard/statistiques",
       icon: Lucide.LucideChartNoAxesCombined,
     },
   ],

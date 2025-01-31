@@ -13,7 +13,6 @@ import {
   Download,
   Edit,
   Trash,
-  Building,
   Eye,
 } from "lucide-react";
 
@@ -36,6 +35,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
+import AlertDialogDetail from "../_components/EtablissementDetailDialog";
 
 type Etablissement = {
   id: number;
@@ -66,6 +66,7 @@ export default function Page() {
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
   const [selectedEtablissement, setSelectedEtablissement] =
     useState<Etablissement | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -186,6 +187,12 @@ export default function Page() {
     }
   };
 
+  // show details logic
+  const handleShowDetails = (etablissement: Etablissement) => {
+    setSelectedEtablissement(etablissement);
+    setIsDetailDialogOpen(true); // Open the dialog
+  };
+
   const columns = [
     {
       name: "ID",
@@ -237,9 +244,7 @@ export default function Page() {
           <Button
             size="sm"
             variant="see"
-            onClick={() => {
-              router.push(`/dashboard/etablissement/${row.id}`); // Navigate to detailed view
-            }}
+            onClick={() => handleShowDetails(row)}
           >
             <Eye />
           </Button>
@@ -368,6 +373,13 @@ export default function Page() {
             onConfirm={deleteEtablissement}
             confirmText="Continuer"
             cancelText="Annuler"
+          />
+
+          {/* Dialog for displaying details */}
+          <AlertDialogDetail
+            isOpen={isDetailDialogOpen}
+            onClose={() => setIsDetailDialogOpen(false)}
+            etablissement={selectedEtablissement}
           />
         </>
       )}

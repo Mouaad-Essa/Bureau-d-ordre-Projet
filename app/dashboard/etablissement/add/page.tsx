@@ -99,7 +99,7 @@ export default function AddEtablissementPage() {
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="hidden md:block" />
                     <BreadcrumbItem>
-                    <BreadcrumbPage>Créer</BreadcrumbPage>
+                      <BreadcrumbPage>Créer</BreadcrumbPage>
                     </BreadcrumbItem>
                     </BreadcrumbList>
                 </Breadcrumb>

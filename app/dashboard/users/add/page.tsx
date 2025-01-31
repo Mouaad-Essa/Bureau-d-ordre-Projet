@@ -217,8 +217,8 @@ export default function AddUserPage() {
             </div>
 
             <div className="w-full sm:w-[48%]">
-                <label htmlFor="division" className="block text-sm font-medium mb-1">
-                Division
+                <label htmlFor="service" className="block text-sm font-medium mb-1">
+                Service
                 </label>
                 <Select value={formData.service} onValueChange={handleServiceChange} >
                   <SelectTrigger>

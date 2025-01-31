@@ -28,6 +28,7 @@ import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reus
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import AlertDialogDetail from "../_components/ServiceDetailDialog";
 
 type Service = {
   id: number;
@@ -56,6 +57,7 @@ export default function Page() {
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
   const [selectedService, setSelectedService] =
     useState<Service | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -173,6 +175,12 @@ export default function Page() {
     }
   };
 
+  // show details logic
+  const handleShowDetails = (service: Service) => {
+    setSelectedService(service);
+    setIsDetailDialogOpen(true); // Open the dialog
+  };
+
   const columns = [
     {
       name: "ID",
@@ -215,9 +223,7 @@ export default function Page() {
           <Button
             size="sm"
             variant="see"
-            onClick={() => {
-              router.push(`/dashboard/service/${row.id}`); // Navigate to detailed view
-            }}
+            onClick={() => handleShowDetails(row)}
           >
             <Eye />
           </Button>
@@ -332,6 +338,13 @@ export default function Page() {
             onConfirm={deleteService}
             confirmText="Continuer"
             cancelText="Annuler"
+        />
+
+        {/* Dialog for displaying details */}
+        <AlertDialogDetail
+            isOpen={isDetailDialogOpen}
+            onClose={() => setIsDetailDialogOpen(false)}
+            service={selectedService}
         />
     </>
     )}
