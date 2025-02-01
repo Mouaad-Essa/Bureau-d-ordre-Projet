@@ -13,6 +13,9 @@ import {
   Download,
   Eye,
   ArrowRightLeft,
+
+  Building,
+
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -25,9 +28,12 @@ import {
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+
+import { fetchDeparts, deleteDepart } from "../../actions/departActions";
 import { useRouter } from "next/navigation";
-import AlertDialogDetail from "../_components/DepartDetailsDialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import AlertDialogDetail from "../../(pages)/_components/departDetailsDialog";
+import ReusableAlertDialog from "../../_components/AlertDialog";
+
 
 // Définition du type pour un départ
 type Depart = {
@@ -54,6 +60,9 @@ export default function Page() {
   const [departs, setDeparts] = useState<Depart[]>([]);
   const [filteredData, setFilteredData] = useState<Depart[]>([]);
   const [searchText, setSearchText] = useState("");
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const [selectedDepart, setSelectedDepart] = useState<Depart | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const router = useRouter();
@@ -137,6 +146,7 @@ export default function Page() {
     },
   ];
 
+
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Liste des départs", 10, 10);
@@ -166,6 +176,7 @@ export default function Page() {
     XLSX.writeFile(workbook, "Départs.xlsx");
   };
 
+
   const handleShowDetails = (depart: Depart) => {
     setSelectedDepart(depart);
     setIsDetailDialogOpen(true);
@@ -181,6 +192,7 @@ export default function Page() {
   return (
     <>
     {!loaded ? (
+
     <div className="flex items-center justify-center min-h-screen">
       <div role="status">
         <svg aria-hidden="true" className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -246,6 +258,7 @@ export default function Page() {
                 </DropdownMenuContent>
             </DropdownMenu>
             </div>
+
           <DataTable
             columns={columns}
             data={filteredData}
@@ -260,8 +273,10 @@ export default function Page() {
           onClose={() => setIsDetailDialogOpen(false)}
           depart={selectedDepart}
         />
+
     </>
     )}
   </>
   );
 }
+

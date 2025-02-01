@@ -29,7 +29,9 @@ import EditPole from "./EditPole";
 import { useRouter } from "next/navigation";
 import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
 import { fetchPoles, updatePole } from "@/app/actions/polesActions";
+
 import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
+
 
   type Pole={
     id:string;
@@ -50,7 +52,9 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
   };
   
 
-  export default function Page(){
+
+export default function Page(){
+
    const [poles, setPoles] = useState<Pole[]>([]);
      const [filteredData, setFilteredData] = useState<Pole[]>([]);
      const [searchText, setSearchText] = useState("");
@@ -77,11 +81,31 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
       fetchData();
     }, []);
 
+  
+    
+
+
+
+
+
+
+
+
+
+    // Handle edit button click
+    const handleEditClick = (pole: any) => {
+        setSelectedPole(pole);
+    };
+
+
+
      //Export 
   
      const exportToPDF = () => {
       const doc = new jsPDF();
+
       doc.text("Liste des pôles", 10, 10);
+
   
       const tableData = filteredData.map((row) => [
         row.id,
@@ -97,7 +121,9 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
         body: tableData,
       });
   
+
       doc.save("poles.pdf");
+
     };
   
     const exportToExcel = () => {
@@ -197,6 +223,7 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
       setIsDetailDialogOpen(true);
     };
 
+
     // Column definitions (in French)
     const columns = [
         {
@@ -254,6 +281,7 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
         },
     ];
 
+
     const router = useRouter();
     
     //handle add button click
@@ -261,6 +289,7 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
         router.push("/dashboard/poles/add");
 
     };
+
 
     return (
         <>
@@ -276,6 +305,7 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
         </div>
       ) : (
       <>
+
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -349,7 +379,9 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
             </div>
 
             {/* Edit User Sheet */}
-      {selectedPole && (
+
+ {selectedPole && (
+
         <EditPole
           pole={selectedPole}
           isOpen={isEditSheetOpen} // Ensure this state exists
@@ -359,6 +391,7 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
       )}      
             {/* Dialogues */}
             <AlertDialogDetail isOpen={isDetailDialogOpen} onClose={() => setIsDetailDialogOpen(false)} pole={selectedPole} />
+
 
 
       <ReusableAlertDialog

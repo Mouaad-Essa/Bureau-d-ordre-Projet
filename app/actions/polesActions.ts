@@ -17,6 +17,7 @@ export async function fetchPoles() {
   }
 }
 
+
 // Fetch a single division by ID
 export async function fetchPoleById(id: string) {
   try {

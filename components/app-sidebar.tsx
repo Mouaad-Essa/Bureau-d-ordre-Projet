@@ -78,7 +78,7 @@ const data = {
     },
     {
       title: "Pôles",
-      url: "#",
+      url: "",
       icon: Lucide.Network,
       items: [
         {
@@ -113,22 +113,34 @@ const data = {
       items: [
         {
           title: "Services",
+
           url: "/dashboard/service",
         },
         {
           title: "Créer",
           url: "/dashboard/service/add",
+
         },
       ],
     },
     {
       title: "Arrivées",
-      url: "#",
+      url: "",
       icon: Lucide.Mail,
+      items: [
+        {
+          title: "Arrivées",
+          url: "/dashboard/arrivees",
+        },
+        {
+          title: "Créer une Arrivée",
+          url: "/dashboard/arrivees/add",
+        },
+      ],
     },
     {
       title: "Départs",
-      url: "#",
+      url: "",
       icon: Lucide.Send,
       items: [
         {
