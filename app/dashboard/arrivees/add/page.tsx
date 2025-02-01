@@ -102,7 +102,7 @@ export default function Page() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
-                <BreadcrumbPage>Arrivées</BreadcrumbPage>
+                <BreadcrumbPage>Créer une Arrivée</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -114,10 +114,7 @@ export default function Page() {
           <div className="container">
             <div className="flex flex-col space-y-4 p-4">
               <CardHeader>
-                <h1 className="rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 from-40% to-blue-500 text-gray-900 text-2xl font-semibold p-3 flex items-center justify-center">
-                  <span>Créer une arrivée</span>
-                  <Building />
-                </h1>
+                
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4 w-full">
