@@ -14,8 +14,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar";
-import { title } from "process";
+
+} from "@/components/ui/sidebar"
+import { title } from "process"
+import Link from "next/link"
+
 
 // This is sample data.
 const data = {
@@ -50,11 +53,11 @@ const data = {
       items: [
         {
           title: "Rôles",
-          url: "#",
+          url: "/dashboard/roles",
         },
         {
           title: "Créer",
-          url: "#",
+          url: "/dashboard/roles/create",
         },
       ],
     },
@@ -65,11 +68,11 @@ const data = {
       items: [
         {
           title: "Etablissements",
-          url: "#",
+          url: "/dashboard/etablissement",
         },
         {
           title: "Créer",
-          url: "#",
+          url: "/dashboard/etablissement/add",
         },
       ],
     },
@@ -110,11 +113,13 @@ const data = {
       items: [
         {
           title: "Services",
-          url: "/dashboard/services",
+
+          url: "/dashboard/service",
         },
         {
           title: "Créer",
-          url: "/dashboard/services/add",
+          url: "/dashboard/service/add",
+
         },
       ],
     },
@@ -150,7 +155,7 @@ const data = {
     },
     {
       title: "Statistiques",
-      url: "#",
+      url: "/dashboard/statistiques",
       icon: Lucide.LucideChartNoAxesCombined,
     },
   ],
@@ -160,24 +165,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <a href="#">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-sidebar-primary-foreground">
-                  <img src="/assets/img/logo.png" className="size-7" />
-                </div>
-                <div className="flex flex-col gap-0.5 leading-none">
-                  <span className="font-semibold">Bureau d'ordre</span>
-                  <span className="">UCD</span>
-                </div>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+
+        <SidebarMenu className="bg-[#192130] rounded-md text-white">
+            <SidebarMenuItem>
+              <SidebarMenuButton size="lg" asChild>
+                <Link href="#">
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white text-sidebar-primary-foreground">
+                  
+                    <img src="/assets/img/logo.png" className="size-7" />
+                  </div>
+                  <div className="flex flex-col gap-0.5 leading-none">
+                    <span className="font-semibold">Bureau d'ordre</span>
+                    <span className="">UCD</span>
+                  </div>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} menuName="Menu" />
+        <NavMain items={data.navMain} menuName="Menu"/>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

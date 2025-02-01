@@ -40,7 +40,9 @@ const ReusableAlertDialog: React.FC<ReusableAlertDialogProps> = ({
         <AlertDialogDescription>{description}</AlertDialogDescription>
         <AlertDialogFooter>
           <AlertDialogCancel onClick={onClose}>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
+
+          <AlertDialogAction onClick={onConfirm} className="bg-red-600 hover:bg-red-700">
+
             {confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -50,3 +52,4 @@ const ReusableAlertDialog: React.FC<ReusableAlertDialogProps> = ({
 };
 
 export default ReusableAlertDialog;
+
