@@ -38,6 +38,7 @@ type user = {
   service: string;
 };
 
+
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
   rangeSeparatorText: "de",
@@ -45,6 +46,7 @@ const paginationComponentOptions = {
   selectAllRowsItem: true,
   selectAllRowsItemText: "Tous",
 };
+
 
 export default function Page() {
   const [users, setUsers] = useState<user[]>([]);

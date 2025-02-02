@@ -103,4 +103,6 @@ export async function deleteDepart(id: string) {
     console.error(error);
     return { error: "Failed to delete depart" };
   }
+
 }
+

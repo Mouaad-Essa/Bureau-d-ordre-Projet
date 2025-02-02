@@ -29,6 +29,7 @@ interface EditUserSheetProps {
 }
 
 export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSheetProps) {
+
   const [formData, setFormData] = useState({
     nom: user.nom,
     prenom: user.prenom,
@@ -65,9 +66,12 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
       id: user.id,
       ...formData,
     };
+
     onSave(updatedUser);
     onOpenChange(false); // Close the sheet after saving
   };
+
+
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -80,37 +84,45 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
             Nom
           </label>
           <Input
+
             name="nom"
             placeholder="Nom..."
             value={formData.nom}
             onChange={handleInputChange}
+
           />
           <label htmlFor="prenom" className="block text-sm font-medium mb-1">
             Prénom
           </label>
           <Input
+
             name="prenom"
             placeholder="Prénom..."
             value={formData.prenom}
             onChange={handleInputChange}
+
           />
           <label htmlFor="email" className="block text-sm font-medium mb-1">
             Email
           </label>
           <Input
+
             name="email"
             placeholder="Email..."
             value={formData.email}
             onChange={handleInputChange}
+
           />
           <label htmlFor="telephone" className="block text-sm font-medium mb-1">
             Téléphone
           </label>
           <Input
+
             name="telephone"
             placeholder="Téléphone..."
             value={formData.telephone}
             onChange={handleInputChange}
+
           />
           <label htmlFor="service" className="block text-sm font-medium mb-1">
             Service
@@ -130,10 +142,12 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
           </label>
           <Input
             type="password"
+
             name="password"
             placeholder="Mot de passe..."
             value={formData.password}
             onChange={handleInputChange}
+
           />
         </div>
         <SheetFooter>
