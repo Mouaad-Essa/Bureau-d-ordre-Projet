@@ -1,16 +1,13 @@
 import { NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // server action fetching
 export async function fetchRoles() {
   try {
-    const response = await fetch(
-      "https://679b8f7333d3168463244f7f.mockapi.io/api/uni/roles"
-    );
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
-    const data = await response.json();
-    return NextResponse.json(data); // Return data to client
+    const response = await prisma.role.findMany();
+    return NextResponse.json(response);
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to fetch data" });
