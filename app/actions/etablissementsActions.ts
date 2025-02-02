@@ -1,109 +1,105 @@
 import { NextResponse } from "next/server";
 
-const API_URL =
-  "https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/etablissements";
 // server action fetching
+import { prisma } from "@/lib/prisma"; // Import the Prisma instance
+
+// Server action fetching data from MySQL
 export async function fetchEtablissements() {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
-    const data = await response.json();
-    return NextResponse.json(data); // Return data to client
+    const etablissements = await prisma.etablissement.findMany(); // Fetch data
+
+    return NextResponse.json(etablissements); // Return JSON response
   } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Failed to fetch data" });
+    console.error("Error fetching etablissements:", error);
+    return NextResponse.json({ error: "Failed to fetch data from database" });
   }
 }
 
-// server action delete etab
+// Server action to delete an etablissement by id
 export async function deleteEtablissement(id: string) {
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
+    // Use Prisma to delete the Etablissement by its `id`
+    await prisma.etablissement.delete({
+      where: {
+        id: id, // The `id` is used to identify which etablissement to delete
+      },
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete etablissement");
-    }
     return { message: "Etablissement deleted successfully" };
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting etablissement:", error);
     return { error: "Failed to delete etablissement" };
   }
 }
 
-// server action update etab
+// Server action to update an existing etablissement
 export async function updateEtablissement(updatedEtablissement: {
   id: string;
   nom: string;
   ville: string;
   contact: string;
-  fax: number;
+  fax: string; // Prisma expects a string, so we'll convert it
   adresse: string;
 }) {
   try {
-    const response = await fetch(`${API_URL}/${updatedEtablissement.id}`, {
-      method: "PUT", // Use PUT to update
-      headers: {
-        "Content-Type": "application/json",
+    const etablissement = await prisma.etablissement.update({
+      where: { id: updatedEtablissement.id },
+      data: {
+        nom: updatedEtablissement.nom,
+        ville: updatedEtablissement.ville,
+        contact: updatedEtablissement.contact,
+        fax: updatedEtablissement.fax, // Convert `fax` to string
+        adresse: updatedEtablissement.adresse,
       },
-      body: JSON.stringify(updatedEtablissement),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to update etablissement");
-    }
-
-    const data = await response.json();
-    return data; // Return updated etablissement data
+    return {
+      message: "Etablissement updated successfully",
+      data: etablissement,
+    };
   } catch (error) {
-    console.error(error);
+    console.error("Error updating etablissement:", error);
     return { error: "Failed to update etablissement" };
   }
 }
 
-// server action to add a new etablissement
+// Server action to add a new etablissement
 export async function addEtablissement(newEtablissement: {
   nom: string;
   ville: string;
   contact: string;
-  fax: number;
+  fax: string;
   adresse: string;
 }) {
   try {
-    const response = await fetch(API_URL, {
-      method: "POST", // Use POST to add
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newEtablissement),
+    const etablissement = await prisma.etablissement.create({
+      data: newEtablissement, // Insert into MySQL
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to add etablissement");
-    }
-
-    const data = await response.json();
-    return { message: "Etablissement added successfully", data }; // Return the added etablissement data
+    return { message: "Etablissement added successfully", data: etablissement };
   } catch (error) {
-    console.error(error);
+    console.error("Error adding etablissement:", error);
     return { error: "Failed to add etablissement" };
   }
 }
 
-// fetch etabById if needed
-
+// Server action to fetch an etablissement by id
 export async function fetchEtablissementById(id: string) {
   try {
-    const response = await fetch(`${API_URL}/${id}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch etablissement");
+    // Use Prisma to fetch the Etablissement by its `id`
+    const etablissement = await prisma.etablissement.findUnique({
+      where: {
+        id: id, // The `id` is used to identify the etablissement
+      },
+    });
+
+    if (!etablissement) {
+      throw new Error("Etablissement not found");
     }
-    return await response.json();
+
+    return etablissement; // Return the fetched etablissement
   } catch (error) {
     console.error("Error fetching etablissement by ID:", error);
-    throw error;
+    throw error; // Throw error for further handling
   }
 }
