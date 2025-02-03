@@ -109,14 +109,10 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="bdarrivee">
-        <Card className="mycard">
-          <div className="container">
-            <div className="flex flex-col space-y-4 p-4">
-              <CardHeader>
-                
-              </CardHeader>
-              <CardContent>
+      <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
+    <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Ajouter une Arrivée</h1>
+        </div>
                 <form onSubmit={handleSubmit} className="space-y-4 w-full">
                   {/* Réception et traitement */}
                   <div className="flex gap-4 w-full">
@@ -244,11 +240,9 @@ export default function Page() {
                     </Button>
                   </div>
                 </form>
-              </CardContent>
+              
             </div>
-          </div>
-        </Card>
-      </div>
+         
     </>
   );
 }

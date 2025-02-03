@@ -136,15 +136,10 @@ export default function Page() {
       </header>
 
 
-<div className="bddepart">
-      <Card className="mycard">
-      <div className="container">
-        <div className="flex flex-col space-y-4 p-4">
-          
-          <CardHeader>
-         
-          </CardHeader>
-          <CardContent>
+      <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
+    <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Ajouter un Départ</h1>
+        </div>
 
 
 
@@ -306,13 +301,9 @@ export default function Page() {
 
             </div>
           </form>
-          </CardContent>
 
         </div>
-      </div>
-
-      </Card>
-      </div>
+     
 
     </>
   );

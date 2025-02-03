@@ -36,7 +36,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@radix-ui/react-dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 // Définition du type pour un départ
 type Depart = {
@@ -63,9 +63,7 @@ export default function Page() {
   const [departs, setDeparts] = useState<Depart[]>([]);
   const [filteredData, setFilteredData] = useState<Depart[]>([]);
   const [searchText, setSearchText] = useState("");
-
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
   const [selectedDepart, setSelectedDepart] = useState<Depart | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const router = useRouter();

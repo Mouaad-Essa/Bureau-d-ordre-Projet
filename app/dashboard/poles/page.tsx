@@ -81,22 +81,10 @@ export default function Page(){
       fetchData();
     }, []);
 
-  
-    
-
-
-
-
-
-
-
-
-
     // Handle edit button click
     const handleEditClick = (pole: any) => {
         setSelectedPole(pole);
     };
-
 
 
      //Export 

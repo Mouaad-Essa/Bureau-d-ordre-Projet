@@ -87,8 +87,6 @@ export default function AddPolePage() {
 <>
 
 
-<div className="bddepart">
-      <Card className="mycard">
 
 
 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
@@ -125,12 +123,9 @@ export default function AddPolePage() {
 
     
     <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
-    <CardHeader>
-          <h1 className="rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 from-40% to-blue-500 text-gray-900 text-2xl font-semibold p-3 flex items-center justify-center">
-            <span>Ajouter Pole</span>
-            <Building />
-          </h1>
-          </CardHeader>
+    <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Ajouter un Pole</h1>
+        </div>
       <form onSubmit={handleSubmit} className="space-y-4 w-full">
 
 
@@ -236,8 +231,6 @@ export default function AddPolePage() {
         </div>
       </form>
     </div>
-    </Card>
-</div>
 </>
 
 

@@ -16,15 +16,25 @@ import {
   Building,
   Mail,
   DownloadIcon,
+  CalendarDays,
+  Calendar,
+  User,
+  Paperclip,
+  Newspaper,
+  FileType2,
+  File,
+  Notebook,
+  ClipboardPenLine,
+  MessageSquareQuoteIcon,
 } from "lucide-react";
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbLink,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
-  } from "@/components/ui/breadcrumb";
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
@@ -36,18 +46,15 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-  
-
-
+} from "@/components/ui/select";
 
 // Définition du type pour un départ
 type Depart = {
@@ -79,14 +86,6 @@ export default function Page() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const router = useRouter();
 
-
-
-
-
-
-
-
-
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/depart");
@@ -97,10 +96,6 @@ export default function Page() {
 
     fetchData();
   }, []);
-
-
-
-
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
@@ -119,22 +114,49 @@ export default function Page() {
 
   const columns = [
     { name: "ID", selector: (row: Depart) => row.id, sortable: true },
-    { name: "Signé Par", selector: (row: Depart) => row.signePar, sortable: true },
-    { name: "Traité Par", selector: (row: Depart) => row.traitePar, sortable: true },
-    { name: "Numéro d'Ordre", selector: (row: Depart) => row.numeroOrdre, sortable: true },
-    { name: "Date de Départ", selector: (row: Depart) => row.dateDepart, sortable: true },
+    {
+      name: "Signé Par",
+      selector: (row: Depart) => row.signePar,
+      sortable: true,
+    },
+    {
+      name: "Traité Par",
+      selector: (row: Depart) => row.traitePar,
+      sortable: true,
+    },
+    {
+      name: "Numéro d'Ordre",
+      selector: (row: Depart) => row.numeroOrdre,
+      sortable: true,
+    },
+    {
+      name: "Date de Départ",
+      selector: (row: Depart) => row.dateDepart,
+      sortable: true,
+    },
     { name: "Objet", selector: (row: Depart) => row.objet, sortable: true },
-    { name: "Destination", selector: (row: Depart) => row.destination, sortable: true },
+    {
+      name: "Destination",
+      selector: (row: Depart) => row.destination,
+      sortable: true,
+    },
     {
       name: "Actions",
       cell: (row: Depart) => (
         <div className="space-x-2 flex">
-          <Button variant="see" size="sm" onClick={() => handleShowDetails(row)}>
+          <Button
+            variant="see"
+            size="sm"
+            onClick={() => handleShowDetails(row)}
+          >
             <Eye />
           </Button>
-          <Button variant="update" size="sm" onClick={() => handleShowDetails(row)}>
+          <Button
+            variant="update"
+            size="sm"
+            onClick={() => handleShowDetails(row)}
+          >
             <ArrowRightLeft />
-            
           </Button>
         </div>
       ),
@@ -146,15 +168,13 @@ export default function Page() {
     setIsDetailDialogOpen(true);
   };
 
-  
   const handleAddDepart = () => {
     router.push("/dashboard/departs/add");
   };
 
   return (
-
     <>
-    <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -174,98 +194,134 @@ export default function Page() {
 
       <div className="container">
         <div className="flex flex-col space-y-4 p-4">
-         <div className="flex items-center ">
-        
-  
-    <Card className="w-[450px] ">
-      <CardHeader>
-        <CardTitle>Transferrer le courrier</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form>
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="name">Destiné à : </Label>
-              <Select>
-            <SelectTrigger className="">
-                <SelectValue placeholder="Sélectionner un utilisateur principa" />
-            </SelectTrigger>
-            <SelectContent>
-                <SelectItem value="light">Light</SelectItem>
-                <SelectItem value="dark">Dark</SelectItem>
-                <SelectItem value="system">System</SelectItem>
-            </SelectContent>
-            </Select>
+        <div className="flex items-center justify-center">
+        <Card className="w-[450px] ">
+              <CardHeader>
+                <CardTitle>Transferrer le courrier</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form>
+                  <div className="grid w-full items-center gap-4">
+                    <div className="flex flex-col space-y-1.5">
+                    <div className="flex space-x-2 pb-2">
 
+                    <User/>  <Label htmlFor="name"> Destiné à :</Label>
+                      </div>
+                      <Select>
+                        <SelectTrigger className="">
+                          <SelectValue placeholder="Sélectionner un utilisateur principa" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="light">Light</SelectItem>
+                          <SelectItem value="dark">Dark</SelectItem>
+                          <SelectItem value="system">System</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Note </Label>
-              <Input id="name" placeholder="note" />
-            </div>
-            <div className="flex flex-col space-y-1.5">
-              <Label htmlFor="framework">Note </Label>
-              <Input id="name" placeholder="note" />
-            </div>
-          </div>
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline">Fermer</Button>
-        <Button>Transferrer</Button>
-      </CardFooter>
-    </Card>
-    <Card className="w-[450px] ">
-      <CardHeader className="bg-sky-400"> 
-        <div className="flex mr-px">
-
-      <Mail className="mr-4"/>
-
-        <CardTitle>Détails du courrier</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent className="mt-4">
-          <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
-              <p><b>Date : </b> ipsum dolor sit amet,  elit. Explicabo </p>
-              <p><b>ID et Année : </b> ipsum dolor sit amet,  elit. Explicabo </p>
-              <p><b>Éxpediteur : </b> ipsum dolor sit amet,  elit. Explicabo </p>
-              <p><b>Objet : </b> ipsum dolor sit amet,  elit. Explicabo </p>
-              <p><b>Type de support : </b> ipsum dolor sit amet,  elit. Explicabo </p>
-              <p><b>Type de courrier : </b> ipsum dolor sit amet,  elit. Explicabo </p>
-              <p><b>Fiche : </b> 
-              <Button 
-              className="mr-2"
-            variant="see"
-            size="sm"
-            onClick={() => handleShowDetails()}
-          >
-            <Eye />
-          </Button> 
-              <Button
-            variant="see"
-            size="sm"
-            onClick={() => handleShowDetails(row)}
-          >
-            <DownloadIcon />
-          </Button> 
-          
-          </p>
-
-
-            </div>
-           
-          </div>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline">retour à la liste</Button>
-      </CardFooter>
-    </Card>
-    </div>
-
+                    <div className="flex flex-col space-y-1.5">
+                    <div className="flex space-x-2 pb-2">
+                     <MessageSquareQuoteIcon/> <Label htmlFor="framework">Note </Label>
 </div>
-    </div>
-    </>
+                      <Input id="name" placeholder="note" />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                    <div className="flex space-x-2 pb-2">
+                     <MessageSquareQuoteIcon/> <Label htmlFor="framework">Note </Label>
+</div>                      <Input id="name" placeholder="note" />
+                    </div>
+                  </div>
+                </form>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline">Fermer</Button>
+                <Button>Transferrer</Button>
+              </CardFooter>
+            </Card>
+            <Card className="w-[450px] ">
+              <CardHeader className="bg-sky-400">
+                <div className="flex mr-px">
+                  <Mail className="mr-4" />
 
+                  <CardTitle>Détails du courrier</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="mt-4">
+                <div className="grid w-full items-center gap-4">
+                  <div className="flex flex-col space-y-1.5">
+                    <div className="flex space-x-2 pb-2">
+                      <Calendar />{" "}
+                      <p>
+                        <b> ID et Année: </b>
+                      
+                      ipsum dolor sit amet, elit. Explicabo </p>
+                    </div>
+                    <div className="flex space-x-2 pb-2">
+                      <CalendarDays />
+                      <p>
+                        <b> Date : </b>
+                     
+                       ipsum dolor sit amet, elit. Explicabo </p>
+                    </div>
+                    <div className="flex space-x-2 pb-2">
+                      <User />
+                      <p>
+                        <b> Éxpediteur : </b>
+                      
+                      ipsum dolor sit amet, elit. Explicabo </p>
+                    </div>
+                    <div className="flex space-x-2 pb-2">
+                    <Newspaper />
+                    <p>
+                        <b> Objet : </b>
+                      
+                      ipsum dolor sit amet, elit. Explicabo </p>
+                    </div>
+                    <div className="flex space-x-2 pb-2">
+                      <Paperclip />
+                      <p>
+                        <b> Type de support : </b>
+                     
+                    ipsum dolor sit amet, elit. Explicabo </p>
+                    </div>
+                    <div className="flex space-x-2 pb-2">
+                      <FileType2 />
+                      <p>
+                        <b> Type de courrier : </b>
+                      
+                      ipsum dolor sit amet, elit. Explicabo </p>
+                    </div>
+                    <div className="flex space-x-2 pb-2">
+                      <File />
+                      <p>
+                        <b> Fiche : </b>
+                      
+                       <Button
+                        className="mr-2"
+                        variant="see"
+                        size="sm"
+                        onClick={() => handleShowDetails()}
+                      >
+                        <Eye />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleShowDetails(row)}
+                      >
+                        <DownloadIcon />
+                      </Button> </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter className="flex justify-between">
+                <Button variant="outline">retour à la liste</Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

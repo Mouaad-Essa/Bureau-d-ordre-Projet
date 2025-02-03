@@ -9,20 +9,28 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
+type Arrivee = {
+  id: string;
+  idOrdre: string;
+  dateArv: string;
+  dateOrigin: string;
+  expediteur: string;
+  objet: string;
+  numero: string;
+  nbrFichier: number;
+  typeSupport: string;
+  typeCourrier: string;
+};
+
 type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
-  arrivee: {
-    id: string;
-    expediteur: string;
-    objet: string;
-    dateArrivee: string;
-    trierPar: string;
-  } | null;
+  Arrivee:Arrivee|null;
+
 };
 
 const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
-  ({ isOpen, onClose, arrivee }) => {
+  ({ isOpen, onClose, Arrivee }) => {
     return (
       <AlertDialog open={isOpen} onOpenChange={onClose}>
         <AlertDialogContent className="rounded-lg bg-white shadow-lg p-6">
@@ -33,16 +41,16 @@ const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
           </AlertDialogHeader>
           <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
             <span>
-              <strong className="font-medium">Expéditeur :</strong> {arrivee?.expediteur}
+              <strong className="font-medium">Date d'Arrivée :</strong> {Arrivee?.dateArv}
             </span>
             <span>
-              <strong className="font-medium">Objet :</strong> {arrivee?.objet}
+              <strong className="font-medium">Expéditeur :</strong> {Arrivee?.expediteur}
             </span>
             <span>
-              <strong className="font-medium">Date d'Arrivée :</strong> {arrivee?.dateArrivee}
+              <strong className="font-medium">Objet :</strong> {Arrivee?.objet}
             </span>
             <span>
-              <strong className="font-medium">Trié par :</strong> {arrivee?.trierPar}
+              <strong className="font-medium">Trié par :</strong> {Arrivee?.expediteur}
             </span>
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">
