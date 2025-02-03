@@ -3,7 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // Import useRouter
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@radix-ui/react-separator";
@@ -20,9 +20,42 @@ export default function AddUserPage() {
     email: "",
     telephone: "",
     service: "",
+    serviceId: "",
+    role: "",
+    roleId: "",
     password: "",
     repeatPassword: "",
   });
+  const [services, setServices] = useState<{ id: number; nom: string; description: string; division: number }[]>([]);
+  const [roles, setRoles] = useState<{ id: number; nom: string; description: string; }[]>([]);
+
+  useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await fetch("/api/service");
+          const data = await response.json();
+          setServices(data);
+        } catch (error) {
+          console.error("Error fetching sevices:", error);
+        }
+      };
+  
+      fetchData();
+    }, []);
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await fetch("/api/role");
+          const data = await response.json();
+          setRoles(data);
+        } catch (error) {
+          console.error("Error fetching roles:", error);
+        }
+      };
+  
+      fetchData();
+    }, []);
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,16 +65,32 @@ export default function AddUserPage() {
 
   // Handle Select changes
   const handleServiceChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, service: value }));
+    const selectedService = services.find((service) => service.id.toString() === value);
+    if (selectedService) {
+      setFormData((prev) => ({
+        ...prev,
+        serviceId: selectedService.id.toString(), // ✅ Store as a number
+        service: selectedService.nom, // ✅ Update service name (optional)
+      }));
+    }
+  };
+
+  // Handle Select changes
+  const handleRoleChange = (value: string) => {
+    const selectedRole = roles.find((role) => role.id.toString() === value);
+    if (selectedRole) {
+      setFormData((prev) => ({
+        ...prev,
+        roleId: selectedRole.id.toString(), // ✅ Store as a number
+        role: selectedRole.nom, // ✅ Update service name (optional)
+      }));
+    }
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Prepare the user data to be saved
-    const newUser = { ...formData };
-
+  
     // Validate passwords match
     if (formData.password !== formData.repeatPassword) {
       toast({
@@ -51,8 +100,20 @@ export default function AddUserPage() {
       });
       return;
     }
-
+  
+    // Prepare the user data to be saved
+    const newUser = {
+      nom: formData.nom,
+      prenom: formData.prenom,
+      email: formData.email,
+      telephone: formData.telephone,
+      password: formData.password,
+      serviceId: formData.serviceId ? formData.serviceId : null, // ✅ Convert to number or allow null
+      roleId: formData.roleId ? formData.roleId : null, // ✅ Convert to number or allow null
+    };
+  
     try {
+      console.log(newUser);
       // Call the addUser API to add the new user
       const response = await fetch("/api/users", {
         method: "POST",
@@ -61,14 +122,14 @@ export default function AddUserPage() {
         },
         body: JSON.stringify(newUser),
       });
-
+  
       if (response.ok) {
         // Show success toast
         toast({
           title: "Utilisateur ajouté",
-          description: "l'utilisateur' a été ajouté avec succès.",
+          description: "L'utilisateur a été ajouté avec succès.",
         });
-        //redirect
+        // Redirect
         router.push("/dashboard/users");
       } else {
         throw new Error("Failed to add user");
@@ -81,7 +142,8 @@ export default function AddUserPage() {
         variant: "destructive",
       });
     }
-  }
+  };
+  
 
   // Handle cancel button click
   const handleCancel = () => {
@@ -216,20 +278,43 @@ export default function AddUserPage() {
               </div>
             </div>
 
-            <div className="w-full sm:w-[48%]">
-                <label htmlFor="service" className="block text-sm font-medium mb-1">
-                Service
-                </label>
-                <Select value={formData.service} onValueChange={handleServiceChange} >
-                  <SelectTrigger>
-                    <SelectValue placeholder="-- Séléctionner le service --" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Informatique">Informatique</SelectItem>
-                    <SelectItem value="Recherche">Recherche</SelectItem>
-                    <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="flex gap-4 w-full">
+              <div className="w-full sm:w-[48%]">
+                  <label htmlFor="service" className="block text-sm font-medium mb-1">
+                  Service
+                  </label>
+                  <Select value={formData.serviceId ? formData.serviceId.toString() : ""} onValueChange={handleServiceChange} >
+                    <SelectTrigger>
+                      <SelectValue placeholder="-- Séléctionner le service --" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {services.map((service) =>{
+                        return(
+                          <SelectItem key={service.id} value={service.id.toString()}>{service.nom}</SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+              </div>
+            
+
+              <div className="w-full sm:w-[48%]">
+                  <label htmlFor="role" className="block text-sm font-medium mb-1">
+                    Rôle
+                  </label>
+                  <Select value={formData.roleId ? formData.roleId.toString() : ""} onValueChange={handleRoleChange} >
+                    <SelectTrigger>
+                      <SelectValue placeholder="-- Séléctionner un rôle --" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {roles.map((role) =>{
+                        return(
+                          <SelectItem key={role.id} value={role.id.toString()}>{role.nom}</SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+              </div>
             </div>
 
             {/* Buttons */}

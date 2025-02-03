@@ -86,6 +86,11 @@ export default function AddPolePage() {
 
 <>
 
+
+<div className="bddepart">
+      <Card className="mycard">
+
+
 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -99,6 +104,7 @@ export default function AddPolePage() {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
+
                     <BreadcrumbLink href="/dashboard/poles">
                       Pôles
                     </BreadcrumbLink>
@@ -106,118 +112,135 @@ export default function AddPolePage() {
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     <BreadcrumbPage>Ajouter</BreadcrumbPage>
+
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
           </header>
-          <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
-        <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Ajouter un Pôle</h1>
-        </div>
+
+
+
+
+
+    
+    <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
+    <CardHeader>
+          <h1 className="rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 from-40% to-blue-500 text-gray-900 text-2xl font-semibold p-3 flex items-center justify-center">
+            <span>Ajouter Pole</span>
+            <Building />
+          </h1>
+          </CardHeader>
       <form onSubmit={handleSubmit} className="space-y-4 w-full">
 
-              <div className="flex gap-4 w-full">
-                  <div className="w-full sm:w-[48%]">
-                    <label htmlFor="nom" className="block text-sm font-medium mb-1">
-                      Nom
-                    </label>
-                    <Input
-                      id="nom"
-                      name="nom"
-                      placeholder="Nom"
-                      value={formData.nom}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="w-full sm:w-[48%]">
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Responsable
-                    </label>
-                    <Input
-                      id="responsable"
-                      name="responsable"
-                      placeholder="Responsable"
-                      value={formData.responsable}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
+
+
+      <div className="flex gap-4 w-full">
+          <div className="w-full sm:w-[48%]">
+            <label htmlFor="nom" className="block text-sm font-medium mb-1">
+              Nom
+            </label>
+            <Input
+              id="nom"
+              name="nom"
+              placeholder="Nom"
+              value={formData.nom}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="w-full sm:w-[48%]">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-1"
+            >
+              Responsable
+            </label>
+            <Input
+              id="responsable"
+              name="responsable"
+              placeholder="Responsable"
+              value={formData.responsable}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+        </div>
 
 
 
-              <div className="flex gap-4 w-full">
-                  <div className="w-full sm:w-[48%]">
-                    <label htmlFor="nom" className="block text-sm font-medium mb-1">
-                      Taches Principales
-                    </label>
-                    <Input
-                      id="tachesPrincipales"
-                      name="tachesPrincipales"
-                      placeholder="Taches Principales"
-                      value={formData.tachesPrincipales}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  <div className="w-full sm:w-[48%]">
-                    <label
-                      htmlFor="description"
-                      className="block text-sm font-medium mb-1"
-                    >
-                      Contacts
-                    </label>
-                    <Input
-                      id="contacts"
-                      name="contacts"
-                      placeholder="Contacts"
-                      value={formData.contacts}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="flex gap-4 w-full">
-                  <div className="w-full sm:w-[48%]">
-                    <label htmlFor="nom" className="block text-sm font-medium mb-1">
-                      Statut
-                    </label>
-                    <Input
-                      id="statut"
-                      name="statut"
-                      placeholder="Statut"
-                      value={formData.statut}
-                      onChange={handleInputChange}
-                      required
-                    />
-                  </div>
-                  </div>
+      <div className="flex gap-4 w-full">
+          <div className="w-full sm:w-[48%]">
+            <label htmlFor="nom" className="block text-sm font-medium mb-1">
+              Taches Principales
+            </label>
+            <Input
+              id="tachesPrincipales"
+              name="tachesPrincipales"
+              placeholder="Taches Principales"
+              value={formData.tachesPrincipales}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          <div className="w-full sm:w-[48%]">
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium mb-1"
+            >
+              Contacts
+            </label>
+            <Input
+              id="contacts"
+              name="contacts"
+              placeholder="Contacts"
+              value={formData.contacts}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+        </div>
+        <div className="flex gap-4 w-full">
+          <div className="w-full sm:w-[48%]">
+            <label htmlFor="nom" className="block text-sm font-medium mb-1">
+              Statut
+            </label>
+            <Input
+              id="statut"
+              name="statut"
+              placeholder="Statut"
+              value={formData.statut}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+          </div>
 
 
 
-                <div className="mt-6 flex gap-4">
-                  <Button
-                    type="submit"
-                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
-                  >
-                    Ajouter
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCancel}
-                    className="w-full sm:w-auto"
-                  >
-                    Annuler
-                  </Button>
-                </div>
-              </form>
-            </div>
-        </>
+        <div className="mt-6 flex gap-4">
+          <Button
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+          >
+            Ajouter
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleCancel}
+            className="w-full sm:w-auto"
+          >
+            Annuler
+          </Button>
+        </div>
+      </form>
+    </div>
+    </Card>
+</div>
+</>
+
+
+
   );
 }

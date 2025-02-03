@@ -13,7 +13,6 @@ import {
   Download,
   Edit,
   Trash,
-  Eye,
 } from "lucide-react";
 
 import {
@@ -23,20 +22,23 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { EditUserSheet } from "./EditUserSheet"; 
-import { updateUser } from "../../actions/usersActions"; 
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 
 type user = {
-  id: number;
+  id: string;
   nom: string;
   prenom: string;
   email: string;
   telephone: string;
-  service: string;
+  serviceId: string | null;
+  service: string | null;
+  role: string | null;
+  roleId: string | null;
 };
+
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -46,6 +48,7 @@ const paginationComponentOptions = {
   selectAllRowsItemText: "Tous",
 };
 
+
 export default function Page() {
   const [users, setUsers] = useState<user[]>([]);
   const [filteredData, setFilteredData] = useState<user[]>([]);
@@ -53,7 +56,7 @@ export default function Page() {
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
   const [selectedUserId, setSelectedUserId] = useState<
-    null | number
+    null | string
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
   const [selectedUser, setSelectedUser] =
@@ -67,6 +70,7 @@ export default function Page() {
         setLoaded(true); // Set loaded to true after data is fetched
         setUsers(data);
         setFilteredData(data);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -85,7 +89,8 @@ export default function Page() {
         item.prenom.toLowerCase().includes(searchValue)
         || item.email.toLowerCase().includes(searchValue)
         || item.telephone.toLowerCase().includes(searchValue)
-        || item.service.toLowerCase().includes(searchValue)
+        || item.service?.toLowerCase().includes(searchValue)
+        || item.role?.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -102,10 +107,11 @@ export default function Page() {
       row.email,
       row.telephone,
       row.service,
+      row.role,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service"]],
+      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service", "Rôle"]],
       body: tableData,
     });
 
@@ -153,32 +159,43 @@ export default function Page() {
   };
 
   const handleSave = async (updatedUser: user) => {
-    try {
-      const updatedUserWithStringId = {
-        ...updatedUser,
-        id: String(updatedUser.id), // Convert id to a string
-      };
+      //if (selectedUserId === null) return;
 
-      const result = await updateUser(
-        updatedUserWithStringId
-      );
+      try {
+        const result = await fetch(`/api/users`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: updatedUser.id,
+            nom: updatedUser.nom,
+            prenom: updatedUser.prenom,
+            email: updatedUser.email,
+            telephone: updatedUser.telephone,
+            serviceId: updatedUser.serviceId || null,
+            roleId: updatedUser.roleId || null, // ✅ Ensure it's a number
+          }),
+        });
 
-      if (result.error) {
-        console.error("Failed to update user:", result.error);
-        return;
-      }
+        if (!result) {
+          console.error("Failed to update user");
+          return;
+        }
 
-      setUsers((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
-        )
-      );
-      setIsEditSheetOpen(false); // Close the sheet after saving
+        setUsers((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedUser.id ? updatedUser : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedUser.id ? updatedUser : item
+          )
+        );
+
+      
+        setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
       console.error("Error updating user:", error);
     }
@@ -214,6 +231,11 @@ export default function Page() {
     {
       name: "Service",
       selector: (row: user) => row.service,
+      sortable: true,
+    },
+    {
+      name: "Rôle",
+      selector: (row: user) => row.role,
       sortable: true,
     },
     {

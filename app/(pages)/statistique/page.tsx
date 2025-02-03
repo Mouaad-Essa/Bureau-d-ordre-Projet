@@ -96,10 +96,10 @@ export default function StatistiquePage() {
    from-40% to-blue-500 text-gray-900 text-2xl 
    font-semibold p-3 flex items-center justify-center"
       >
-        <span>Liste des courriers</span>
+        <span>Statistiques</span>
         <ChartNoAxesCombined />
       </h1>
-      <div className="flex flex-row  gap-6">
+      <div className="flex flex-row gap-6">
         {/* Handle errors */}
         {error && <div className="text-red-500">{error}</div>}
 
