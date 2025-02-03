@@ -13,6 +13,7 @@ import {
   Download,
   Edit,
   Trash,
+  Eye,
 } from "lucide-react";
 
 import {
@@ -26,6 +27,8 @@ import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reus
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { toast } from "@/hooks/use-toast";
+import AlertDialogDetail from "../_components/UserDetailsDialog";
 
 type user = {
   id: string;
@@ -55,6 +58,7 @@ export default function Page() {
   const [loaded, setLoaded] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<
     null | string
   >(null);
@@ -144,12 +148,26 @@ export default function Page() {
         setFilteredData((prevData) =>
           prevData.filter((item) => item.id !== selectedUserId)
         );
+        toast({
+          title: "Utilisateur supprimé",
+          description: "L'utilisateur a été supprimé avec succès.",
+        });
         setIsDeleteDialogOpen(false);
       } else {
         console.error("Failed to delete user");
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la suppression de l'utilisateur.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression de l'utilisateur.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -180,6 +198,11 @@ export default function Page() {
 
         if (!result) {
           console.error("Failed to update user");
+          toast({
+            title: "Erreur",
+            description: "Erreur lors de la modification de l'utilisateur.",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -194,11 +217,26 @@ export default function Page() {
           )
         );
 
+        toast({
+          title: "Utilisateur modifié",
+          description: "L'utilisateur a été modifié avec succès.",
+        });
       
         setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
       console.error("Error updating user:", error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la modification de l'utilisateur.",
+        variant: "destructive",
+      });
     }
+  };
+
+  // show details logic
+  const handleShowDetails = (user: user) => {
+    setSelectedUser(user);
+    setIsDetailDialogOpen(true); // Open the dialog
   };
 
   const columns = [
@@ -254,6 +292,13 @@ export default function Page() {
             }}
           >
             <Trash />
+          </Button>
+          <Button
+            size="sm"
+            variant="see"
+            onClick={() => handleShowDetails(row)}
+          >
+            <Eye />
           </Button>
         </div>
       ),
@@ -366,6 +411,13 @@ export default function Page() {
             onConfirm={deleteUser}
             confirmText="Continuer"
             cancelText="Annuler"
+        />
+
+        {/* Dialog for displaying details */}
+        <AlertDialogDetail
+          isOpen={isDetailDialogOpen}
+          onClose={() => setIsDetailDialogOpen(false)}
+          user={selectedUser}
         />
         </>
       )}

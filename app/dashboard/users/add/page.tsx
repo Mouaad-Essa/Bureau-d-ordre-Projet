@@ -108,6 +108,7 @@ export default function AddUserPage() {
       email: formData.email,
       telephone: formData.telephone,
       password: formData.password,
+      repeatPassword: formData.repeatPassword,
       serviceId: formData.serviceId ? formData.serviceId : null, // ✅ Convert to number or allow null
       roleId: formData.roleId ? formData.roleId : null, // ✅ Convert to number or allow null
     };
@@ -122,8 +123,17 @@ export default function AddUserPage() {
         },
         body: JSON.stringify(newUser),
       });
+
+      const result = await response.json(); // Parse the response JSON
   
-      if (response.ok) {
+      if (result.error) {
+        // Show server-side validation error message
+        toast({
+          title: "Erreur",
+          description: result.error || "Erreur lors de l'ajout de l'utilisateur.",
+          variant: "destructive",
+        });
+      } else {
         // Show success toast
         toast({
           title: "Utilisateur ajouté",
@@ -131,8 +141,6 @@ export default function AddUserPage() {
         });
         // Redirect
         router.push("/dashboard/users");
-      } else {
-        throw new Error("Failed to add user");
       }
     } catch (error) {
       // Show error toast

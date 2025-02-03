@@ -18,6 +18,13 @@ export default function AddUserPage() {
     role: "",
     nom: "",
     description: "",
+    permissions: {
+      canView: false,
+      canEditEstablishment: false,
+      canCreateDepart: false,
+      canCreateArrive: false,
+      isSuperAdmin: false,
+    },
   });
 
   // Handle input changes
@@ -148,6 +155,97 @@ export default function AddUserPage() {
                 />
               </div>
             </div>
+
+            {/* Privilèges Section */}
+            <fieldset className="border-t border-gray-300 mt-4 pt-4">
+              <legend className="text-base font-semibold text-gray-700 mb-2">
+                Privilèges
+              </legend>
+              
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions?.canView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        permissions: { ...formData.permissions, canView: e.target.checked },
+                      })
+                    }
+                  />
+                  <span>Peut consulter</span>
+                </label>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions?.canEditEstablishment || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        permissions: {
+                          ...formData.permissions,
+                          canEditEstablishment: e.target.checked,
+                        },
+                      })
+                    }
+                  />
+                  <span>Peut modifier établissement</span>
+                </label>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions?.canCreateDepart || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        permissions: {
+                          ...formData.permissions,
+                          canCreateDepart: e.target.checked,
+                        },
+                      })
+                    }
+                  />
+                  <span>Peut créer un départ</span>
+                </label>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions?.canCreateArrive || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        permissions: {
+                          ...formData.permissions,
+                          canCreateArrive: e.target.checked,
+                        },
+                      })
+                    }
+                  />
+                  <span>Peut créer une arrivée</span>
+                </label>
+
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={formData.permissions?.isSuperAdmin || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        permissions: {
+                          ...formData.permissions,
+                          isSuperAdmin: e.target.checked,
+                        },
+                      })
+                    }
+                  />
+                  <span>Super Admin</span>
+                </label>
+              </div>
+            </fieldset>
 
             {/* Buttons */}
             <div className="mt-6 flex gap-4">

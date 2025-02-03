@@ -49,20 +49,21 @@ export async function fetchUsers() {
 // server action delete etab
 export async function deleteUser(id: string) {
   try {
-    const response = await fetch(
-      `https://679aa202747b09cdcccf5f08.mockapi.io/api/uni/users/${id}`,
-      {
-        method: "DELETE",
+    const removedUser = await prisma.utilisateur.delete({
+      where: {
+        id:  id, 
       }
-    );
+    });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete user");
-    }
-    return { message: "User deleted successfully" };
+    return NextResponse.json(
+      { message: "User deleted successfully", user: removedUser },
+      { status: 200 }
+    );
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to delete user" };
+    return NextResponse.json(
+      { error: "Failed to delete user from database" },
+      { status: 500 }
+    );
   }
 }
 
@@ -128,11 +129,69 @@ export async function addUser(newUserObj: {
   prenom: string;
   email: string;
   password: string;
+  repeatPassword:string;
   telephone: string;
   serviceId: string | null;
   roleId: string | null;
 }) {
+
+  // Field validation
+  if (!newUserObj.nom) {
+    return { error: "Le champ 'nom' est obligatoire.", status: 400 };
+  }
+
+  if (!newUserObj.prenom) {
+    return { error: "Le champ 'prénom' est obligatoire.", status: 400 };
+  }
+
+  if (!newUserObj.email) {
+    return { error: "Le champ 'email' est obligatoire.", status: 400 };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(newUserObj.email)) {
+    return { error: "L'adresse email n'est pas valide.", status: 400 };
+  }
+
+  if (!newUserObj.password) {
+    return { error: "Le champ 'mot de passe' est obligatoire.", status: 400 };
+  }
+
+  if (newUserObj.password.length < 6) {
+    return { error: "Le mot de passe doit contenir au moins 6 caractères.", status: 400 };
+  }
+
+  const hasLetter = /[a-zA-Z]/.test(newUserObj.password);
+  const hasNumber = /[0-9]/.test(newUserObj.password);
+
+  if (!hasLetter || !hasNumber) {
+    return {
+      error: "Le mot de passe doit contenir des lettres et des chiffres.",
+      status: 400,
+    };
+  }
+
+  if (newUserObj.password !== newUserObj.repeatPassword) {
+    return { error: "Les mots de passe ne correspondent pas.", status: 400 };
+  }
+
+  if (!newUserObj.telephone) {
+    return { error: "Le champ 'téléphone' est obligatoire.", status: 400 };
+  }
+
+  if (!/^\d{10}$/.test(newUserObj.telephone)) {
+    return { error: "Le numéro de téléphone doit contenir exactement 10 chiffres.", status: 400 };
+  }
+
   try {
+    // ✅ Check if email already exists
+    const existingUser = await prisma.utilisateur.findUnique({
+      where: { email: newUserObj.email },
+    });
+
+    if (existingUser) {
+      return { error: "Cette adresse email est déjà utilisée.", status: 400 };
+    }
     // ✅ Hash password before storing it in the database
     const hashedPassword = await bcrypt.hash(newUserObj.password, 10);
     // Create a new user in the database

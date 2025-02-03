@@ -164,7 +164,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="max-h-screen overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Modifier l'utilisateur</SheetTitle>
         </SheetHeader>

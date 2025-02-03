@@ -67,32 +67,76 @@ export async function updateRole(updatedRole: {
 
 // server action to add a new etablissement
 export async function addRole(newRole: {
-    id: string;
-    role: string;
-    nom: string;
-    description: string;
+  role: string;
+  nom: string;
+  description: string;
+  privileges: {
+    canView: boolean;
+    canEditEstablishment: boolean;
+    canCreateDepart: boolean;
+    canCreateArrive: boolean;
+    isSuperAdmin: boolean;
+  };
 }) {
   try {
-    const response = await fetch(
-      "https://679b8f7333d3168463244f7f.mockapi.io/api/uni/roles",
-      {
-        method: "POST", // Use POST to add
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newRole),
-      }
-    );
+    // ✅ Create the new role in the role table
+    const createdRole = await prisma.role.create({
+      data: {
+        nom: newRole.role,
+        description: newRole.description,
+      },
+    });
 
-    if (!response.ok) {
-      throw new Error("Failed to add Role");
+    if (!createdRole) {
+      return { error: "Role creation failed", status: 500 };
     }
 
-    const data = await response.json();
-    return { message: "Role added successfully", data }; // Return the added Role data
+    // ✅ Add missing privileges if they don't exist
+    const privileges = [
+      { nom: "canView", value: newRole.privileges.canView },
+      { nom: "canEditEstablishment", value: newRole.privileges.canEditEstablishment },
+      { nom: "canCreateDepart", value: newRole.privileges.canCreateDepart },
+      { nom: "canCreateArrive", value: newRole.privileges.canCreateArrive },
+      { nom: "isSuperAdmin", value: newRole.privileges.isSuperAdmin },
+    ];
+
+    // Check and create privileges if they don't exist
+    for (const privilege of privileges) {
+      const existingPrivilege = await prisma.privilege.findFirst({
+        where: { nom: privilege.nom },
+      });
+
+      if (!existingPrivilege) {
+        // If privilege does not exist, create it
+        await prisma.privilege.create({
+          data: {
+            nom: privilege.nom,
+          },
+        });
+      }
+    }
+
+    // ✅ Link privileges to the new role in the role_privilege table
+    for (const privilege of privileges) {
+      const privilegeRecord = await prisma.privilege.findFirst({
+        where: { nom: privilege.nom },
+      });
+
+      if (privilegeRecord && privilege.value) {
+        await prisma.role_Privilege.create({
+          data: {
+            idRole: createdRole.id,
+            idPrv: privilegeRecord.id,
+          },
+        });
+      }
+    }
+
+    // Return the newly created role
+    return createdRole;
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to add role" };
+    console.error("Create Role Error:", error);
+    return { error: "Failed to create role", status: 500 };
   }
 }
 
