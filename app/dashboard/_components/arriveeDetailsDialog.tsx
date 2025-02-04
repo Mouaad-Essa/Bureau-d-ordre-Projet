@@ -20,6 +20,7 @@ type Arrivee = {
   nbrFichier: number;
   typeSupport: string;
   typeCourrier: string;
+  trierPar:string;
 };
 
 type AlertDialogDetailProps = {
@@ -40,18 +41,33 @@ const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
-            <span>
-              <strong className="font-medium">Date d'Arrivée :</strong> {Arrivee?.dateArv}
-            </span>
-            <span>
-              <strong className="font-medium">Expéditeur :</strong> {Arrivee?.expediteur}
-            </span>
-            <span>
-              <strong className="font-medium">Objet :</strong> {Arrivee?.objet}
-            </span>
-            <span>
-              <strong className="font-medium">Trié par :</strong> {Arrivee?.expediteur}
-            </span>
+          <span>
+    <strong className="font-medium">Date d'Arrivée :</strong> {Arrivee?.dateArv}
+  </span>
+  <span>
+    <strong className="font-medium">Date d'Origine :</strong> {Arrivee?.dateOrigin}
+  </span>
+  <span>
+    <strong className="font-medium">Expéditeur :</strong> {Arrivee?.expediteur}
+  </span>
+  <span>
+    <strong className="font-medium">Objet :</strong> {Arrivee?.objet}
+  </span>
+  <span>
+    <strong className="font-medium">Numéro :</strong> {Arrivee?.numero}
+  </span>
+  <span>
+    <strong className="font-medium">Nombre de Fichiers :</strong> {Arrivee?.nbrFichier}
+  </span>
+  <span>
+    <strong className="font-medium">Type de Support :</strong> {Arrivee?.typeSupport || "Non spécifié"}
+  </span>
+  <span>
+    <strong className="font-medium">Type de Courrier :</strong> {Arrivee?.typeCourrier || "Non spécifié"}
+  </span>
+  <span>
+    <strong className="font-medium">Trié par :</strong> {Arrivee?.trierPar}
+  </span>
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel

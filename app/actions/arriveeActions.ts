@@ -1,108 +1,95 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";//-
+import { prisma } from "@/lib/prisma"; // Import the correct Prisma client//+
 
-const API_URL = "https://679d162b87618946e65452c7.mockapi.io/arrivee"; // Modifier l'URL pour les arrivées
-
-// Récupérer toutes les arrivées
-export async function fetchArrivees() {
-  try {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to fetch arrivees");
-    }
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json({ error: "Failed to fetch arrivees" });
-  }
-}
-
-// Récupérer une arrivée par ID
-export async function fetchArriveeById(id: string) {
-  try {
-    const response = await fetch(`${API_URL}/${id}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch arrivee");
-    }
-    return await response.json();
-  } catch (error) {
-    console.error("Error fetching arrivee by ID:", error);
-    throw error;
-  }
-}
-
-// Ajouter une nouvelle arrivée
-export async function addArrivee(newArrivee: {
-  objet: string;
-  expediteur: string;
-  dateReception: string;
-  statut: string;
-  trierPar:string
-}) {
-  try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newArrivee),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to add arrivee");
-    }
-
-    const data = await response.json();
-    return { message: "Arrivee added successfully", data };
-  } catch (error) {
-    console.error(error);
-    return { error: "Failed to add arrivee" };
-  }
-}
-
-// Mettre à jour une arrivée
-export async function updateArrivee(updatedArrivee: {
-  id: string;
-  objet: string;
-  expediteur: string;
-  dateReception: string;
-  statut: string;
-  trierPar:string;
-}) {
-  try {
-    const response = await fetch(`${API_URL}/${updatedArrivee.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedArrivee),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to update arrivee");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error);
-    return { error: "Failed to update arrivee" };
-  }
-}
-
-// Supprimer une arrivée
-export async function deleteArrivee(id: string) {
-  try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to delete arrivee");
-    }
-    return { message: "Arrivee deleted successfully" };
-  } catch (error) {
-    console.error(error);
-    return { error: "Failed to delete arrivee" };
-  }
-}
+// Récupérer toutes les arrivées//-
+export async function fetchArrivees() {//-
+  try {//-
+    const arrivees = await prisma.arrivee.findMany();//-
+    return NextResponse.json(arrivees);//-
+  } catch (error) {//-
+    // console.error("Erreur lors de la récupération des arrivées:", error);//-
+    return NextResponse.json({ error: "Échec de la récupération des arrivées" });//-
+  }//-
+}//-
+//-
+// Supprimer une arrivée par ID//-
+export async function deleteArrivee(id: string) {//-
+  try {//-
+    await prisma.arrivee.delete({//-
+      where: { id },//-
+    });//-
+//-
+    return { message: "Arrivée supprimée avec succès" };//-
+  } catch (error) {//-
+    console.error("Erreur lors de la suppression de l'arrivée:", error);//-
+    return { error: "Échec de la suppression de l'arrivée" };//-
+  }//-
+}//-
+//-
+// Mettre à jour une arrivée existante//-
+export async function updateArrivee(updatedArrivee: {//-
+  id: string;//-
+  idOrdre?: string;//-
+  dateArv: string;//-
+  dateOrigin: string;//-
+  expediteur: string;//-
+  objet: string;//-
+  numero: string;//-
+  nbrFichier: number;//-
+  typeSupport?: string;//-
+  typeCourrier?: string;//-
+}) {//-
+  try {//-
+    const arrivee = await prisma.arrivee.update({//-
+      where: { id: updatedArrivee.id },//-
+      data: updatedArrivee,//-
+    });//-
+//-
+    return { message: "Arrivée mise à jour avec succès", data: arrivee };//-
+  } catch (error) {//-
+    console.error("Erreur lors de la mise à jour de l'arrivée:", error);//-
+    return { error: "Échec de la mise à jour de l'arrivée" };//-
+  }//-
+}//-
+//-
+// Ajouter une nouvelle arrivée//-
+export async function addArrivee(newArrivee: {//-
+  idOrdre?: string;//-
+  dateArv: string;//-
+  dateOrigin: string;//-
+  expediteur: string;//-
+  objet: string;//-
+  numero: string;//-
+  nbrFichier: number;//-
+  typeSupport?: string;//-
+  typeCourrier?: string;//-
+}) {//-
+  try {//-
+    const arrivee = await prisma.arrivee.create({//-
+      data: newArrivee,//-
+    });//-
+//-
+    return { message: "Arrivée ajoutée avec succès", data: arrivee };//-
+  } catch (error) {//-
+    console.error("Erreur lors de l'ajout de l'arrivée:", error);//-
+    return { error: "Échec de l'ajout de l'arrivée" };//-
+  }//-
+}//-
+//-
+// Récupérer une arrivée par ID//-
+export async function fetchArriveeById(id: string) {//-
+  try {//-
+    const arrivee = await prisma.arrivee.findUnique({//-
+      where: { id },//-
+    });//-
+//-
+    if (!arrivee) {//-
+      throw new Error("Arrivée non trouvée");//-
+    }//-
+//-
+    return arrivee;//-
+  } catch (error) {//-
+    console.error("Erreur lors de la récupération de l'arrivée par ID:", error);//-
+    throw error;//-
+  }//-
+}//-

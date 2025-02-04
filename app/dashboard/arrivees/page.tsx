@@ -45,6 +45,7 @@ type Arrivee = {
   nbrFichier: number;
   typeSupport: string;
   typeCourrier: string;
+  trierPar:string;
 };
 
 const paginationComponentOptions = {
@@ -100,9 +101,10 @@ export default function Page() {
       sortable: true,
     },
     { name: "Objet", selector: (row: Arrivee) => row.objet, sortable: true },
+   
     {
-      name: "Date",
-      selector: (row: Arrivee) => row.dateOrigin,
+      name: "Trier Par",
+      selector: (row: Arrivee) => row.trierPar,
       sortable: true,
     },
     {
@@ -135,7 +137,8 @@ export default function Page() {
     const tableData = filteredData.map((row) => [
       row.dateArv,
       row.expediteur,
-      row.objet
+      row.objet,
+      row.trierPar
       
     
     ]);

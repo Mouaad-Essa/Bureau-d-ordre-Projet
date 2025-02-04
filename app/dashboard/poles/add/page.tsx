@@ -24,10 +24,8 @@ export default function AddPolePage() {
   // State to manage form inputs
   const [formData, setFormData] = useState({
     nom: "",
-    responsable: "",
-    tachesPrincipales: "",
-    contacts: "",
-    statut: "",
+    description: "",
+    
   });
 
   // Handle input changes
@@ -69,10 +67,8 @@ export default function AddPolePage() {
     // Reset the form after submission
     setFormData({
       nom: "",
-      responsable: "",
-      tachesPrincipales: "",
-      contacts: "",
-      statut: "",
+      description: ""
+      
     });
   };
 
@@ -85,10 +81,6 @@ export default function AddPolePage() {
   return (
 
 <>
-
-
-
-
 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
@@ -149,13 +141,13 @@ export default function AddPolePage() {
               htmlFor="description"
               className="block text-sm font-medium mb-1"
             >
-              Responsable
+              Description
             </label>
             <Input
-              id="responsable"
-              name="responsable"
-              placeholder="Responsable"
-              value={formData.responsable}
+              id="description"
+              name="description"
+              placeholder="description"
+              value={formData.description}
               onChange={handleInputChange}
               required
             />
@@ -164,54 +156,7 @@ export default function AddPolePage() {
 
 
 
-      <div className="flex gap-4 w-full">
-          <div className="w-full sm:w-[48%]">
-            <label htmlFor="nom" className="block text-sm font-medium mb-1">
-              Taches Principales
-            </label>
-            <Input
-              id="tachesPrincipales"
-              name="tachesPrincipales"
-              placeholder="Taches Principales"
-              value={formData.tachesPrincipales}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="w-full sm:w-[48%]">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium mb-1"
-            >
-              Contacts
-            </label>
-            <Input
-              id="contacts"
-              name="contacts"
-              placeholder="Contacts"
-              value={formData.contacts}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-        </div>
-        <div className="flex gap-4 w-full">
-          <div className="w-full sm:w-[48%]">
-            <label htmlFor="nom" className="block text-sm font-medium mb-1">
-              Statut
-            </label>
-            <Input
-              id="statut"
-              name="statut"
-              placeholder="Statut"
-              value={formData.statut}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          </div>
-
-
+   
 
         <div className="mt-6 flex gap-4">
           <Button

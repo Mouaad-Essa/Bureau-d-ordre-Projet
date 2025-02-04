@@ -12,16 +12,12 @@ import {
 } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
 import ReusableAlertDialog from "@/app/_components/AlertDialog";
-
-
 type Pole = {
-  id: string;
-  nom: string;
-  responsable: string;
-  tachesPrincipales: string;
-  contacts: string;
-  statut: string;
-};
+  id:string,
+  nom:string,
+  description?:string,
+}
+
 interface EditPoleSheetProps {
   pole: Pole;
   isOpen: boolean;
@@ -33,24 +29,16 @@ export default function EditPole({ pole, isOpen, onOpenChange, onSave}:EditPoleS
 
   const [formData, setFormData] = useState({
     nom: pole.nom,
-    responsable: pole.responsable,
-    tachesPrincipales: pole.tachesPrincipales,
-    contacts: pole.contacts,
-    statut: pole.statut,
+    description:pole?.description
   });
 
-  
-  
     const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   
     // Sync state with the selected pole whenever it changes
     useEffect(() => {
       setFormData({
         nom: pole.nom,
-        responsable: pole.responsable,
-        tachesPrincipales: pole.tachesPrincipales,
-        contacts: pole.contacts,
-        statut: pole.statut,
+        description:pole.description
       });
     }, [pole]);
   
@@ -88,25 +76,12 @@ export default function EditPole({ pole, isOpen, onOpenChange, onSave}:EditPoleS
               onChange={(e) => handleChange("nom", e.target.value)}
             />
             <Input
-              placeholder="Responsable"
-              value={formData.responsable}
-              onChange={(e) => handleChange("responsable", e.target.value)}
+              placeholder="Description"
+              value={formData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
             />
-            <Input
-              placeholder="Tâches principales"
-              value={formData.tachesPrincipales}
-              onChange={(e) => handleChange("tachesPrincipales", e.target.value)}
-            />
-            <Input
-              placeholder="Contacts"
-              value={formData.contacts}
-              onChange={(e) => handleChange("contacts", e.target.value)}
-            />
-            <Input
-              placeholder="Statut"
-              value={formData.statut}
-              onChange={(e) => handleChange("statut", e.target.value)}
-            />
+           
+          
           </div>
           <SheetFooter>
             <Button onClick={handleSave}>Modifier</Button>

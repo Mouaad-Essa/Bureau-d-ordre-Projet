@@ -5,6 +5,8 @@ CREATE TABLE `Utilisateur` (
     `prenom` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `tel` VARCHAR(191) NULL,
+    `password` VARCHAR(191) NULL,
+    `picture` VARCHAR(191) NULL,
     `serviceId` VARCHAR(191) NULL,
     `roleId` VARCHAR(191) NULL,
 
@@ -116,6 +118,7 @@ CREATE TABLE `Arrivee` (
     `nbrFichier` INTEGER NOT NULL,
     `typeSupport` VARCHAR(191) NULL,
     `typeCourrier` VARCHAR(191) NULL,
+    `traiteParId` VARCHAR(191) NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -149,3 +152,6 @@ ALTER TABLE `Fichier` ADD CONSTRAINT `Fichier_idDepart_fkey` FOREIGN KEY (`idDep
 
 -- AddForeignKey
 ALTER TABLE `Fichier` ADD CONSTRAINT `Fichier_idArrivee_fkey` FOREIGN KEY (`idArrivee`) REFERENCES `Arrivee`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Arrivee` ADD CONSTRAINT `Arrivee_traiteParId_fkey` FOREIGN KEY (`traiteParId`) REFERENCES `Utilisateur`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

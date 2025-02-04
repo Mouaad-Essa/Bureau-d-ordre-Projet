@@ -5,6 +5,8 @@ import {
     addArrivee,
   } from "../../actions/arriveeActions";
   
+
+  
   // Gérer la requête GET pour récupérer toutes les arrivées
   export async function GET() {
     try {

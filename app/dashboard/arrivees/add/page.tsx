@@ -45,20 +45,21 @@ export default function Page() {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     recuPar: "",
-    traitePar: "",
+    traitePar: "Admin",
     numeroOrdre: "",
     dateArrivee: "",
     objet: "",
     provenance: "",
     fichier: "",
     nombreFichiers: "",
+
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      const response = await fetch("/api/arrivee", {
+      const response = await fetch("/api/arrivees", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
