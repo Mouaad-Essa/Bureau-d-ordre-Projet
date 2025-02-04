@@ -59,34 +59,27 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
       role: user.role || "",
       roleId: user.roleId || null,
     });
-  }, [user]);
+  }, [user && isOpen]);
 
-
+  //fetch services / roles
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch("/api/service");
-        const data = await response.json();
-        setServices(data);
+        const [servicesRes, rolesRes] = await Promise.all([
+          fetch("/api/service"),
+          fetch("/api/role")
+        ]);
+  
+        const servicesData = await servicesRes.json();
+        const rolesData = await rolesRes.json();
+  
+        setServices(servicesData);
+        setRoles(rolesData);
       } catch (error) {
-        console.error("Error fetching sevices:", error);
+        console.error("Error fetching data:", error);
       }
     };
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/role");
-        const data = await response.json();
-        setRoles(data);
-      } catch (error) {
-        console.error("Error fetching roles:", error);
-      }
-    };
-
+  
     fetchData();
   }, []);
 
@@ -176,7 +169,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="nom"
             placeholder="Nom..."
-            value={formData.nom}
+            value={formData.nom ? formData.nom : ""}
             onChange={handleInputChange}
 
           />
@@ -187,7 +180,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="prenom"
             placeholder="Prénom..."
-            value={formData.prenom}
+            value={formData.prenom ? formData.prenom : ""}
             onChange={handleInputChange}
 
           />
@@ -198,7 +191,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="email"
             placeholder="Email..."
-            value={formData.email}
+            value={formData.email ? formData.email : ""}
             onChange={handleInputChange}
 
           />
@@ -209,7 +202,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="telephone"
             placeholder="Téléphone..."
-            value={formData.telephone}
+            value={formData.telephone ? formData.telephone : ""}
             onChange={handleInputChange}
 
           />

@@ -63,8 +63,7 @@ export default function Page() {
     null | string
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
-  const [selectedUser, setSelectedUser] =
-    useState<user | null>(null);
+  const [selectedUser, setSelectedUser] = useState<user | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -177,54 +176,63 @@ export default function Page() {
   };
 
   const handleSave = async (updatedUser: user) => {
-      //if (selectedUserId === null) return;
-
-      try {
-        const result = await fetch(`/api/users`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: updatedUser.id,
-            nom: updatedUser.nom,
-            prenom: updatedUser.prenom,
-            email: updatedUser.email,
-            telephone: updatedUser.telephone,
-            serviceId: updatedUser.serviceId || null,
-            roleId: updatedUser.roleId || null, // ✅ Ensure it's a number
-          }),
+    try {
+      // Prepare the user data for update
+      const userData = {
+        id: updatedUser.id,
+        nom: updatedUser.nom,
+        prenom: updatedUser.prenom,
+        email: updatedUser.email,
+        telephone: updatedUser.telephone,
+        serviceId: updatedUser.serviceId ? updatedUser.serviceId : null, // ✅ Convert empty values to null
+        roleId: updatedUser.roleId ? updatedUser.roleId : null, // ✅ Convert empty values to null
+        role: updatedUser.role,
+        service: updatedUser.service,
+      };
+  
+      console.log("Updating user:", userData);
+  
+      // Call the API to update the user
+      const response = await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      const result = await response.json(); // Parse the response JSON
+  
+      if (!response.ok || result.error) {
+        // Show server-side validation error message
+        toast({
+          title: "Erreur",
+          description: result.error || "Erreur lors de la modification de l'utilisateur.",
+          variant: "destructive",
         });
-
-        if (!result) {
-          console.error("Failed to update user");
-          toast({
-            title: "Erreur",
-            description: "Erreur lors de la modification de l'utilisateur.",
-            variant: "destructive",
-          });
-          return;
-        }
-
+        return;
+      }
+  
+        // ✅ Update local state with new user data
         setUsers((prevData) =>
           prevData.map((item) =>
-            item.id === updatedUser.id ? updatedUser : item
+            item.id === updatedUser.id ? { ...item, ...userData } : item
           )
         );
         setFilteredData((prevData) =>
           prevData.map((item) =>
-            item.id === updatedUser.id ? updatedUser : item
+            item.id === updatedUser.id ? { ...item, ...userData } : item
           )
         );
-
+    
+        // ✅ Show success message
         toast({
           title: "Utilisateur modifié",
           description: "L'utilisateur a été modifié avec succès.",
         });
-      
-        setIsEditSheetOpen(false); // Close the sheet after saving
+        
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("❌ Error updating user:", error);
       toast({
         title: "Erreur",
         description: "Erreur lors de la modification de l'utilisateur.",
@@ -268,12 +276,12 @@ export default function Page() {
     },
     {
       name: "Service",
-      selector: (row: user) => row.service,
+      selector: (row: user) => row.service || "",
       sortable: true,
     },
     {
       name: "Rôle",
-      selector: (row: user) => row.role,
+      selector: (row: user) => row.role || "",
       sortable: true,
     },
     {
@@ -395,10 +403,10 @@ export default function Page() {
         {/* Edit user Sheet */}
         {selectedUser && (
             <EditUserSheet
-            user={selectedUser}
-            isOpen={isEditSheetOpen} // Ensure this state exists
-            onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
-            onSave={handleSave} // Implement the save logic here
+              user={selectedUser}
+              isOpen={isEditSheetOpen}
+              onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)}
+              onSave={handleSave}
             />
         )}
 

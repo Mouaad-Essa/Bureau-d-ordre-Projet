@@ -15,53 +15,111 @@ export async function fetchRoles() {
 }
 
 // server action delete etab
-export async function deleteRole(id: string) {
+export async function deleteRole(roleId: string) {
   try {
-    const response = await fetch(
-      `https://679b8f7333d3168463244f7f.mockapi.io/api/uni/roles/${id}`,
-      {
-        method: "DELETE",
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to delete role");
+    if (!roleId) {
+      return { error: "Role ID is required", status: 400 };
     }
-    return { message: "role deleted successfully" };
+
+    // ✅ Step 1: Delete all relations in `role_Privilege`
+    await prisma.role_Privilege.deleteMany({
+      where: { idRole: roleId },
+    });
+
+    // ✅ Step 2: Delete the role itself
+    const deletedRole = await prisma.role.delete({
+      where: { id: roleId },
+    });
+
+    return { success: true, deletedRole };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to delete role" };
+    console.error("❌ Delete Role Error:", error);
+    return { error: "Failed to delete role", status: 500 };
   }
 }
 
 // server action update etab
 export async function updateRole(updatedRole: {
-    id: string;
-    role: string;
-    nom: string;
-    description: string;
+  id: string;
+  nom: string;
+  description: string;
+  privileges: {
+    canView: boolean;
+    canEditEstablishment: boolean;
+    canCreateDepart: boolean;
+    canCreateArrive: boolean;
+    isSuperAdmin: boolean;
+  };
 }) {
-  try {
-    const response = await fetch(
-      `https://679b8f7333d3168463244f7f.mockapi.io/api/uni/roles/${updatedRole.id}`,
-      {
-        method: "PUT", // Use PUT to update
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedRole),
-      }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to update role");
+  // ✅ Validate required fields
+  if (!updatedRole.nom) {
+    return { error: "Le champ 'nom' est obligatoire.", status: 400 };
+  }
+
+  try {
+    // ✅ Step 1: Update the role details
+    const updated = await prisma.role.update({
+      where: { id: updatedRole.id },
+      data: {
+        nom: updatedRole.nom,
+        description: updatedRole.description,
+      },
+    });
+
+    if (!updated) {
+      return { error: "Role update failed", status: 500 };
     }
 
-    const data = await response.json();
-    return data; // Return updated Role data
+    // ✅ Step 2: Define privileges
+    const privileges = [
+      { nom: "canView", value: updatedRole.privileges.canView },
+      { nom: "canEditEstablishment", value: updatedRole.privileges.canEditEstablishment },
+      { nom: "canCreateDepart", value: updatedRole.privileges.canCreateDepart },
+      { nom: "canCreateArrive", value: updatedRole.privileges.canCreateArrive },
+      { nom: "isSuperAdmin", value: updatedRole.privileges.isSuperAdmin },
+    ];
+
+    // ✅ Step 3: Ensure privileges exist in the privilege table
+    const privilegeIds = await Promise.all(
+      privileges.map(async (privilege) => {
+        let privilegeRecord = await prisma.privilege.findUnique({
+          where: { nom: privilege.nom },
+        });
+
+        if (!privilegeRecord) {
+          privilegeRecord = await prisma.privilege.create({
+            data: { nom: privilege.nom },
+          });
+        }
+
+        return privilege.value ? privilegeRecord.id : null; // Only return IDs for true values
+      })
+    );
+
+    // ✅ Step 4: Remove existing privileges for the role
+    await prisma.role_Privilege.deleteMany({
+      where: { idRole: updatedRole.id },
+    });
+
+    // ✅ Step 5: Link only the selected privileges to the role
+    const rolePrivilegesToCreate = privilegeIds
+      .filter((id) => id !== null) // Remove null values (unchecked privileges)
+      .map((idPrv) => ({
+        idRole: updatedRole.id,
+        idPrv: idPrv!,
+      }));
+
+    if (rolePrivilegesToCreate.length > 0) {
+      await prisma.role_Privilege.createMany({
+        data: rolePrivilegesToCreate,
+      });
+    }
+
+    return { success: true, role: updated };
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to update role" };
+    console.error("❌ Update Role Error:", error);
+    return { error: "Failed to update role", status: 500 };
   }
 }
 
@@ -79,10 +137,10 @@ export async function addRole(newRole: {
   };
 }) {
   try {
-    // ✅ Create the new role in the role table
+    // ✅ Step 1: Create the new role
     const createdRole = await prisma.role.create({
       data: {
-        nom: newRole.role,
+        nom: newRole.nom, // Use newRole.nom instead of newRole.role
         description: newRole.description,
       },
     });
@@ -91,7 +149,7 @@ export async function addRole(newRole: {
       return { error: "Role creation failed", status: 500 };
     }
 
-    // ✅ Add missing privileges if they don't exist
+    // ✅ Step 2: Define privileges
     const privileges = [
       { nom: "canView", value: newRole.privileges.canView },
       { nom: "canEditEstablishment", value: newRole.privileges.canEditEstablishment },
@@ -100,45 +158,44 @@ export async function addRole(newRole: {
       { nom: "isSuperAdmin", value: newRole.privileges.isSuperAdmin },
     ];
 
-    // Check and create privileges if they don't exist
-    for (const privilege of privileges) {
-      const existingPrivilege = await prisma.privilege.findFirst({
-        where: { nom: privilege.nom },
-      });
-
-      if (!existingPrivilege) {
-        // If privilege does not exist, create it
-        await prisma.privilege.create({
-          data: {
-            nom: privilege.nom,
-          },
+    // ✅ Step 3: Ensure privileges exist in the privilege table
+    const privilegeIds = await Promise.all(
+      privileges.map(async (privilege) => {
+        let privilegeRecord = await prisma.privilege.findUnique({
+          where: { nom: privilege.nom },
         });
-      }
+
+        if (!privilegeRecord) {
+          privilegeRecord = await prisma.privilege.create({
+            data: { nom: privilege.nom },
+          });
+        }
+
+        return privilege.value ? privilegeRecord.id : null; // Only return IDs for true values
+      })
+    );
+
+    // ✅ Step 4: Link only the selected privileges to the new role
+    const rolePrivilegesToCreate = privilegeIds
+      .filter((id) => id !== null) // Remove null values (unchecked privileges)
+      .map((idPrv) => ({
+        idRole: createdRole.id,
+        idPrv: idPrv!,
+      }));
+
+    if (rolePrivilegesToCreate.length > 0) {
+      await prisma.role_Privilege.createMany({
+        data: rolePrivilegesToCreate,
+      });
     }
 
-    // ✅ Link privileges to the new role in the role_privilege table
-    for (const privilege of privileges) {
-      const privilegeRecord = await prisma.privilege.findFirst({
-        where: { nom: privilege.nom },
-      });
-
-      if (privilegeRecord && privilege.value) {
-        await prisma.role_Privilege.create({
-          data: {
-            idRole: createdRole.id,
-            idPrv: privilegeRecord.id,
-          },
-        });
-      }
-    }
-
-    // Return the newly created role
-    return createdRole;
+    return { success: true, role: createdRole };
   } catch (error) {
-    console.error("Create Role Error:", error);
+    console.error("❌ Create Role Error:", error);
     return { error: "Failed to create role", status: 500 };
   }
 }
+
 
 export async function fetchRoleById(id: string) {
   try {

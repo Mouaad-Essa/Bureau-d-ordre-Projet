@@ -79,6 +79,33 @@ export async function updateUser(updatedUserObj: {
   role: string | null;
   roleId: string | null;
 }) {
+
+  // ✅ Validate required fields
+  if (!updatedUserObj.nom) {
+    return { error: "Le champ 'nom' est obligatoire.", status: 400 };
+  }
+
+  if (!updatedUserObj.prenom) {
+    return { error: "Le champ 'prénom' est obligatoire.", status: 400 };
+  }
+
+  if (!updatedUserObj.email) {
+    return { error: "Le champ 'email' est obligatoire.", status: 400 };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(updatedUserObj.email)) {
+    return { error: "L'adresse email n'est pas valide.", status: 400 };
+  }
+
+  if (!updatedUserObj.telephone) {
+    return { error: "Le champ 'téléphone' est obligatoire.", status: 400 };
+  }
+
+  if (!/^\d{10}$/.test(updatedUserObj.telephone)) {
+    return { error: "Le numéro de téléphone doit contenir exactement 10 chiffres.", status: 400 };
+  }
+
   try {
   const updated = await prisma.utilisateur.update({
     where: { id: updatedUserObj.id },

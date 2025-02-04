@@ -18,7 +18,7 @@ export default function AddUserPage() {
     role: "",
     nom: "",
     description: "",
-    permissions: {
+    privileges: {
       canView: false,
       canEditEstablishment: false,
       canCreateDepart: false,
@@ -38,7 +38,7 @@ export default function AddUserPage() {
     e.preventDefault();
 
     // Prepare the Service data to be saved
-    const newService = { ...formData };
+    const newRole = { ...formData };
 
     try {
       // Call the addService API to add the new Service
@@ -47,13 +47,13 @@ export default function AddUserPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newService),
+        body: JSON.stringify(newRole),
       });
 
       if (response.ok) {
         // Show success toast
         toast({
-          title: "Service ajouté",
+          title: "Rôle ajouté",
           description: "le rôle a été ajouté avec succès.",
         });
         //redirect
@@ -166,11 +166,11 @@ export default function AddUserPage() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={formData.permissions?.canView || false}
+                    checked={formData.privileges?.canView || false}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        permissions: { ...formData.permissions, canView: e.target.checked },
+                        privileges: { ...formData.privileges, canView: e.target.checked },
                       })
                     }
                   />
@@ -180,12 +180,12 @@ export default function AddUserPage() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={formData.permissions?.canEditEstablishment || false}
+                    checked={formData.privileges?.canEditEstablishment || false}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        permissions: {
-                          ...formData.permissions,
+                        privileges: {
+                          ...formData.privileges,
                           canEditEstablishment: e.target.checked,
                         },
                       })
@@ -197,12 +197,12 @@ export default function AddUserPage() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={formData.permissions?.canCreateDepart || false}
+                    checked={formData.privileges?.canCreateDepart || false}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        permissions: {
-                          ...formData.permissions,
+                        privileges: {
+                          ...formData.privileges,
                           canCreateDepart: e.target.checked,
                         },
                       })
@@ -214,12 +214,12 @@ export default function AddUserPage() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={formData.permissions?.canCreateArrive || false}
+                    checked={formData.privileges?.canCreateArrive || false}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        permissions: {
-                          ...formData.permissions,
+                        privileges: {
+                          ...formData.privileges,
                           canCreateArrive: e.target.checked,
                         },
                       })
@@ -231,12 +231,12 @@ export default function AddUserPage() {
                 <label className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    checked={formData.permissions?.isSuperAdmin || false}
+                    checked={formData.privileges?.isSuperAdmin || false}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        permissions: {
-                          ...formData.permissions,
+                        privileges: {
+                          ...formData.privileges,
                           isSuperAdmin: e.target.checked,
                         },
                       })
