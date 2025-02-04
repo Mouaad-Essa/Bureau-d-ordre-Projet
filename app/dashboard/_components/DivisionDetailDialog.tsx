@@ -13,9 +13,11 @@ type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
   division: {
+    id: string;
     nom: string;
     description: string;
-    pole: string;
+    poleId: string;
+    pole: { nom: string };
   } | null;
 };
 
@@ -39,7 +41,7 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
             </span>
             <span>
               <strong className="font-medium">Responsable ID:</strong>{" "}
-              {division?.pole}
+              {division?.pole.nom}
             </span>
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">

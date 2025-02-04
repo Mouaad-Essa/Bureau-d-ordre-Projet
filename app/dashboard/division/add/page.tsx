@@ -25,8 +25,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu"; // Ensure DropdownMenu components are imported
 
 export default function AddDivisionPage() {
@@ -42,23 +40,15 @@ export default function AddDivisionPage() {
     statut: string;
   };
 
-  type Service = {
-    id: string;
-    nom: string;
-    division: string;
-    description: string;
-  };
-
   // State to manage form inputs
   const [formData, setFormData] = useState({
     nom: "",
     description: "",
-    poleId: "", // Pole ID for dropdown selection
-    services: [] as string[], // Array of selected service IDs
+    poleId: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [poles, setPoles] = useState<Pole[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
+
   const [selectedPole, setSelectedPole] = useState<string | null>(null);
 
   // Fetch available poles and services when the component mounts
@@ -68,10 +58,6 @@ export default function AddDivisionPage() {
         const poleResponse = await fetch("/api/poles");
         const poleData = await poleResponse.json();
         setPoles(poleData);
-
-        const serviceResponse = await fetch("/api/service");
-        const serviceData = await serviceResponse.json();
-        setServices(serviceData); // Populate the services list
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -95,11 +81,6 @@ export default function AddDivisionPage() {
   const filteredPoles = poles.filter((pole) =>
     pole.nom.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  // Handle selected services (multi-selection)
-  const handleServicesChange = (selectedServices: string[]) => {
-    setFormData((prev) => ({ ...prev, services: selectedServices }));
-  };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -143,7 +124,6 @@ export default function AddDivisionPage() {
       nom: "",
       description: "",
       poleId: "",
-      services: [], // Reset selected services
     });
   };
 
@@ -219,70 +199,30 @@ export default function AddDivisionPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-3">
-            {/* Pole Dropdown Menu */}
-            <div className=" ">
-              <Label className="block text-sm font-medium mb-1">Pole</Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild className="w-auto">
-                  <Button variant="outline" className="  justify-between">
-                    {selectedPole
-                      ? poles.find((pole) => pole.id === selectedPole)?.nom
-                      : "Select Pole..."}
-                    <ChevronsUpDown className="opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-[200px] h-60 overflow-y-auto">
-                  {filteredPoles.map((pole) => (
-                    <DropdownMenuItem
-                      key={pole.id}
-                      onClick={() => handlePoleSelect(pole.id)}
-                    >
-                      {pole.nom}
-                      {selectedPole === pole.id && (
-                        <Check className="ml-auto" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Services Dropdown Menu */}
-            <div className="w-full">
-              <Label className="block text-sm font-medium mb-1">Services</Label>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild className="w-auto">
-                  <Button variant="outline">
-                    {formData.services.length > 0
-                      ? `Services: ${formData.services.join(", ")}`
-                      : "Select Services"}
-                    <ChevronsUpDown className="opacity-50" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-80 h-60 overflow-y-auto">
-                  {services.map((service) => (
-                    <DropdownMenuItem
-                      key={service.id}
-                      onClick={() => {
-                        const newServices = formData.services.includes(
-                          service.id
-                        )
-                          ? formData.services.filter((id) => id !== service.id)
-                          : [...formData.services, service.id];
-                        handleServicesChange(newServices);
-                      }}
-                    >
-                      <FileText className="mr-2" />
-                      {service.nom}
-                      {formData.services.includes(service.id) && (
-                        <Check className="ml-auto" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+          {/* Pole Dropdown Menu */}
+          <div>
+            <Label className="block text-sm font-medium mb-1">Pole</Label>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild className="w-auto">
+                <Button variant="outline" className="  justify-between">
+                  {selectedPole
+                    ? poles.find((pole) => pole.id === selectedPole)?.nom
+                    : "Select Pole..."}
+                  <ChevronsUpDown className="opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[200px] h-60 overflow-y-auto">
+                {filteredPoles.map((pole) => (
+                  <DropdownMenuItem
+                    key={pole.id}
+                    onClick={() => handlePoleSelect(pole.id)}
+                  >
+                    {pole.nom}
+                    {selectedPole === pole.id && <Check className="ml-auto" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Buttons */}

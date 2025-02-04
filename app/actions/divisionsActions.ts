@@ -4,7 +4,20 @@ import { prisma } from "@/lib/prisma"; // Ensure your Prisma instance is correct
 // Fetch all divisions
 export async function fetchDivisions() {
   try {
-    const divisions = await prisma.division.findMany();
+    const divisions = await prisma.division.findMany({
+      select: {
+        id: true,
+        nom: true,
+        description: true,
+        poleId: true,
+        pole: {
+          select: {
+            nom: true,
+          },
+        },
+      },
+    });
+
     return NextResponse.json(divisions);
   } catch (error) {
     console.error("Failed to fetch divisions:", error);
