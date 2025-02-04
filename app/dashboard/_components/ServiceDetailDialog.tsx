@@ -12,13 +12,20 @@ import {
 type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
+  
   service: {
     nom: string;
-    division: string;
-    description: string;
+    division: Division;
+    description?: string;
   } | null;
+  
 };
+type Division= {
+  id          :String 
+  nom         :String
+  description :String
 
+}
 const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   ({ isOpen, onClose, service }) => {
     return (
@@ -35,7 +42,7 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
             </span>
             <span>
               <strong className="font-medium">Division:</strong>{" "}
-              {service?.division}
+              {service?.division.nom}
             </span>
             <span>
               <strong className="font-medium">Description:</strong>{" "}

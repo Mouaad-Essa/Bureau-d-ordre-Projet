@@ -95,7 +95,6 @@ export default function Page(){
       const tableData = filteredData.map((row) => [
         row.id,
         row.nom,
-        row?.description
       ]);
   
       autoTable(doc, {

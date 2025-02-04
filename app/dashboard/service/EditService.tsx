@@ -17,8 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 type Service = {
   id: number;
   nom: string;
-  division: string;
-  description: string;
+  division?:string;
+  description?: string;
 };
 
 interface EditServiceSheetProps {
@@ -37,7 +37,7 @@ export function EditServiceSheet({
   const [formData, setFormData] = useState({
     nom: service.nom,
     division: service.division,
-    description: service.description,
+    description: service?.description,
   });
 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
@@ -46,8 +46,8 @@ export function EditServiceSheet({
   useEffect(() => {
     setFormData({
       nom: service.nom,
-      division: service.division,
-      description: service.description,
+      division: service?.division,
+      description: service?.description,
     });
   }, [service]);
 

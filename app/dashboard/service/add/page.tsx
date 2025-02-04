@@ -16,7 +16,7 @@ export default function AddServicePage() {
   // State to manage form inputs
   const [formData, setFormData] = useState({
     nom: "",
-    division: "",
+    divisionId: "",
     description: "",
   });
 
@@ -28,7 +28,7 @@ export default function AddServicePage() {
 
   // Handle Select changes
   const handleDivisionChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, division: value }));
+    setFormData((prev) => ({ ...prev, divisionId: value }));
   };
 
   // Handle form submission
@@ -38,6 +38,7 @@ export default function AddServicePage() {
     // Prepare the Service data to be saved
     const newService = { ...formData };
 
+    newService.divisionId="uuid1";
     try {
       // Call the addService API to add the new Service
       const response = await fetch("/api/service", {
@@ -71,7 +72,7 @@ export default function AddServicePage() {
     // Reset the form after submission
     setFormData({
         nom: "",
-        division: "",
+        divisionId: "",
         description: "",
     });
   };
@@ -133,7 +134,7 @@ export default function AddServicePage() {
                 <label htmlFor="division" className="block text-sm font-medium mb-1">
                 Division
                 </label>
-                <Select value={formData.division} onValueChange={handleDivisionChange} >
+                <Select value={formData.divisionId} onValueChange={handleDivisionChange} >
                   <SelectTrigger>
                     <SelectValue placeholder="-- Séléctionner la division --" />
                   </SelectTrigger>
@@ -143,6 +144,13 @@ export default function AddServicePage() {
                     <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
                   </SelectContent>
                 </Select>
+                {/* <select onChange={handleDivisionChange} id="small" name="destination" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                  <option disabled >Sélectionner une Destination :</option>
+                  <option value="US">United States</option>
+                  <option value="CA">Canada</option>
+                  <option value="FR">France</option>
+                  <option value="DE">Germany</option>
+                </select> */}
             </div>
             <div className="w-full sm:w-[48%]">
                 <label htmlFor="description" className="block text-sm font-medium mb-1">

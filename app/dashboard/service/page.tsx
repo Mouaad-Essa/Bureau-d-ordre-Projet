@@ -30,12 +30,21 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import AlertDialogDetail from "../_components/ServiceDetailDialog";
 
+
+
 type Service = {
   id: number;
   nom: string;
-  division: string;
+  division: Division;
   description: string;
 };
+type Division= {
+  id          :String 
+  nom         :String
+  description :String
+
+}
+
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -91,7 +100,7 @@ export default function Page() {
     const tableData = filteredData.map((row) => [
       row.id,
       row.nom,
-      row.division,
+      row.division.nom,
       row.description,
     ]);
 
@@ -195,7 +204,7 @@ export default function Page() {
     },
     {
       name: "Division",
-      selector: (row: Service) => row.division,
+      selector: (row: Service) => row.division.nom,
       sortable: true,
     },
     {

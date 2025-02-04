@@ -4,7 +4,14 @@ import { prisma } from "@/lib/prisma";
 // Récupérer tous les services
 export async function fetchServices() {
   try {
-    const services = await prisma.service.findMany();
+    const services = await prisma.service.findMany(
+      {
+      include:{
+        division:true,
+      },
+    }
+  );
+  console.log(services);
     return NextResponse.json(services);
   } catch (error) {
     console.error("Erreur lors de la récupération des services:", error);
@@ -32,7 +39,9 @@ export async function updateService(updatedService: {
   nom?: string;
   description?: string;
   divisionId?: string;
-}) {
+}) 
+
+{
   try {
     const service = await prisma.service.update({
       where: { id: updatedService.id },
