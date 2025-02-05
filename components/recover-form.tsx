@@ -26,7 +26,7 @@ export function RecoverPasswordForm({
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/recover", {
+      const response = await fetch("/api/recover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
