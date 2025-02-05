@@ -38,6 +38,7 @@ export async function updateArrivee(updatedArrivee: {//-
   nbrFichier: number;//-
   typeSupport?: string;//-
   typeCourrier?: string;//-
+  traiteParId?:string
 }) {//-
   try {//-
     const arrivee = await prisma.arrivee.update({//-
@@ -63,7 +64,9 @@ export async function addArrivee(newArrivee: {//-
   nbrFichier: number;//-
   typeSupport?: string;//-
   typeCourrier?: string;//-
+  traiteParId?:string
 }) {//-
+
   try {//-
     const arrivee = await prisma.arrivee.create({//-
       data: newArrivee,//-

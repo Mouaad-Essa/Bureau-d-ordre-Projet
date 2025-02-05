@@ -39,25 +39,32 @@ import {
 import { toast, useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+
 
 export default function Page() {
   const router = useRouter();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     recuPar: "",
-    traitePar: "Admin",
+    traiteParId: "Admin",
+    idOrdre:"",
     numeroOrdre: "",
-    dateArrivee: "",
+    dateArv: "",
+    dateOrigin: "",
+    expediteur: "",
     objet: "",
-    provenance: "",
+    nbrFichier: 0,
+    typeSupport:"",
+    typeCourrier:"",
     fichier: "",
-    nombreFichiers: "",
 
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    console.log(formData);
     try {
       const response = await fetch("/api/arrivees", {
         method: "POST",
@@ -83,6 +90,9 @@ export default function Page() {
         variant: "destructive",
       });
     }
+  };
+  const handleChange = (value: string) => {
+    setFormData((prev) => ({ ...prev, divisionId: value }));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -111,139 +121,201 @@ export default function Page() {
       </header>
 
       <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
-    <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Ajouter une Arrivée</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Ajouter une Arrivée</h1>
         </div>
-                <form onSubmit={handleSubmit} className="space-y-4 w-full">
-                  {/* Réception et traitement */}
-                  <div className="flex gap-4 w-full">
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="recuPar" className="block text-sm font-medium mb-1">
-                        Reçu Par * :
-                      </label>
-                      <Input
-                        id="recuPar"
-                        name="recuPar"
-                        placeholder="Nom du réceptionnaire"
-                        value={formData.recuPar}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="traitePar" className="block text-sm font-medium mb-1">
-                        Traité par * :
-                      </label>
-                      <Input
-                        id="traitePar"
-                        name="traitePar"
-                        placeholder="Nom du responsable"
-                        value={formData.traitePar}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Numéro d'ordre et date */}
-                  <div className="flex gap-4 w-full">
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="numeroOrdre" className="block text-sm font-medium mb-1">
-                        Numéro d'ordre *
-                      </label>
-                      <Input
-                        id="numeroOrdre"
-                        name="numeroOrdre"
-                        placeholder="Numéro d'ordre"
-                        value={formData.numeroOrdre}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="dateArrivee" className="block text-sm font-medium mb-1">
-                        Date & Heure d'Arrivée *
-                      </label>
-                      <Input
-                        id="dateArrivee"
-                        name="dateArrivee"
-                        type="datetime-local"
-                        value={formData.dateArrivee}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Objet et Provenance */}
-                  <div className="flex gap-4 w-full">
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="objet" className="block text-sm font-medium mb-1">
-                        Objet *
-                      </label>
-                      <Input
-                        id="objet"
-                        name="objet"
-                        placeholder="Objet du courrier"
-                        value={formData.objet}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="provenance" className="block text-sm font-medium mb-1">
-                        Provenance *
-                      </label>
-                      <Input
-                        id="provenance"
-                        name="provenance"
-                        placeholder="Origine du courrier"
-                        value={formData.provenance}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Fichier et Nombre de fichiers */}
-                  <div className="flex gap-4 w-full">
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="fichier" className="block text-sm font-medium mb-1">
-                        Fichier *
-                      </label>
-                      <Input
-                        id="fichier"
-                        name="fichier"
-                        type="file"
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                    <div className="w-full sm:w-[48%]">
-                      <label htmlFor="nombreFichiers" className="block text-sm font-medium mb-1">
-                        Nombre de Fichiers *
-                      </label>
-                      <Input
-                        id="nombreFichiers"
-                        name="nombreFichiers"
-                        type="number"
-                        value={formData.nombreFichiers}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  {/* Bouton de soumission */}
-                  <div className="mt-6 flex gap-4">
-                    <Button type="submit" className="bg-green-600 hover:bg-green-700 w-full sm:w-auto">
-                      Créer
-                    </Button>
-                  </div>
-                </form>
-              
+        <form onSubmit={handleSubmit} className="space-y-4 w-full">
+          {/* Réception et traitement */}
+          <div className="flex gap-4 w-full">
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="recuPar"
+                className="block text-sm font-medium mb-1"
+              >
+                Date D'arrivée * :
+              </label>
+              <Input
+                id="dateArv"
+                name="dateArv"
+                type="datetime-local"
+                value={formData.dateArv}
+                onChange={handleInputChange}
+                required
+              />
             </div>
-         
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="traitePar"
+                className="block text-sm font-medium mb-1"
+              >
+                ID et Année * :
+              </label>
+              <Input
+                id="idOrdre"
+                name="idOrdre"
+                placeholder="ID et Année"
+                value={formData.idOrdre}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Numéro d'ordre et date */}
+          <div className="flex gap-4 w-full">
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="numeroOrdre"
+                className="block text-sm font-medium mb-1"
+              >
+                Date *
+              </label>
+              <Input
+                id="dateOrigin"
+                name="dateOrigin"
+                placeholder="Date"
+                type="datetime-local"
+                value={formData.dateOrigin}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="dateArrivee"
+                className="block text-sm font-medium mb-1"
+              >
+                Numéro *
+              </label>
+              <Input
+                id="numeroOrdre"
+                name="numeroOrdre"
+                value={formData.numeroOrdre}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+
+          {/* Objet et Provenance */}
+          <div className="flex gap-4 w-full">
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="provenance"
+                className="block text-sm font-medium mb-1"
+              >
+                Expéditeur *
+              </label>
+              <Select value={formData.expediteur} onValueChange={handleChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="-- Séléctionner un Expéditeur --" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="uudi1">user1</SelectItem>
+                  <SelectItem value="uuid2">user 2</SelectItem>
+                  <SelectItem value="uuid3">user3</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="w-full sm:w-[48%]">
+              <label htmlFor="objet" className="block text-sm font-medium mb-1">
+                Objet *
+              </label>
+              <Input
+                id="objet"
+                name="objet"
+                placeholder="Objet du courrier"
+                value={formData.objet}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+          </div>
+          {/* Fichier et Nombre de fichiers */}
+          <div className="flex gap-4 w-full">
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="nombreFichiers"
+                className="block text-sm font-medium mb-1"
+              >
+                Nombre de piéces jointes *
+              </label>
+              <Input
+                id="nbrFichier"
+                name="nbrFichier"
+                type="number"
+                value={formData.nbrFichier}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="fichier"
+                className="block text-sm font-medium mb-1"
+              >
+                Type du support *
+              </label>
+              <RadioGroup defaultValue={formData.typeSupport}>
+                <div className="flex items-center space-x-2">
+                <RadioGroupItem value="option-one" id="option-one" />
+                  <Label htmlFor="Papier">Papier</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="option-two" id="option-two" />
+                  <Label htmlFor="Numérique">Numérique</Label>
+                </div>
+              </RadioGroup>
+            </div>
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="fichier"
+                className="block text-sm font-medium mb-1"
+              >
+                Type de Courrier *
+              </label>
+              <RadioGroup defaultValue={formData.typeCourrier}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="option-one" id="option-one" />
+                  <Label htmlFor="Papier">Confidential</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="option-two" id="option-two" />
+                  <Label htmlFor="Numérique">Urgent</Label>
+                </div>
+              </RadioGroup>
+            </div>
+          </div>
+          <div className="flex gap-4 w-full">
+            <div className="w-full sm:w-[48%]">
+              <label
+                htmlFor="numeroOrdre"
+                className="block text-sm font-medium mb-1"
+              >
+                Fiche *
+              </label>
+              <Input
+                id="fichier"
+                name="fichier"
+                type="file"
+                value={""}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            </div>
+          {/* Bouton de soumission */}
+          <div className="mt-6 flex gap-4">
+            <Button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700 w-full sm:w-auto"
+            >
+              Créer
+            </Button>
+          </div>
+        </form>
+      </div>
     </>
   );
 }
