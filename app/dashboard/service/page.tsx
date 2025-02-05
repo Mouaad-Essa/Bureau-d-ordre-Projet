@@ -33,16 +33,16 @@ import AlertDialogDetail from "../_components/ServiceDetailDialog";
 
 
 type Service = {
-  id: number;
+  id: string;
   nom: string;
-  division: Division;
-  description: string;
+  division?:Division;
+  divisionId?:string;
+  description?: string;
 };
-type Division= {
-  id          :String 
-  nom         :String
-  description :String
 
+type Division = {
+  id:string;
+  nom:string
 }
 
 
@@ -61,12 +61,14 @@ export default function Page() {
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
   const [selectedServiceId, setSelectedServiceId] = useState<
-    null | number
+    null | string
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
   const [selectedService, setSelectedService] =
     useState<Service | null>(null);
+  const [selectedDivision,setSelectedDivision] = useState<Division|null>()
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,6 +82,8 @@ export default function Page() {
     fetchData();
   }, []);
 
+  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
@@ -87,7 +91,7 @@ export default function Page() {
     const filtered = services.filter(
       (item) =>
         item.nom.toLowerCase().includes(searchValue) ||
-        item.description.toLowerCase().includes(searchValue)
+        item.division?.nom?.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -98,14 +102,11 @@ export default function Page() {
     doc.text("Liste des services", 10, 10);
 
     const tableData = filteredData.map((row) => [
-      row.id,
       row.nom,
-      row.division.nom,
-      row.description,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Division", "Description"]],
+      head: [["Nom","Description","Division"]],
       body: tableData,
     });
 
@@ -152,22 +153,22 @@ export default function Page() {
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
-  const handleSave = async (updatedService: Service) => {
-    try {
-      const updatedServiceWithStringId = {
-        ...updatedService,
-        id: String(updatedService.id), // Convert id to a string
-      };
+ //update
+ const handleSave = async (updatedService: Service) => {
+  try {
+    const response = await fetch(`/api/service`, {
+      method: "PUT", // We are updating the pole
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedService),
+    });
+    
+    const data = await response.json();
 
-      const result = await updateService(
-        updatedServiceWithStringId
-      );
-
-      if (result.error) {
-        console.error("Failed to update service:", result.error);
-        return;
-      }
-
+    if (response.ok) {
+      
+  
       setServices((prevData) =>
         prevData.map((item) =>
           item.id === updatedService.id ? updatedService : item
@@ -178,25 +179,22 @@ export default function Page() {
           item.id === updatedService.id ? updatedService : item
         )
       );
-      setIsEditSheetOpen(false); // Close the sheet after saving
-    } catch (error) {
-      console.error("Error updating service:", error);
+      setIsEditSheetOpen(false);
+    } else {
+      console.error("Failed to update Service:", data.message);
     }
-  };
-
-  // show details logic
+  } catch (error) {
+    console.error("Error updating Service:", error);
+  }
+};
+// show details logic
   const handleShowDetails = (service: Service) => {
     setSelectedService(service);
     setIsDetailDialogOpen(true); // Open the dialog
   };
 
   const columns = [
-    {
-      name: "ID",
-      selector: (row: Service) => row.id,
-      sortable: true,
-
-    },
+ 
     {
       name: "Nom",
       selector: (row: Service) => row.nom,
@@ -204,7 +202,7 @@ export default function Page() {
     },
     {
       name: "Division",
-      selector: (row: Service) => row.division.nom,
+      selector: (row: Service) => row.divisionId,
       sortable: true,
     },
     {

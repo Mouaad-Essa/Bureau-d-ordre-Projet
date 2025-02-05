@@ -15,7 +15,7 @@ type AlertDialogDetailProps = {
   
   service: {
     nom: string;
-    division: Division;
+    division?: Division;
     description?: string;
   } | null;
   
@@ -23,7 +23,7 @@ type AlertDialogDetailProps = {
 type Division= {
   id          :String 
   nom         :String
-  description :String
+  description ?:String
 
 }
 const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
@@ -42,7 +42,7 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
             </span>
             <span>
               <strong className="font-medium">Division:</strong>{" "}
-              {service?.division.nom}
+              {service?.division?.nom}
             </span>
             <span>
               <strong className="font-medium">Description:</strong>{" "}

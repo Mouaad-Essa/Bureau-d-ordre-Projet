@@ -45,6 +45,7 @@ export async function PUT(request: Request) {
     const updatedService = await request.json();
 
     // Call the updateService function from the actions
+    console.log(updatedService);
     const result = await updateService(updatedService);
 
     // Return the result of the update

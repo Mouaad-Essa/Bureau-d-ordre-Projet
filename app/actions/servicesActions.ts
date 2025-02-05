@@ -6,12 +6,22 @@ export async function fetchServices() {
   try {
     const services = await prisma.service.findMany(
       {
-      include:{
-        division:true,
-      },
-    }
+        select:{
+          id:true,
+          nom:true,
+          description:true,
+          division:{
+            select:{
+              id:true,
+              nom:true,
+            },
+            
+          },
+          divisionId:true
+        }
+      }
+    
   );
-  console.log(services);
     return NextResponse.json(services);
   } catch (error) {
     console.error("Erreur lors de la récupération des services:", error);
@@ -36,16 +46,21 @@ export async function deleteService(id: string) {
 // Mettre à jour un service existant
 export async function updateService(updatedService: {
   id: string;
-  nom?: string;
+  nom: string;
   description?: string;
   divisionId?: string;
 }) 
 
 {
+  
   try {
     const service = await prisma.service.update({
       where: { id: updatedService.id },
-      data: updatedService,
+      data: {
+        nom: updatedService.nom,
+        description:updatedService.description,
+        divisionId: updatedService.divisionId
+      },
     });
 
     return { message: "Service mis à jour avec succès", data: service };
