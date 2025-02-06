@@ -23,11 +23,16 @@ import jwtDecode from "jsonwebtoken";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const [superAdminData, setSuperAdminData] = useState({
+    nom: "",
+    prenom: "",
     email: "",
+    roleId: "",
+    isSuperAdmin: false,
+    privileges: [],
   });
 
     //fetch super admin data
-    useEffect(() => {
+    /*useEffect(() => {
         const token = localStorage.getItem("token");
 
         if (token) {
@@ -39,6 +44,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             console.error("Invalid token:", error);
           }
         }
+    }, []);*/
+
+    useEffect(() => {
+      async function fetchUser() {
+        try {
+          const res = await fetch("/api/userData");
+          if (!res.ok) throw new Error("Failed to fetch user data");
+            const data = await res.json();
+            console.log(data);
+            setSuperAdminData(data.user);
+        } catch (err) {
+          console.error("Erreur");
+        }
+      }
+  
+      fetchUser();
     }, []);
 
   const data = {

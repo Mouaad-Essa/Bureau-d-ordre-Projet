@@ -168,8 +168,8 @@ export function LoginForm({
       }
 
       // ✅ Store JWT in localStorage (or cookies for security)
-      localStorage.setItem("token", result.token);
-      localStorage.setItem("user", JSON.stringify(result.user));
+      /*localStorage.setItem("token", result.token);
+      localStorage.setItem("user", JSON.stringify(result.user));*/
 
       toast({
         title: "Connexion réussie",

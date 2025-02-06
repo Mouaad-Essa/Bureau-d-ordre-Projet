@@ -6,6 +6,8 @@ import bcrypt from "bcryptjs";
 
 import jwt from "jsonwebtoken";
 
+import { serialize } from "cookie";
+
 
 const prisma = new PrismaClient();
 
@@ -44,6 +46,15 @@ return NextResponse.json(
 const user = await prisma.utilisateur.findUnique({
 
 where: { email },
+    include: {
+        role: {
+            include: {
+                privileges: {
+                include: { privilege: true },
+                },
+            },
+        },
+    },
 
 });
 
@@ -65,12 +76,14 @@ return NextResponse.json({ error: "Mot de passe incorrect." }, { status: 401 });
 
 }
 
+const privilegeNames = user.role?.privileges.map(p => p.privilege.nom) || [];
+const isSuperAdmin = privilegeNames.includes("isSuperAdmin");
 
 // Generate JWT Token
 
 const token = jwt.sign(
 
-{ id: user.id, email: user.email, role: user.roleId },
+{ id: user.id, nom: user.nom, prenom: user.prenom, email: user.email, role: user.roleId, isSuperAdmin, privileges: privilegeNames },
 
 JWT_SECRET,
 
@@ -79,9 +92,20 @@ JWT_SECRET,
 );
 
 
+  const cookie = serialize("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: 3600,
+  });
+
+  const response = NextResponse.json({ message: "Authentification réussie" });
+  response.headers.set("Set-Cookie", cookie);
+  return response;
+
 // Return token to client
 
-return NextResponse.json({ token, user }, { status: 200 });
+//return NextResponse.json({ token, user }, { status: 200 });
 
 
 } catch (error) {

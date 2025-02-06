@@ -30,7 +30,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import {useRouter} from "next/navigation";
+import { useLogout } from "@/hooks/useLogout"
 
 export function NavUser({
   user,
@@ -43,15 +43,7 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar()
 
-  const router = useRouter();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("user");
-
-    router.push("/login");
-  }
+  const { handleLogout } = useLogout();
 
   return (
     <SidebarMenu>
