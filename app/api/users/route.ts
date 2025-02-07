@@ -43,7 +43,6 @@ export async function PUT(request: Request) {
   try {
     // Parse the updated User data from the request body
     const updatedUser = await request.json();
-
     // Call the updateUser function from the actions
     const result = await updateUser(updatedUser);
 
