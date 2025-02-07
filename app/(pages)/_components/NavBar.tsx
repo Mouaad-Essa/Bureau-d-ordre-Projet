@@ -13,7 +13,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { LogOut, User } from "lucide-react";
-
+import { useLogout } from "@/hooks/useLogout";
 
 const NavBar = () => {
   const pathname = usePathname();
