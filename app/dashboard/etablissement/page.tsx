@@ -7,14 +7,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Search,
-  Plus,
-  Download,
-  Edit,
-  Trash,
-  Eye,
-} from "lucide-react";
+import { Search, Plus, Download, Edit, Trash, Eye } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -157,7 +150,9 @@ export default function Page() {
   // update logic
   const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
+
       const response = await fetch("/api/etablissement", {
+
         method: "PUT", // Use PUT for updating
         headers: {
           "Content-Type": "application/json",

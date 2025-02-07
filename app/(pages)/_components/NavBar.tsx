@@ -7,14 +7,13 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User } from "lucide-react";
-import { useLogout } from "@/hooks/useLogout";
+
+import { LogOut, User } from "lucide-react";
+
 
 const NavBar = () => {
   const pathname = usePathname();
@@ -82,11 +81,11 @@ const NavBar = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-40">
             <DropdownMenuItem>
-              <User className="w-4 h-4 mr-2" /> Profil
+              <Link href="/profil" className="flex items-center justify-center">
+                <User className="w-4 h-4 mr-2" /> Profil
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="w-4 h-4 mr-2" /> Paramètres
-            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-500">
               <LogOut className="w-4 h-4 mr-2" /> Déconnexion
