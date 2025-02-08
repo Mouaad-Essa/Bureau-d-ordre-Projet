@@ -27,7 +27,7 @@ const ProfilePage = () => {
     prenom: "",
     email: "",
     tel: "",
-    picture: "/profile.png",
+    picture: "/assets/img/profile.png",
   });
   const [isEditable, setIsEditable] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,6 +37,8 @@ const ProfilePage = () => {
     newPassword: "",
     confirmPassword: "",
   });
+
+  /*
 
   useEffect(() => {
     const getCookie = (name: string) => {
@@ -70,6 +72,34 @@ const ProfilePage = () => {
       setError("No token found in cookies");
       setIsLoading(false);
     }
+  }, []);
+  */
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Step 1: Get user ID from the token
+        const response = await fetch("/api/userData");
+        if (!response.ok) {
+          throw new Error("Failed to fetch user ID");
+        }
+
+        const { user } = await response.json();
+        if (!user || !user.id) {
+          throw new Error("Invalid user data");
+        }
+
+        // Step 2: Fetch user details using userId
+        await fetchUserById(user.id);
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   const fetchUserById = async (userId: string) => {
@@ -165,7 +195,7 @@ const ProfilePage = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result as string);
+        setImagePreview(reader.result as string); // Base64 string
       };
       reader.readAsDataURL(file);
     }
@@ -200,7 +230,7 @@ const ProfilePage = () => {
       <CardContent>
         <div className="flex flex-col items-center mb-6 border-b pb-6">
           <Image
-            src={imagePreview || "/profile.png"}
+            src={imagePreview || "/assets/img/profile.png"}
             alt="Profile Image"
             width={120}
             height={120}
@@ -295,7 +325,7 @@ const ProfilePage = () => {
                 className="bg-gray-50"
               />
             </div>
-            <div className="col-span-2">
+            <div>
               <Label className="text-sm font-medium">
                 Confirmer le mot de passe
               </Label>

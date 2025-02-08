@@ -94,8 +94,9 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
+    const { id } = await params;
     // Fetch the user by ID using the fetchUserById function
-    const result = await fetchUserById(params.id);
+    const result = await fetchUserById(id);
 
     // Check if the user is found
     if (result.error) {
