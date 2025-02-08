@@ -47,7 +47,12 @@ export async function fetchUsers() {
 }
 
 // server action delete etab
-export async function deleteUser(id: string) {
+export async function deleteUser(id: string, currentUser: string) {
+
+  if(currentUser == id){
+    return { error: "Vous ne pouvez pas supprimer votre compte", status: 400 };
+  }
+    
   try {
     const removedUser = await prisma.utilisateur.delete({
       where: {
@@ -251,7 +256,7 @@ export async function addUser(newUserObj: {
   }
 }
 
-export async function fetchUserById(id: string) {
+/*export async function fetchUserById(id: string) {
   try {
     const response = await fetch(
       `https://679aa202747b09cdcccf5f08.mockapi.io/api/uni/users/${id}`
@@ -264,4 +269,4 @@ export async function fetchUserById(id: string) {
     console.error("Error fetching User by ID:", error);
     throw error;
   }
-}
+}*/
