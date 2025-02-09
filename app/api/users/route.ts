@@ -22,10 +22,10 @@ export async function GET() {
 export async function DELETE(request: Request) {
   try {
     // Read the ID from the request body
-    const { id } = await request.json();
+    const { id, currentUser } = await request.json();
 
     // Call the deleteUser function from the actions
-    const result = await deleteUser(id);
+    const result = await deleteUser(id, currentUser);
 
     // Return the result of the deletion
     return new Response(JSON.stringify(result), { status: 200 });
@@ -43,7 +43,6 @@ export async function PUT(request: Request) {
   try {
     // Parse the updated User data from the request body
     const updatedUser = await request.json();
-
     // Call the updateUser function from the actions
     const result = await updateUser(updatedUser);
 

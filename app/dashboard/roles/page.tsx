@@ -27,12 +27,20 @@ import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reus
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { toast } from "@/hooks/use-toast";
 
 type role = {
   id: number;
   role: string;
   nom: string;
   description: string;
+  privileges: {
+    canView: boolean,
+    canEditEstablishment: boolean,
+    canCreateDepart: boolean,
+    canCreateArrive: boolean,
+    isSuperAdmin: boolean,
+  },
 };
 
 const paginationComponentOptions = {
@@ -44,7 +52,7 @@ const paginationComponentOptions = {
 };
 
 export default function Page() {
-  const [Roles, setRoles] = useState<role[]>([]);
+  const [roles, setRoles] = useState<role[]>([]);
   const [filteredData, setFilteredData] = useState<role[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -76,11 +84,10 @@ export default function Page() {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
 
-    const filtered = Roles.filter(
+    const filtered = roles.filter(
       (item) =>
-        item.role.toLowerCase().includes(searchValue) ||
         item.nom.toLowerCase().includes(searchValue)
-        || item.description.toLowerCase().includes(searchValue)
+        || item.description?.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -132,6 +139,10 @@ export default function Page() {
           prevData.filter((item) => item.id !== selectedRoleId)
         );
         setIsDeleteDialogOpen(false);
+        toast({
+          title: "Rôle supprimé",
+          description: "Le rôle a été supprimé avec succès.",
+        });
       } else {
         console.error("Failed to delete role");
       }
@@ -146,18 +157,35 @@ export default function Page() {
   };
 
   const handleSave = async (updatedRole: role) => {
+
     try {
-      const updatedRoleWithStringId = {
-        ...updatedRole,
-        id: String(updatedRole.id), // Convert id to a string
-      };
+      const response = await fetch(`/api/role`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: updatedRole.id,
+          nom: updatedRole.nom,
+          description: updatedRole.description,
+          privileges: {
+            canView: updatedRole.privileges.canView,
+            canEditEstablishment: updatedRole.privileges.canEditEstablishment,
+            canCreateDepart: updatedRole.privileges.canCreateDepart,
+            canCreateArrive: updatedRole.privileges.canCreateArrive,
+            isSuperAdmin: updatedRole.privileges.isSuperAdmin,
+          },
+        }),
+      });
 
-      const result = await updateRole(
-        updatedRoleWithStringId
-      );
+      const result = await response.json();
 
-      if (result.error) {
-        console.error("Failed to update Role:", result.error);
+      if (!response.ok || result.error) {
+        toast({
+          title: "Erreur",
+          description: result.error || "Erreur lors de la modification du rôle",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -171,11 +199,22 @@ export default function Page() {
           item.id === updatedRole.id ? updatedRole : item
         )
       );
+
+      toast({
+        title: "Rôle modifié",
+        description: "Le rôle a été modifié avec succès.",
+      });
+    
       setIsEditSheetOpen(false); // Close the sheet after saving
-    } catch (error) {
-      console.error("Error updating role:", error);
-    }
-  };
+  } catch (error) {
+    console.error("Error updating role:", error);
+    toast({
+      title: "Erreur",
+      description: "Erreur lors de la modification du rôle.",
+      variant: "destructive",
+    });
+  }
+};
 
   const columns = [
     {
@@ -186,11 +225,6 @@ export default function Page() {
     },
     {
       name: "Rôle",
-      selector: (row: role) => row.role,
-      sortable: true,
-    },
-    {
-      name: "Nom",
       selector: (row: role) => row.nom,
       sortable: true,
     },
