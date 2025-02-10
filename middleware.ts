@@ -30,7 +30,10 @@ export async function middleware(request: NextRequest) {
     const isSuperAdmin = decodedToken?.privileges.includes("isSuperAdmin");
 
     // If user is logged in and trying to access /login or /recover, redirect to /dashboard
-    if (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/recover") {
+    if (
+      request.nextUrl.pathname === "/login" ||
+      request.nextUrl.pathname === "/recover"
+    ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
@@ -41,16 +44,17 @@ export async function middleware(request: NextRequest) {
 
     // If user is a SuperAdmin, allow them to access /dashboard and subpaths
     if (isSuperAdmin && !request.nextUrl.pathname.startsWith("/dashboard")) {
-        // Redirect SuperAdmin to the dashboard if they try to access a non-dashboard page
-        return NextResponse.redirect(new URL("/dashboard", request.url));
+      // Redirect SuperAdmin to the dashboard if they try to access a non-dashboard page
+      return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
   // If the user is not logged in, redirect from protected pages (like /dashboard)
+
     if (!token && request.nextUrl.pathname !== "/login" && request.nextUrl.pathname !== "/recover") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-  
+
 
   return NextResponse.next();
 }
@@ -58,15 +62,16 @@ export async function middleware(request: NextRequest) {
 // Define which routes the middleware applies to
 export const config = {
   matcher: [
-    "/login", 
-    "/recover", 
-    "/register", 
-    "/dashboard", 
-    "/dashboard/:path*", 
-    "/depart", 
-    "/etablissement", 
-    "/statistique", 
-    "/"],
+    "/login",
+    "/recover",
+    "/register",
+    "/dashboard",
+    "/dashboard/:path*",
+    "/depart",
+    "/etablissement",
+    "/statistique",
+    "/",
+  ],
 };
  */
 

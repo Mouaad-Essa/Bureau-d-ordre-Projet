@@ -29,15 +29,13 @@ import {
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@radix-ui/react-dropdown-menu";
 
 type Division = {
   id: string;
   nom: string;
   description: string;
-  responsableId: string;
-  bureauId: string;
-  statut: string;
+  poleId: string;
+  pole: { nom: string }; // ✅ An object with `nom`
 };
 
 const paginationComponentOptions = {
@@ -76,10 +74,9 @@ export default function Page() {
       const data = await response.json();
       setDivisions(data);
       setFilteredData(data);
-
       setLoaded(true);
+      console.log(data);
     };
-
     fetchData();
   }, []);
 
@@ -87,16 +84,14 @@ export default function Page() {
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
-
-    const filtered = divisions.filter(
-      (item) =>
-        item.nom.toLowerCase().includes(searchValue) ||
-        item.description.toLowerCase().includes(searchValue) ||
-        item.responsableId.toLowerCase().includes(searchValue) ||
-        item.bureauId.toLowerCase().includes(searchValue)
+    setFilteredData(
+      divisions.filter(
+        (item) =>
+          item.nom.toLowerCase().includes(searchValue) ||
+          item.description.toLowerCase().includes(searchValue) ||
+          item.pole.nom.toLowerCase().includes(searchValue)
+      )
     );
-
-    setFilteredData(filtered);
   };
 
   //export logic
@@ -104,21 +99,16 @@ export default function Page() {
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Liste des divisions", 10, 10);
-
     const tableData = filteredData.map((row) => [
       row.id,
       row.nom,
       row.description,
-      row.responsableId,
-      row.bureauId,
-      row.statut,
+      row.pole.nom,
     ]);
-
     autoTable(doc, {
-      head: [["ID", "Nom", "Description", "Responsable", "Bureau", "Statut"]],
+      head: [["ID", "Nom", "Description", "Pole"]],
       body: tableData,
     });
-
     doc.save("divisions.pdf");
   };
 
@@ -212,11 +202,6 @@ export default function Page() {
       name: "ID",
       selector: (row: Division) => row.id,
       sortable: true,
-
-      style: {
-        minWidth: "60px",
-        maxWidth: "80px",
-      },
     },
     {
       name: "Nom",
@@ -229,18 +214,8 @@ export default function Page() {
       sortable: true,
     },
     {
-      name: "Responsable",
-      selector: (row: Division) => row.responsableId,
-      sortable: true,
-    },
-    {
-      name: "Bureau",
-      selector: (row: Division) => row.bureauId,
-      sortable: true,
-    },
-    {
-      name: "Statut",
-      selector: (row: Division) => row.statut,
+      name: "Pole",
+      selector: (row: Division) => row.pole?.nom ?? "N/A",
       sortable: true,
     },
     {
