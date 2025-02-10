@@ -41,15 +41,31 @@ import {
 // Définition du type pour un départ
 type Depart = {
   id: string;
-  signePar: string;
-  traitePar: string;
-  numeroOrdre: string;
+  signeParId: string;
+  traiteParId: string;
+  numOrdre: string;
   dateDepart: string;
   objet: string;
-  destination: string;
-  fichier: string;
-  nombreFichiers: string;
+  destinationId: string;
+  destination: Etablissement;
+  fichiers: Fichier[];
+  nbrFichier: Number;
+  traitePar:Utilisateur
+  signePar:Utilisateur
 };
+type Fichier = {
+  id:string,
+  nom:string,
+  url:string
+}
+type Utilisateur={
+  id:string,
+  nom:string
+}
+type Etablissement={
+  id:string,
+  nom:string
+}
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -87,54 +103,68 @@ export default function Page() {
 
     const filtered = departs.filter(
       (item) =>
-        item.signePar.toLowerCase().includes(searchValue) ||
-        item.traitePar.toLowerCase().includes(searchValue) ||
-        item.numeroOrdre.toLowerCase().includes(searchValue) ||
+        item.signePar.nom.toLowerCase().includes(searchValue) ||
+        item.traitePar.nom.toLowerCase().includes(searchValue) ||
+        item.numOrdre.toLowerCase().includes(searchValue) ||
         item.objet.toLowerCase().includes(searchValue) ||
-        item.destination.toLowerCase().includes(searchValue)
+        item.destination.nom.toLowerCase().includes(searchValue)
     );
     setFilteredData(filtered);
   };
 
   const columns = [
-    { name: "ID", selector: (row: Depart) => row.id, sortable: true },
     {
-      name: "Signé Par",
-      selector: (row: Depart) => row.signePar,
+      name: "Numero",
+      selector: (row: Depart) => row.numOrdre,
       sortable: true,
     },
     {
-      name: "Traité Par",
-      selector: (row: Depart) => row.traitePar,
+      name: "Date",
+      selector: (row: Depart) => new Date(row.dateDepart).toLocaleString(),
       sortable: true,
     },
     {
-      name: "Numéro d'Ordre",
-      selector: (row: Depart) => row.numeroOrdre,
+      name: "Objet",
+      selector: (row: Depart) => row.objet,
       sortable: true,
     },
     {
-      name: "Date de Départ",
-      selector: (row: Depart) => row.dateDepart,
+      name: "Destiné à",
+      selector: (row: Depart) => row.destination.nom,
       sortable: true,
     },
-    { name: "Objet", selector: (row: Depart) => row.objet, sortable: true },
     {
-      name: "Destination",
-      selector: (row: Depart) => row.destination,
+      name: "Signé par",
+      selector: (row: Depart) => row.signePar.nom,
       sortable: true,
     },
+    {
+      name: "Traité par",
+      selector: (row: Depart) => row.traitePar?.nom,
+      sortable: true,
+    },
+   
+   {
+            name: "Fichier",
+            cell: (row: Depart) => (
+             <div className="space-x-2 flex">
+             {row?.fichiers?.length>0 ? (
+               <Button
+                 variant="see"
+                 size="sm"
+                 onClick={() => handleShowDetails(row)}
+               >
+                 <Eye />
+               </Button>
+             ) : null}
+           </div>
+            ),
+          },
     {
       name: "Actions",
       cell: (row: Depart) => (
         <div className="space-x-2 flex">
-          <Button
-            variant="see"
-            size="sm"
-            onClick={() => handleShowDetails(row)}
-          >
-            <Eye />
-          </Button>
+      
           <Button
             variant="update"
             size="sm"
@@ -152,24 +182,25 @@ export default function Page() {
     doc.text("Liste des départs", 10, 10);
 
     const tableData = filteredData.map((row) => [
-      row.id,
-      row.signePar,
-      row.traitePar,
-      row.numeroOrdre,
+      row.signePar.nom,
+      row.traitePar.nom,
+      row.numOrdre,
       row.dateDepart,
       row.objet,
-      row.destination,
+      row.destination.nom,
     ]);
 
     autoTable(doc, {
       head: [
         [
-          "ID",
+          "Numero",
+          "Date ",
+          "Traité par",
+          "Objet",
+          "Déstiné à",
           "Signé par",
           "Traité par",
-          "Numéro d'ordre",
-          "Date Départ",
-          "Objet",
+          "fichier",
           "Destination",
         ],
       ],

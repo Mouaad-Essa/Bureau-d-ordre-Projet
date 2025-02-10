@@ -64,12 +64,11 @@ import {
   export async function POST(request: Request) {
     try {
       // Lire les données de la nouvelle arrivée depuis le corps de la requête
-      console.log(request.body);
+      // console.log(request.body);
       const newArrivee = await request.json();
       
       // Appeler la fonction addArrivee depuis les actions
       const result = await addArrivee(newArrivee);
-  
       // Retourner le résultat de l'ajout
       return new Response(JSON.stringify(result), { status: 201 });
     } catch (error) {

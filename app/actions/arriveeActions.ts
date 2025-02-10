@@ -4,8 +4,14 @@ import { prisma } from "@/lib/prisma"; // Import the correct Prisma client//+
 // Récupérer toutes les arrivées//-
 export async function fetchArrivees() {//-
   try {//-
-    const arrivees = await prisma.arrivee.findMany();//-
-    return NextResponse.json(arrivees);//-
+    const arrivees = await prisma.arrivee.findMany({
+      include:{
+        expediteur:true,
+        traitePar:true,
+        fichiers:true
+      }
+    });//-
+    return NextResponse.json(arrivees);
   } catch (error) {//-
     // console.error("Erreur lors de la récupération des arrivées:", error);//-
     return NextResponse.json({ error: "Échec de la récupération des arrivées" });//-
@@ -32,7 +38,7 @@ export async function updateArrivee(updatedArrivee: {//-
   idOrdre?: string;//-
   dateArv: string;//-
   dateOrigin: string;//-
-  expediteur: string;//-
+  expediteurId: string;//-
   objet: string;//-
   numero: string;//-
   nbrFichier: number;//-
@@ -58,7 +64,7 @@ export async function addArrivee(newArrivee: {//-
   idOrdre?: string;//-
   dateArv: string;//-
   dateOrigin: string;//-
-  expediteur: string;//-
+  expediteurId: string;//-
   objet: string;//-
   numero: string;//-
   nbrFichier: number;//-

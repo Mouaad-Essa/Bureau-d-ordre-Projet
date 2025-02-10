@@ -21,9 +21,12 @@ model Utilisateur {
   service   Service?   @relation(fields: [serviceId], references: [id])
   role      Role?      @relation(fields: [roleId], references: [id])
 
+  courrierRecu   Envoi[]   @relation(name: "transferer_courrier")  // Users who signed
+  courrierTransfere   Envoi[]   @relation(name: "destinataire_courrier")  // Users who signed
   signees   Depart[]   @relation(name: "SigneParRelation")  // Users who signed
   traitees  Depart[]   @relation(name: "TraiteParRelation") // Users who processed
   traiteArriv Arrivee[]  @relation(name: "TraiteArrParRelation") // Users who processed
+  
 }
 
 
@@ -60,6 +63,9 @@ model Etablissement {
   adresse  String?
   ville    String?
   contact  String?
+  traiteArriv Arrivee[]  @relation(name: "expediteur_Arrivee") // Users who processed
+  departDestination Depart[]  @relation(name: "destination_depart") // Users who processed
+  
 }
 
 model Pole {
@@ -97,9 +103,12 @@ model Depart {
   numOrdre    String?
   dateDepart  DateTime
   objet       String
-  destination String
+  destinationId String
   nbrFichier  Int
+  courrierId String?  @unique
 
+  courrier  Courrier? @relation(fields: [courrierId], references: [id])
+  destination Etablissement? @relation(name : "destination_depart",fields: [destinationId], references: [id])
   signePar   Utilisateur? @relation(name: "SigneParRelation", fields: [signeParId], references: [id])
   traitePar  Utilisateur? @relation(name: "TraiteParRelation", fields: [traiteParId], references: [id])
 
@@ -118,19 +127,42 @@ model Fichier {
   arrivee    Arrivee?  @relation(fields: [idArrivee], references: [id])
 }
 
+model Courrier{
+  id         String  @id @default(uuid())
+
+  arrivee  Arrivee?
+  depart Depart?
+  envoi Envoi?
+
+}
 model Arrivee {
   id          String  @id @default(uuid())
   idOrdre     String?
   dateArv     DateTime
   dateOrigin  DateTime
-  expediteur  String
+  expediteurId  String
   objet       String
   numero      String
   nbrFichier  Int
   typeSupport String?
   typeCourrier String?
   traiteParId String?
+  courrierId String?  @unique
 
+  courrier  Courrier? @relation(fields: [courrierId], references: [id])
+  expediteur Etablissement? @relation(name : "expediteur_Arrivee",fields: [expediteurId], references: [id])
   traitePar  Utilisateur? @relation(name: "TraiteArrParRelation", fields: [traiteParId], references: [id])
   fichiers    Fichier[]
+} 
+
+model Envoi {
+  id          String   @id @default(uuid())
+  expediteurId  String   
+  destinataireId String  
+
+  expediteur Utilisateur? @relation(name: "transferer_courrier", fields: [expediteurId], references: [id])
+  destinataire Utilisateur? @relation(name: "destinataire_courrier", fields: [destinataireId], references: [id])
+  courrierId  String   @unique
+  createdAt   DateTime @default(now())
+  courrier    Courrier @relation(fields: [courrierId], references: [id])
 }

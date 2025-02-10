@@ -4,7 +4,14 @@ import { prisma } from "@/lib/prisma";
 // Récupérer tous les départs
 export async function fetchDeparts() {
   try {
-    const departs = await prisma.depart.findMany();
+    const departs = await prisma.depart.findMany({
+      include:{
+        fichiers:true,
+        signePar:true,
+        traitePar:true,
+        destination:true
+      }
+    });
     return NextResponse.json(departs);
   } catch (error) {
     console.error("Erreur lors de la récupération des départs:", error);
@@ -26,43 +33,31 @@ export async function deleteDepart(id: string) {
   }
 }
 
-// Mettre à jour un départ existant
-export async function updateDepart(updatedDepart: {
-  id: string;
-  signeParId?: string;
-  traiteParId?: string;
-  numOrdre?: string;
-  dateDepart?: string;
-  objet?: string;
-  destination?: string;
-  nbrFichier?: number;
-}) {
-  try {
-    const depart = await prisma.depart.update({
-      where: { id: updatedDepart.id },
-      data: updatedDepart,
-    });
 
-    return { message: "Départ mis à jour avec succès", data: depart };
-  } catch (error) {
-    console.error("Erreur lors de la mise à jour du départ:", error);
-    return { error: "Échec de la mise à jour du départ" };
-  }
-}
 
 // Ajouter un nouveau départ
 export async function addDepart(newDepart: {
-  signeParId?: string;
-  traiteParId?: string;
-  numOrdre?: string;
+  signeParId: string;
+  traiteParId: string;
+  numOrdre: string;
   dateDepart: string;
   objet: string;
-  destination: string;
+  destinationId: string;
   nbrFichier: number;
+
 }) {
   try {
     const depart = await prisma.depart.create({
-      data: newDepart,
+      data: {
+        signeParId: newDepart.signeParId,
+        traiteParId: newDepart.traiteParId,
+        numOrdre: newDepart.numOrdre,
+        dateDepart: newDepart.dateDepart,
+        objet: newDepart.objet,
+        destinationId: newDepart.destinationId,
+        nbrFichier: newDepart.nbrFichier,
+      }
+        
     });
 
     return { message: "Départ ajouté avec succès", data: depart };

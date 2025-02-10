@@ -12,19 +12,30 @@ import {
 type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
-  depart :{
+  depart: {
     id: string;
-    signePar: string;
-    traitePar: string;
-    numeroOrdre: string;
+    signeParId: string;
+    traiteParId: string;
+    numOrdre: string;
     dateDepart: string;
     objet: string;
     destination: string;
-    fichier: string;
-    nombreFichiers: string;
-  }| null;
- 
+    fichier: Fichier;
+    nbrFichier: Number;
+    traitePar:Utilisateur
+    signePar:Utilisateur
+  
+  }|null;
+  
 };
+type Fichier = {
+  id:string,
+  nom:string
+}
+type Utilisateur={
+  id:string,
+  nom:string
+}
 
 const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   ({ isOpen, onClose, depart }) => {
@@ -38,11 +49,11 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
           </AlertDialogHeader>
           <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
             <span>
-              <strong className="font-medium">Signé par:</strong> {depart?.signePar}
+              <strong className="font-medium">Signé par:</strong> {depart?.signePar.nom}
             </span>
             <span>
               <strong className="font-medium">Traité par :</strong>{" "}
-              {depart?.traitePar}
+              {depart?.traitePar.nom}
             </span>
             <span>
               <strong className="font-medium">Objet:</strong>{" "}

@@ -7,14 +7,7 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  Search,
-  Plus,
-  Download,
-  Edit,
-  Trash,
-  Eye,
-} from "lucide-react";
+import { Search, Plus, Download, Edit, Trash, Eye } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -23,7 +16,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { EditEtablissementSheet } from "../../(pages)/etablissement/EditEtablissement"; // Import your EditEtablissementSheet
-import { updateEtablissement } from "../../actions/etablissementsActions"; // Import the updateEtablissement action
 import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -155,33 +147,35 @@ export default function Page() {
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
+  // update logic
   const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
-      const updatedEtablissementWithStringId = {
-        ...updatedEtablissement,
-        id: String(updatedEtablissement.id), // Convert id to a string
-      };
+      const response = await fetch(`/api/etablissement`, {
+        method: "PUT", // Use PUT for updating
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedEtablissement),
+      });
 
-      const result = await updateEtablissement(
-        updatedEtablissementWithStringId
-      );
+      const data = await response.json();
 
-      if (result.error) {
-        console.error("Failed to update etablissement:", result.error);
-        return;
+      if (response.ok) {
+        // Update the state
+        setEtablissements((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedEtablissement.id ? updatedEtablissement : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedEtablissement.id ? updatedEtablissement : item
+          )
+        );
+        setIsEditSheetOpen(false);
+      } else {
+        console.error("Failed to update etablissement:", data.message);
       }
-
-      setEtablissements((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedEtablissement.id ? updatedEtablissement : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedEtablissement.id ? updatedEtablissement : item
-        )
-      );
-      setIsEditSheetOpen(false); // Close the sheet after saving
     } catch (error) {
       console.error("Error updating etablissement:", error);
     }

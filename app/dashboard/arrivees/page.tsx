@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import * as XLSX from "xlsx";
-import autoTable from "jspdf-autotable";
+import autoTable, { Row } from "jspdf-autotable";
 import jsPDF from "jspdf";
 
 // Définition du type pour une arrivée
@@ -39,14 +39,29 @@ type Arrivee = {
   idOrdre: string;
   dateArv: string;
   dateOrigin: string;
-  expediteur: string;
+  expediteur: Etablissement;
   objet: string;
   numero: string;
   nbrFichier: number;
   typeSupport: string;
   typeCourrier: string;
-  trierPar:string;
+  traitePar:Utilisateur;
+  fichiers:Fichier[]
+  
 };
+type Utilisateur = {
+  id:string,
+  nom:string
+}
+type Etablissement = {
+  id:string,
+  nom:string
+}
+type Fichier = {
+id:string,
+nom:string,
+url:string
+}
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -64,8 +79,8 @@ export default function Page() {
   const [selectedArrivee, setSelectedArrivee] = useState<Arrivee | null>(null);
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
-  
-
+  const [showFile,setShowFile] = useState(false);
+  const[file,setFile] = useState<Fichier>();
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/arrivees");
@@ -82,7 +97,7 @@ export default function Page() {
     setSearchText(searchValue);
     const filtered = arrivees.filter(
       (item) =>
-        item.expediteur.toLowerCase().includes(searchValue) ||
+        item.expediteur.nom.toLowerCase().includes(searchValue) ||
         item.objet.toLowerCase().includes(searchValue) ||
         item.numero.toLowerCase().includes(searchValue)
     );
@@ -92,42 +107,53 @@ export default function Page() {
   const columns = [
     {
       name: "Date d'Arrivée",
-      selector: (row: Arrivee) => row.dateArv,
+      selector: (row: Arrivee) => new Date(row.dateArv).toLocaleString(),
       sortable: true,
     },
     {
       name: "Expéditeur",
-      selector: (row: Arrivee) => row.expediteur,
+      selector: (row: Arrivee) => row.expediteur.nom,
       sortable: true,
     },
     { name: "Objet", selector: (row: Arrivee) => row.objet, sortable: true },
    
     {
       name: "Trier Par",
-      selector: (row: Arrivee) => row.trierPar,
+      selector: (row: Arrivee) => row.traitePar.nom,
       sortable: true,
     },
-    {
-      name: "Actions",
-      cell: (row: Arrivee) => (
-        <div className="space-x-2 flex">
-          <Button
-            variant="see"
-            size="sm"
-            onClick={() => handleShowDetails(row)}
-          >
-            <Eye />
-          </Button>
-          <Button
-            variant="update"
-            size="sm"
-            onClick={() => handleTransfer(row.id)}
-          >
-            <ArrowRightLeft />
-          </Button>
+       {
+         name: "Fichier",
+         cell: (row: Arrivee) => (
+          <div className="space-x-2 flex">
+          {row?.fichiers?.length>0 ? (
+            <Button
+              variant="see"
+              size="sm"
+              onClick={() => handleShowDetails(row)}
+            >
+              <Eye />
+            </Button>
+          ) : null}
         </div>
-      ),
-    },
+         ),
+       },
+       {
+         name: "Actions",
+         cell: (row: Arrivee) => (
+           <div className="space-x-2 flex">
+             <Button
+               variant="update"
+               size="sm"
+               onClick={() => handleTransfer(row.id)}
+             >
+               <ArrowRightLeft />
+             </Button>
+           </div>
+         ),
+       },
+       { name: "Type", selector: (row: Arrivee) => row.typeCourrier, sortable: true },
+
   ];
 
   const exportToPDF = () => {
@@ -136,9 +162,9 @@ export default function Page() {
 
     const tableData = filteredData.map((row) => [
       row.dateArv,
-      row.expediteur,
+      row.expediteur.nom,
       row.objet,
-      row.trierPar
+      row.traitePar.nom
       
     
     ]);
@@ -149,8 +175,8 @@ export default function Page() {
           "Date ",
           "Expéditeur",
           "Objet",
-          "Trier Par"
-
+          "Trier Par",
+          "Expediteur",
         ],
       ],
       body: tableData,
@@ -171,6 +197,7 @@ export default function Page() {
     setIsDetailDialogOpen(true);
   };
 
+
   const handleAddArrivee = () => {
     router.push("/dashboard/arrivees/add");
   };
@@ -178,6 +205,10 @@ export default function Page() {
   const handleTransfer = (id: string) => {
     router.push("/dashboard/arrivees/" + id);
   };
+
+  const handleShowFile2 = ()=>{
+    window.open('/dashboard/arrivees');
+  }
 
   return (
     <>
@@ -276,6 +307,7 @@ export default function Page() {
             onClose={() => setIsDetailDialogOpen(false)}
             Arrivee={selectedArrivee}
           />
+    
         </>
       )}
     </>

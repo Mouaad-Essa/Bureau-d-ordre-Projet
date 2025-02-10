@@ -14,14 +14,28 @@ type Arrivee = {
   idOrdre: string;
   dateArv: string;
   dateOrigin: string;
-  expediteur: string;
+  expediteur: Etablissement;
   objet: string;
   numero: string;
   nbrFichier: number;
   typeSupport: string;
   typeCourrier: string;
-  trierPar:string;
+  traitePar:Utilisateur;
+  fichiers:Fichier[]
 };
+type Utilisateur = {
+  id:string,
+  nom:string
+}
+type Etablissement = {
+  id:string,
+  nom:string
+}
+type Fichier = {
+  id:string,
+  nom:string,
+  url:string
+}
 
 type AlertDialogDetailProps = {
   isOpen: boolean;
@@ -30,49 +44,36 @@ type AlertDialogDetailProps = {
 
 };
 
-const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
+const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   ({ isOpen, onClose, Arrivee }) => {
     return (
       <AlertDialog open={isOpen} onOpenChange={onClose}>
-        <AlertDialogContent className="rounded-lg bg-white shadow-lg p-6">
-          <AlertDialogHeader className="pb-4">
+        <AlertDialogContent className="rounded-lg bg-white shadow-lg w-[600px] max-h-[800px] flex flex-col">
+          <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-semibold text-gray-800">
-              Détails d'Arrivée
+              Détails Fichier
             </AlertDialogTitle>
           </AlertDialogHeader>
-          <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
-          <span>
-    <strong className="font-medium">Date d'Arrivée :</strong> {Arrivee?.dateArv}
-  </span>
-  <span>
-    <strong className="font-medium">Date d'Origine :</strong> {Arrivee?.dateOrigin}
-  </span>
-  <span>
-    <strong className="font-medium">Expéditeur :</strong> {Arrivee?.expediteur}
-  </span>
-  <span>
-    <strong className="font-medium">Objet :</strong> {Arrivee?.objet}
-  </span>
-  <span>
-    <strong className="font-medium">Numéro :</strong> {Arrivee?.numero}
-  </span>
-  <span>
-    <strong className="font-medium">Nombre de Fichiers :</strong> {Arrivee?.nbrFichier}
-  </span>
-  <span>
-    <strong className="font-medium">Type de Support :</strong> {Arrivee?.typeSupport || "Non spécifié"}
-  </span>
-  <span>
-    <strong className="font-medium">Type de Courrier :</strong> {Arrivee?.typeCourrier || "Non spécifié"}
-  </span>
-  <span>
-    <strong className="font-medium">Trié par :</strong> {Arrivee?.trierPar}
-  </span>
-          </AlertDialogDescription>
-          <AlertDialogFooter className="mt-4">
+
+          {/* Conteneur avec scroll */}
+          <div className="flex-1 max-h-[600px] overflow-auto p-2 space-y-4">
+            {Arrivee?.fichiers.map((f) => (
+              <iframe
+                key={f.id}
+                src={f.url} // Path to your PDF in the public directory
+                width="100%"
+                height="500px"
+                title="Fichier PDF"
+                className="border rounded-lg shadow"
+              />
+            ))}
+          </div>
+
+          {/* Footer fixé en bas */}
+          <AlertDialogFooter className=" bg-white py-3  h-auto">
             <AlertDialogCancel
               onClick={onClose}
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-gray-300 text-gray-800  hover:bg-gray-400 transition"
             >
               Fermer
             </AlertDialogCancel>
@@ -83,4 +84,4 @@ const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
   }
 );
 
-export default AlertDialogDetailArrivee;
+export default AlertDialogDetail;
