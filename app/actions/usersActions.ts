@@ -48,7 +48,12 @@ export async function fetchUsers() {
 }
 
 // server action delete etab
-export async function deleteUser(id: string) {
+export async function deleteUser(id: string, currentUser: string) {
+
+  if(currentUser == id){
+    return { error: "Vous ne pouvez pas supprimer votre compte", status: 400 };
+  }
+    
   try {
     const removedUser = await prisma.utilisateur.delete({
       where: {
@@ -258,6 +263,7 @@ export async function addUser(newUserObj: {
   }
 }
 
+
 //? update password method
 // Extract user ID from JWT token
 function getUserFromToken(request: Request): string | null {
@@ -421,6 +427,7 @@ export async function updatePersonalInfo(
 
 // server action to fetch user by ID
 export async function fetchUserById(id: string) {
+
   try {
     const user = await prisma.utilisateur.findUnique({
       where: { id: id },
@@ -462,4 +469,6 @@ export async function fetchUserById(id: string) {
     console.error("Fetch User By ID Error:", error);
     return { error: "Échec de la récupération de l'utilisateur", status: 500 };
   }
+
 }
+

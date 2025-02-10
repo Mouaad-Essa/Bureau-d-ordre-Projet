@@ -130,6 +130,10 @@ export default function Page() {
 
   const deleteUser = async () => {
     if (selectedUserId === null) return;
+    const res = await fetch("/api/userData");
+    if(!res.ok) return;
+    const userData = await res.json();
+    const currentUserId = userData.user.id;
 
     try {
       const response = await fetch(`/api/users`, {
@@ -137,10 +141,13 @@ export default function Page() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: selectedUserId }),
+        body: JSON.stringify({ id: selectedUserId, currentUser: currentUserId }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok && !data.error) {
         setUsers((prevData) =>
           prevData.filter((item) => item.id !== selectedUserId)
         );
@@ -151,12 +158,12 @@ export default function Page() {
           title: "Utilisateur supprimé",
           description: "L'utilisateur a été supprimé avec succès.",
         });
+        console.log(data);
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete user");
         toast({
           title: "Erreur",
-          description: "Erreur lors de la suppression de l'utilisateur.",
+          description: data.error || "Erreur lors de la suppression de l'utilisateur.",
           variant: "destructive",
         });
       }
