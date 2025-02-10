@@ -75,6 +75,7 @@ export default function Page() {
       setDivisions(data);
       setFilteredData(data);
       setLoaded(true);
+      console.log(data);
     };
     fetchData();
   }, []);
@@ -214,7 +215,7 @@ export default function Page() {
     },
     {
       name: "Pole",
-      selector: (row: Division) => row.pole.nom,
+      selector: (row: Division) => row.pole?.nom ?? "N/A",
       sortable: true,
     },
     {

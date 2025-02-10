@@ -34,10 +34,7 @@ export default function AddDivisionPage() {
   type Pole = {
     id: string;
     nom: string;
-    responsable: string;
-    tachesPrincipales: string;
-    contacts: string;
-    statut: string;
+    description: string;
   };
 
   // State to manage form inputs

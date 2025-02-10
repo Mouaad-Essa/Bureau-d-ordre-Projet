@@ -1,111 +1,95 @@
+"use server";
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma"; // Ensure your Prisma instance is correctly set up
 
-const API_URL = "https://679a5ca9747b09cdccce9eda.mockapi.io/poles";
-
-// Fetch all divisions
+// Fetch all poles
 export async function fetchPoles() {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error("Failed to fetch poles");
-    }
-    const data = await response.json();
-    return NextResponse.json(data);
+    const poles = await prisma.pole.findMany({
+      select: {
+        id: true,
+        nom: true,
+        description: true,
+        divisions: {
+          select: {
+            nom: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(poles);
   } catch (error) {
-    console.error(error);
+    console.error("Failed to fetch poles:", error);
     return NextResponse.json({ error: "Failed to fetch poles" });
   }
 }
 
-
-// Fetch a single division by ID
+// Fetch a single pole by ID
 export async function fetchPoleById(id: string) {
   try {
-    const response = await fetch(`${API_URL}/${id}`);
-    if (!response.ok) {
-      throw new Error("Failed to fetch pole");
+    const pole = await prisma.pole.findUnique({
+      where: { id },
+      include: { divisions: true }, // Include related divisions if needed
+    });
+
+    if (!pole) {
+      return NextResponse.json({ error: "Pole not found" }, { status: 404 });
     }
-    return await response.json();
+
+    return NextResponse.json(pole);
   } catch (error) {
     console.error("Error fetching pole by ID:", error);
-    throw error;
+    return NextResponse.json({ error: "Failed to fetch pole" });
   }
 }
 
-// Add a new division
-export async function addPole(newPole: {
-  nom: string;
-  description: string;
-  responsableId: string;
-  bureauId: string;
-  statut: string;
-}) {
+// Add a new pole
+export async function addPole(newPole: { nom: string; description?: string }) {
   try {
-    const response = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newPole),
+    const createdPole = await prisma.pole.create({
+      data: newPole,
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to add pole");
-    }
-
-    const data = await response.json();
-    return { message: "pole added successfully", data };
+    return { message: "Pole added successfully", data: createdPole };
   } catch (error) {
-    console.error(error);
+    console.error("Error adding pole:", error);
     return { error: "Failed to add pole" };
   }
 }
 
-// Update a division
+// Update a pole
 export async function updatePole(updatedPole: {
-    id:string;
-    nom:string;
-    responsable:string;
-    tachesPrincipales:string;
-    contacts:string;
-    statut:string
+  id: string;
+  nom: string;
+  description?: string;
 }) {
   try {
-    const response = await fetch(`${API_URL}/${updatedPole.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
+    const updated = await prisma.pole.update({
+      where: { id: updatedPole.id },
+      data: {
+        nom: updatedPole.nom,
+        description: updatedPole.description,
       },
-      body: JSON.stringify(updatedPole),
-      
     });
 
-    if (!response.ok) {
-
-      throw new Error("Failed to update pole ");
-    }
-
-    const data = await response.json();
-    return data;
+    return NextResponse.json(updated);
   } catch (error) {
-    console.error(error);
-    return { error: "Failed to update pole" };
+    console.error("Error updating pole:", error);
+    return NextResponse.json({ error: "Failed to update pole" });
   }
 }
 
-// Delete a division
+// Delete a pole
 export async function deletePole(id: string) {
   try {
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: "DELETE",
+    await prisma.pole.delete({
+      where: { id },
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to delete pole");
-    }
-    return { message: "pole deleted successfully" };
+    return { message: "Pole deleted successfully" };
   } catch (error) {
-    console.error(error);
+    console.error("Error deleting pole:", error);
     return { error: "Failed to delete pole" };
   }
 }
