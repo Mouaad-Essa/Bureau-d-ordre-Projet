@@ -28,20 +28,15 @@ import * as XLSX from 'xlsx';
 import EditPole from "./EditPole";
 import { useRouter } from "next/navigation";
 import ReusableAlertDialog from "../../_components/AlertDialog"; // Import the reusable dialog
-import { fetchPoles, updatePole } from "@/app/actions/polesActions";
-
+import { updatePole } from "@/app/actions/polesActions";
 import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
 
+type Pole={
+  id:string,
+  nom:string,
+  description?:string,
 
-  type Pole={
-    id:string;
-    nom:string;
-    responsable:string;
-    tachesPrincipales:string;
-    contacts:string;
-    statut:string
-  }
-
+}
   // Custom French translations for pagination
   const paginationComponentOptions = {
     rowsPerPageText: 'Lignes par page',
@@ -51,8 +46,6 @@ import AlertDialogDetail from "@/app/dashboard/_components/PoleDetailsDialog";
     selectAllRowsItemText: 'Tous',
   };
   
-
-
 export default function Page(){
 
    const [poles, setPoles] = useState<Pole[]>([]);
@@ -67,10 +60,11 @@ export default function Page(){
      const [selectedPole, setSelectedPole] = useState<Pole | null>(
        null
      );
+     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
      useEffect(() => {
       const fetchData = async () => {
-        const response = await fetchPoles();
+        const response = await fetch("/api/poles");
         const data = await response.json();
         setPoles(data);
         setFilteredData(data);
@@ -81,26 +75,11 @@ export default function Page(){
       fetchData();
     }, []);
 
-  
-    
-
-
-
-
-
-
-
-
-
     // Handle edit button click
     const handleEditClick = (pole: any) => {
         setSelectedPole(pole);
     };
-
-
-
      //Export 
-  
      const exportToPDF = () => {
       const doc = new jsPDF();
 
@@ -110,20 +89,13 @@ export default function Page(){
       const tableData = filteredData.map((row) => [
         row.id,
         row.nom,
-        row.responsable,
-        row.tachesPrincipales,
-        row.contacts,
-        row.statut,
       ]);
   
       autoTable(doc, {
-        head: [["ID", "Nom", "Responsable", "TachesPrincipales", "Contacts", "Statut"]],
+        head: [["ID", "Nom", "Description"]],
         body: tableData,
       });
-  
-
       doc.save("poles.pdf");
-
     };
   
     const exportToExcel = () => {
@@ -141,9 +113,9 @@ export default function Page(){
   
       const filtered = poles.filter(
         (item) =>
+          item.id.toLowerCase().includes(searchValue) ||
           item.nom.toLowerCase().includes(searchValue) ||
-          item.responsable.toLowerCase().includes(searchValue) ||
-          item.tachesPrincipales.toLowerCase().includes(searchValue) 
+          item.description?.toLowerCase().includes(searchValue) 
       );
   
       setFilteredData(filtered);
@@ -184,40 +156,42 @@ export default function Page(){
       setSelectedPole(pole);
       setIsEditSheetOpen(true); // Open the edit sheet
     };
-  
+
     //update
     const handleSave = async (updatedPole: Pole) => {
       try {
-        const updatedPoleWithStringId = {
-          ...updatedPole,
-          id: String(updatedPole.id), // Convert id to a string
-        };
+        const response = await fetch(`/api/poles`, {
+          method: "PUT", // We are updating the pole
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedPole),
+        });
   
-        const result = await updatePole(updatedPoleWithStringId);
+        const data = await response.json();
   
-        if (result.error) {
-          console.error("Failed to update division:", result.error);
-          return;
+        if (response.ok) {
+          // Update state
+          setPoles((prevData) =>
+            prevData.map((item) =>
+              item.id === updatedPole.id ? updatedPole : item
+            )
+          );
+          setFilteredData((prevData) =>
+            prevData.map((item) =>
+              item.id === updatedPole.id ? updatedPole : item
+            )
+          );
+          setIsEditSheetOpen(false);
+        } else {
+          console.error("Failed to update pole:", data.message);
         }
-  
-        setPoles((prevData) =>
-          prevData.map((item) =>
-            item.id === updatedPole.id ? updatedPole : item
-          )
-        );
-        setFilteredData((prevData) =>
-          prevData.map((item) =>
-            item.id === updatedPole.id ? updatedPole : item
-          )
-        );
-        setIsEditSheetOpen(false); // Close the sheet after saving
       } catch (error) {
         console.error("Error updating pole:", error);
       }
     };
-    const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-
-
+  
+  
     const handleShowDetails = (pole: Pole) => {
       setSelectedPole(pole);
       setIsDetailDialogOpen(true);
@@ -237,25 +211,11 @@ export default function Page(){
         sortable: true,
         },
         {
-        name: 'responsable',
-        selector: (row: { responsable: any; }) => row.responsable,
+        name: 'Description',
+        selector: (row: { description?: any; }) => row.description,
         sortable: true,
         },
-        {
-        name: 'tachesPrincipales',
-        selector: (row: { tachesPrincipales: any; }) => row.tachesPrincipales,
-        sortable: true,
-        },
-        {
-        name: 'contacts',
-        selector: (row: { contacts: any; }) => row.contacts,
-        sortable: true,
-        },
-        {
-            name: 'statut',
-            selector: (row: { statut: any; }) => row.statut,
-            sortable: true,
-        },
+        
         {
           name: "Actions",
           cell: (row: Pole) => (

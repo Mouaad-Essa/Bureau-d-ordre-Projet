@@ -3,22 +3,36 @@
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+
+type Division={
+  id:string,
+  nom:string
+}
 export default function AddServicePage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [divisions,setDivisions] = useState<Division[]>();
 
   // State to manage form inputs
   const [formData, setFormData] = useState({
     nom: "",
-    division: "",
+    divisionId: "",
     description: "",
   });
+   useEffect(() => {
+      const fetchData = async () => {
+        const response = await fetch("/api/division");
+        const data = await response.json();
+        setDivisions(data);
+      };
+      fetchData();
+    }, []);
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -26,10 +40,7 @@ export default function AddServicePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle Select changes
-  const handleDivisionChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, division: value }));
-  };
+
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,6 +50,7 @@ export default function AddServicePage() {
     const newService = { ...formData };
 
     try {
+      console.log(newService);
       // Call the addService API to add the new Service
       const response = await fetch("/api/service", {
         method: "POST",
@@ -71,7 +83,7 @@ export default function AddServicePage() {
     // Reset the form after submission
     setFormData({
         nom: "",
-        division: "",
+        divisionId: "",
         description: "",
     });
   };
@@ -133,16 +145,25 @@ export default function AddServicePage() {
                 <label htmlFor="division" className="block text-sm font-medium mb-1">
                 Division
                 </label>
-                <Select value={formData.division} onValueChange={handleDivisionChange} >
-                  <SelectTrigger>
-                    <SelectValue placeholder="-- Séléctionner la division --" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Informatique">Informatique</SelectItem>
-                    <SelectItem value="Recherche">Recherche</SelectItem>
-                    <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Select
+                onValueChange={(value)=>{setFormData((prev) => ({ ...prev, divisionId:value }))}}
+                name="divisionId"
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="-- Division --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {divisions?.map((d) => {
+                    return (
+                      <SelectItem key={d.id} value={d.id}>
+                        {d.nom}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+              
             </div>
             <div className="w-full sm:w-[48%]">
                 <label htmlFor="description" className="block text-sm font-medium mb-1">

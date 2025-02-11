@@ -7,16 +7,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { LogOut, Settings, User } from "lucide-react";
+
+import { LogOut, User } from "lucide-react";
+import { useLogout } from "@/hooks/useLogout";
 
 const NavBar = () => {
   const pathname = usePathname();
+
+  //handle logout
+  const { handleLogout } = useLogout();
 
   // Function to check if the link is active
   const isActive = (path: string) => pathname === path;
@@ -78,13 +81,13 @@ const NavBar = () => {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-40">
             <DropdownMenuItem>
-              <User className="w-4 h-4 mr-2" /> Profil
+              <Link href="/profil" className="flex items-center justify-center">
+                <User className="w-4 h-4 mr-2" /> Profil
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Settings className="w-4 h-4 mr-2" /> Paramètres
-            </DropdownMenuItem>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-500">
+            <DropdownMenuItem onClick={handleLogout} className="text-red-500">
               <LogOut className="w-4 h-4 mr-2" /> Déconnexion
             </DropdownMenuItem>
           </DropdownMenuContent>

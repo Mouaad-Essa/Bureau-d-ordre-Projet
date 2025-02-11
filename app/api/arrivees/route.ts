@@ -3,21 +3,33 @@ import {
     deleteArrivee,
     updateArrivee,
     addArrivee,
+    fetchArriveeById
   } from "../../actions/arriveeActions";
   
-  // Gérer la requête GET pour récupérer toutes les arrivées
-  export async function GET() {
-    try {
+
+
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id"); // Check if 'id' is provided in query params
+
+    if (id) {
+      // If 'id' is provided, fetch the specific arrivee by ID
+      const arrivee = await fetchArriveeById(id);
+      return new Response(JSON.stringify(arrivee), { status: 200 });
+    } else {
+      // If no 'id' is provided, fetch all arrivees
       return await fetchArrivees(); // Récupération des données via l'action serveur
-    } catch (error) {
-      console.error(error);
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch arrivees" }),
-        { status: 500 }
-      );
-    }
+}
+  } catch (error) {
+    console.error(error);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch arrivees" }),
+      { status: 500 }
+    );
   }
-  
+}
+ 
   // Gérer la requête DELETE pour supprimer une arrivée par ID
   export async function DELETE(request: Request) {
     try {
@@ -62,11 +74,11 @@ import {
   export async function POST(request: Request) {
     try {
       // Lire les données de la nouvelle arrivée depuis le corps de la requête
+      // console.log(request.body);
       const newArrivee = await request.json();
-  
+      
       // Appeler la fonction addArrivee depuis les actions
       const result = await addArrivee(newArrivee);
-  
       // Retourner le résultat de l'ajout
       return new Response(JSON.stringify(result), { status: 201 });
     } catch (error) {

@@ -23,19 +23,23 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { EditUserSheet } from "./EditUserSheet"; 
-import { updateUser } from "../../actions/usersActions"; 
 import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reusable dialog
 import { useRouter } from "next/navigation";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import { toast } from "@/hooks/use-toast";
+import AlertDialogDetail from "../_components/UserDetailsDialog";
 
 type user = {
-  id: number;
+  id: string;
   nom: string;
   prenom: string;
   email: string;
   telephone: string;
-  service: string;
+  serviceId: string | null;
+  service: string | null;
+  role: string | null;
+  roleId: string | null;
 };
 
 
@@ -54,12 +58,12 @@ export default function Page() {
   const [loaded, setLoaded] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<
-    null | number
+    null | string
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
-  const [selectedUser, setSelectedUser] =
-    useState<user | null>(null);
+  const [selectedUser, setSelectedUser] = useState<user | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +73,7 @@ export default function Page() {
         setLoaded(true); // Set loaded to true after data is fetched
         setUsers(data);
         setFilteredData(data);
+        console.log(data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
@@ -87,7 +92,8 @@ export default function Page() {
         item.prenom.toLowerCase().includes(searchValue)
         || item.email.toLowerCase().includes(searchValue)
         || item.telephone.toLowerCase().includes(searchValue)
-        || item.service.toLowerCase().includes(searchValue)
+        || item.service?.toLowerCase().includes(searchValue)
+        || item.role?.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -104,10 +110,11 @@ export default function Page() {
       row.email,
       row.telephone,
       row.service,
+      row.role,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service"]],
+      head: [["ID", "Nom", "Prénom", "Email", "Téléphone", "Service", "Rôle"]],
       body: tableData,
     });
 
@@ -123,6 +130,10 @@ export default function Page() {
 
   const deleteUser = async () => {
     if (selectedUserId === null) return;
+    const res = await fetch("/api/userData");
+    if(!res.ok) return;
+    const userData = await res.json();
+    const currentUserId = userData.user.id;
 
     try {
       const response = await fetch(`/api/users`, {
@@ -130,22 +141,39 @@ export default function Page() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: selectedUserId }),
+        body: JSON.stringify({ id: selectedUserId, currentUser: currentUserId }),
       });
 
-      if (response.ok) {
+      const data = await response.json();
+      console.log(data);
+
+      if (response.ok && !data.error) {
         setUsers((prevData) =>
           prevData.filter((item) => item.id !== selectedUserId)
         );
         setFilteredData((prevData) =>
           prevData.filter((item) => item.id !== selectedUserId)
         );
+        toast({
+          title: "Utilisateur supprimé",
+          description: "L'utilisateur a été supprimé avec succès.",
+        });
+        console.log(data);
         setIsDeleteDialogOpen(false);
       } else {
-        console.error("Failed to delete user");
+        toast({
+          title: "Erreur",
+          description: data.error || "Erreur lors de la suppression de l'utilisateur.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("Error deleting user:", error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la suppression de l'utilisateur.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -156,34 +184,74 @@ export default function Page() {
 
   const handleSave = async (updatedUser: user) => {
     try {
-      const updatedUserWithStringId = {
-        ...updatedUser,
-        id: String(updatedUser.id), // Convert id to a string
+      // Prepare the user data for update
+      const userData = {
+        id: updatedUser.id,
+        nom: updatedUser.nom,
+        prenom: updatedUser.prenom,
+        email: updatedUser.email,
+        telephone: updatedUser.telephone,
+        serviceId: updatedUser.serviceId ? updatedUser.serviceId : null, // ✅ Convert empty values to null
+        roleId: updatedUser.roleId ? updatedUser.roleId : null, // ✅ Convert empty values to null
+        role: updatedUser.role,
+        service: updatedUser.service,
       };
-
-      const result = await updateUser(
-        updatedUserWithStringId
-      );
-
-      if (result.error) {
-        console.error("Failed to update user:", result.error);
+  
+      console.log("Updating user:", userData);
+  
+      // Call the API to update the user
+      const response = await fetch(`/api/users`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+  
+      const result = await response.json(); // Parse the response JSON
+  
+      if (!response.ok || result.error) {
+        // Show server-side validation error message
+        toast({
+          title: "Erreur",
+          description: result.error || "Erreur lors de la modification de l'utilisateur.",
+          variant: "destructive",
+        });
         return;
       }
-
-      setUsers((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
-        )
-      );
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === updatedUser.id ? updatedUser : item
-        )
-      );
-      setIsEditSheetOpen(false); // Close the sheet after saving
+  
+        // ✅ Update local state with new user data
+        setUsers((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedUser.id ? { ...item, ...userData } : item
+          )
+        );
+        setFilteredData((prevData) =>
+          prevData.map((item) =>
+            item.id === updatedUser.id ? { ...item, ...userData } : item
+          )
+        );
+    
+        // ✅ Show success message
+        toast({
+          title: "Utilisateur modifié",
+          description: "L'utilisateur a été modifié avec succès.",
+        });
+        
     } catch (error) {
-      console.error("Error updating user:", error);
+      console.error("❌ Error updating user:", error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la modification de l'utilisateur.",
+        variant: "destructive",
+      });
     }
+  };
+
+  // show details logic
+  const handleShowDetails = (user: user) => {
+    setSelectedUser(user);
+    setIsDetailDialogOpen(true); // Open the dialog
   };
 
   const columns = [
@@ -215,7 +283,12 @@ export default function Page() {
     },
     {
       name: "Service",
-      selector: (row: user) => row.service,
+      selector: (row: user) => row.service || "",
+      sortable: true,
+    },
+    {
+      name: "Rôle",
+      selector: (row: user) => row.role || "",
       sortable: true,
     },
     {
@@ -234,6 +307,13 @@ export default function Page() {
             }}
           >
             <Trash />
+          </Button>
+          <Button
+            size="sm"
+            variant="see"
+            onClick={() => handleShowDetails(row)}
+          >
+            <Eye />
           </Button>
         </div>
       ),
@@ -330,10 +410,10 @@ export default function Page() {
         {/* Edit user Sheet */}
         {selectedUser && (
             <EditUserSheet
-            user={selectedUser}
-            isOpen={isEditSheetOpen} // Ensure this state exists
-            onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)} // Pass correct handler
-            onSave={handleSave} // Implement the save logic here
+              user={selectedUser}
+              isOpen={isEditSheetOpen}
+              onOpenChange={(open: boolean | ((prevState: boolean) => boolean)) => setIsEditSheetOpen(open)}
+              onSave={handleSave}
             />
         )}
 
@@ -346,6 +426,13 @@ export default function Page() {
             onConfirm={deleteUser}
             confirmText="Continuer"
             cancelText="Annuler"
+        />
+
+        {/* Dialog for displaying details */}
+        <AlertDialogDetail
+          isOpen={isDetailDialogOpen}
+          onClose={() => setIsDetailDialogOpen(false)}
+          user={selectedUser}
         />
         </>
       )}

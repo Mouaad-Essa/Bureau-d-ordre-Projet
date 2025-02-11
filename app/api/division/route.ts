@@ -1,5 +1,4 @@
 import {
-
   fetchDivisions,
   deleteDivision,
   updateDivision,
@@ -77,4 +76,3 @@ export async function POST(request: Request) {
     });
   }
 }
-

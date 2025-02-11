@@ -30,12 +30,21 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
 import AlertDialogDetail from "../_components/ServiceDetailDialog";
 
+
+
 type Service = {
-  id: number;
+  id: string;
   nom: string;
-  division: string;
-  description: string;
+  division?:Division;
+  divisionId?:string;
+  description?: string;
 };
+
+type Division = {
+  id:string;
+  nom:string
+}
+
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -52,12 +61,14 @@ export default function Page() {
   const [searchText, setSearchText] = useState("");
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false); // State for dialog visibility
   const [selectedServiceId, setSelectedServiceId] = useState<
-    null | number
+    null | string
   >(null);
   const [isEditSheetOpen, setIsEditSheetOpen] = useState(false); // State for edit sheet visibility
   const [selectedService, setSelectedService] =
     useState<Service | null>(null);
+  const [selectedDivision,setSelectedDivision] = useState<Division|null>()
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -71,6 +82,8 @@ export default function Page() {
     fetchData();
   }, []);
 
+  
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
@@ -78,7 +91,7 @@ export default function Page() {
     const filtered = services.filter(
       (item) =>
         item.nom.toLowerCase().includes(searchValue) ||
-        item.description.toLowerCase().includes(searchValue)
+        item.division?.nom?.toLowerCase().includes(searchValue)
     );
 
     setFilteredData(filtered);
@@ -89,14 +102,11 @@ export default function Page() {
     doc.text("Liste des services", 10, 10);
 
     const tableData = filteredData.map((row) => [
-      row.id,
       row.nom,
-      row.division,
-      row.description,
     ]);
 
     autoTable(doc, {
-      head: [["ID", "Nom", "Division", "Description"]],
+      head: [["Nom","Description","Division"]],
       body: tableData,
     });
 
@@ -143,22 +153,22 @@ export default function Page() {
     setIsEditSheetOpen(true); // Open the edit sheet
   };
 
-  const handleSave = async (updatedService: Service) => {
-    try {
-      const updatedServiceWithStringId = {
-        ...updatedService,
-        id: String(updatedService.id), // Convert id to a string
-      };
+ //update
+ const handleSave = async (updatedService: Service) => {
+  try {
+    const response = await fetch(`/api/service`, {
+      method: "PUT", // We are updating the pole
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedService),
+    });
+    
+    const data = await response.json();
 
-      const result = await updateService(
-        updatedServiceWithStringId
-      );
-
-      if (result.error) {
-        console.error("Failed to update service:", result.error);
-        return;
-      }
-
+    if (response.ok) {
+      
+  
       setServices((prevData) =>
         prevData.map((item) =>
           item.id === updatedService.id ? updatedService : item
@@ -169,25 +179,22 @@ export default function Page() {
           item.id === updatedService.id ? updatedService : item
         )
       );
-      setIsEditSheetOpen(false); // Close the sheet after saving
-    } catch (error) {
-      console.error("Error updating service:", error);
+      setIsEditSheetOpen(false);
+    } else {
+      console.error("Failed to update Service:", data.message);
     }
-  };
-
-  // show details logic
+  } catch (error) {
+    console.error("Error updating Service:", error);
+  }
+};
+// show details logic
   const handleShowDetails = (service: Service) => {
     setSelectedService(service);
     setIsDetailDialogOpen(true); // Open the dialog
   };
 
   const columns = [
-    {
-      name: "ID",
-      selector: (row: Service) => row.id,
-      sortable: true,
-
-    },
+ 
     {
       name: "Nom",
       selector: (row: Service) => row.nom,
@@ -195,7 +202,7 @@ export default function Page() {
     },
     {
       name: "Division",
-      selector: (row: Service) => row.division,
+      selector: (row: Service) => row.divisionId,
       sortable: true,
     },
     {
@@ -241,17 +248,29 @@ export default function Page() {
 
   return (
     <>
-    {!loaded ? (
-      <div className="flex items-center justify-center min-h-screen">
-        <div role="status">
-          <svg aria-hidden="true" className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/>
-            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/>
-          </svg>
-          <span className="sr-only">Loading...</span>
+      {!loaded ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <div role="status">
+            <svg
+              aria-hidden="true"
+              className="inline w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300"
+              viewBox="0 0 100 101"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                fill="currentColor"
+              />
+              <path
+                d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                fill="currentFill"
+              />
+            </svg>
+            <span className="sr-only">Loading...</span>
+          </div>
         </div>
-      </div>
-    ) : (
+      ) : (
       <>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">

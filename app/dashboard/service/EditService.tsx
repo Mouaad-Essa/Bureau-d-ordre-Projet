@@ -15,11 +15,18 @@ import ReusableAlertDialog from "../_components/AlertDialog"; // Import the reus
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type Service = {
-  id: number;
+  id: string;
   nom: string;
-  division: string;
-  description: string;
+  divisionId?:string;
+  description?: string;
+  Division?:Division;
 };
+
+type Division = {
+  id:string;
+  nom:string
+}
+
 
 interface EditServiceSheetProps {
   service: Service;
@@ -36,9 +43,11 @@ export function EditServiceSheet({
 }: EditServiceSheetProps) {
   const [formData, setFormData] = useState({
     nom: service.nom,
-    division: service.division,
-    description: service.description,
+    divisionId: service?.divisionId,
+    description: service?.description,
+    division:service?.Division
   });
+ 
 
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
@@ -46,8 +55,9 @@ export function EditServiceSheet({
   useEffect(() => {
     setFormData({
       nom: service.nom,
-      division: service.division,
-      description: service.description,
+      divisionId: service?.divisionId,
+      description: service?.description,
+      division:service?.Division
     });
   }, [service]);
 
@@ -60,7 +70,7 @@ export function EditServiceSheet({
 
   // Handle Select changes
   const handleDivisionChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, division: value }));
+    setFormData((prev) => ({ ...prev, divisionId: value }));
   };
 
   const handleSave = () => {
@@ -68,8 +78,8 @@ export function EditServiceSheet({
   };
 
   const handleConfirmUpdate = () => {
-    const updatedDivision = { id: service.id, ...formData };
-    onSave(updatedDivision); // Save the changes
+    const updatedService = { id: service.id, ...formData };
+    onSave(updatedService); // Save the changes
     setIsConfirmDialogOpen(false); // Close the confirmation dialog
     onOpenChange(false); // Close the sheet
   };
@@ -105,14 +115,14 @@ export function EditServiceSheet({
           <label htmlFor="division" className="block text-sm font-medium mb-1">
             Division
           </label>
-          <Select value={formData.division} onValueChange={handleDivisionChange}>
+          <Select value={formData.divisionId} onValueChange={handleDivisionChange}>
             <SelectTrigger>
               <SelectValue placeholder="-- Séléctionner la division --" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Informatique">Informatique</SelectItem>
-              <SelectItem value="Recherche">Recherche</SelectItem>
-              <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+              <SelectItem value="uuid1">Informatique</SelectItem>
+              <SelectItem value="uuid3">Recherche</SelectItem>
+              <SelectItem value="uuid4">Ressource humaine</SelectItem>
             </SelectContent>
           </Select>
         </div>

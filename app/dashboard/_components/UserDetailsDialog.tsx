@@ -12,37 +12,49 @@ import {
 type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
-  arrivee: {
-    id: string;
-    expediteur: string;
-    objet: string;
-    dateArrivee: string;
-    trierPar: string;
+  user: {
+    nom: string;
+    prenom: string;
+    email: string;
+    telephone: string;
+    service: string | null;
+    role: string | null;
   } | null;
 };
 
-const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
-  ({ isOpen, onClose, arrivee }) => {
+const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
+  ({ isOpen, onClose, user }) => {
     return (
       <AlertDialog open={isOpen} onOpenChange={onClose}>
         <AlertDialogContent className="rounded-lg bg-white shadow-lg p-6">
           <AlertDialogHeader className="pb-4">
             <AlertDialogTitle className="text-xl font-semibold text-gray-800">
-              Détails d'Arrivée
+              Détails de l'utilisateur
             </AlertDialogTitle>
           </AlertDialogHeader>
           <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
             <span>
-              <strong className="font-medium">Expéditeur :</strong> {arrivee?.expediteur}
+              <strong className="font-medium">Nom:</strong> {user?.nom}
             </span>
             <span>
-              <strong className="font-medium">Objet :</strong> {arrivee?.objet}
+              <strong className="font-medium">Prénom:</strong>{" "}
+              {user?.prenom}
             </span>
             <span>
-              <strong className="font-medium">Date d'Arrivée :</strong> {arrivee?.dateArrivee}
+              <strong className="font-medium">Email:</strong>{" "}
+              {user?.email}
             </span>
             <span>
-              <strong className="font-medium">Trié par :</strong> {arrivee?.trierPar}
+              <strong className="font-medium">Téléphone:</strong>{" "}
+              {user?.telephone}
+            </span>
+            <span>
+              <strong className="font-medium">Service:</strong>{" "}
+              {user?.service}
+            </span>
+            <span>
+              <strong className="font-medium">Rôle:</strong>{" "}
+              {user?.role}
             </span>
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">
@@ -59,4 +71,4 @@ const AlertDialogDetailArrivee: React.FC<AlertDialogDetailProps> = React.memo(
   }
 );
 
-export default AlertDialogDetailArrivee;
+export default AlertDialogDetail;
