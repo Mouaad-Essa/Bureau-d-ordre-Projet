@@ -15,10 +15,7 @@ type AlertDialogDetailProps = {
   pole:{
     id:string;
     nom:string;
-    responsable:string;
-    tachesPrincipales:string;
-    contacts:string;
-    statut:string
+    description?:string;
   }| null;
  
 };
@@ -35,23 +32,17 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
           </AlertDialogHeader>
           <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
             <span>
-              <strong className="font-medium">Signé par:</strong> {pole?.nom}
+              <strong className="font-medium">ID:</strong> {pole?.id}
             </span>
             <span>
-              <strong className="font-medium">Traité par :</strong>{" "}
-              {pole?.responsable}
+              <strong className="font-medium">NOM :</strong>{" "}
+              {pole?.nom}
             </span>
             <span>
-              <strong className="font-medium">Objet:</strong>{" "}
-              {pole?.tachesPrincipales}
+              <strong className="font-medium">DESCRIPTION:</strong>{" "}
+              {pole?.description}
             </span>
-            <span>
-              <strong className="font-medium">Date & Heure :</strong> {pole?.contacts}
-            </span>
-            <span>
-              <strong className="font-medium">Destination:</strong>{" "}
-              {pole?.statut}
-            </span>
+           
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">
             <AlertDialogCancel

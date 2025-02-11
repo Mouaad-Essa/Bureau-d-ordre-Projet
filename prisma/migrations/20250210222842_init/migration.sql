@@ -5,6 +5,8 @@ CREATE TABLE `Utilisateur` (
     `prenom` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `tel` VARCHAR(191) NULL,
+    `password` VARCHAR(191) NULL,
+    `picture` VARCHAR(191) NULL,
     `serviceId` VARCHAR(191) NULL,
     `roleId` VARCHAR(191) NULL,
 
@@ -86,9 +88,11 @@ CREATE TABLE `Depart` (
     `numOrdre` VARCHAR(191) NULL,
     `dateDepart` DATETIME(3) NOT NULL,
     `objet` VARCHAR(191) NOT NULL,
-    `destination` VARCHAR(191) NOT NULL,
+    `destinationId` VARCHAR(191) NOT NULL,
     `nbrFichier` INTEGER NOT NULL,
+    `courrierId` VARCHAR(191) NULL,
 
+    UNIQUE INDEX `Depart_courrierId_key`(`courrierId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -105,17 +109,39 @@ CREATE TABLE `Fichier` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `Courrier` (
+    `id` VARCHAR(191) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `Arrivee` (
     `id` VARCHAR(191) NOT NULL,
     `idOrdre` VARCHAR(191) NULL,
     `dateArv` DATETIME(3) NOT NULL,
     `dateOrigin` DATETIME(3) NOT NULL,
-    `expediteur` VARCHAR(191) NOT NULL,
+    `expediteurId` VARCHAR(191) NOT NULL,
     `objet` VARCHAR(191) NOT NULL,
     `numero` VARCHAR(191) NOT NULL,
     `nbrFichier` INTEGER NOT NULL,
     `typeSupport` VARCHAR(191) NULL,
     `typeCourrier` VARCHAR(191) NULL,
+    `traiteParId` VARCHAR(191) NULL,
+    `courrierId` VARCHAR(191) NULL,
+
+    UNIQUE INDEX `Arrivee_courrierId_key`(`courrierId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Envoi` (
+    `id` VARCHAR(191) NOT NULL,
+    `expediteurId` VARCHAR(191) NOT NULL,
+    `destinataireId` VARCHAR(191) NOT NULL,
+    `note` VARCHAR(191) NULL,
+    `courrierId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -139,6 +165,12 @@ ALTER TABLE `Division` ADD CONSTRAINT `Division_poleId_fkey` FOREIGN KEY (`poleI
 ALTER TABLE `Service` ADD CONSTRAINT `Service_divisionId_fkey` FOREIGN KEY (`divisionId`) REFERENCES `Division`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Depart` ADD CONSTRAINT `Depart_courrierId_fkey` FOREIGN KEY (`courrierId`) REFERENCES `Courrier`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Depart` ADD CONSTRAINT `Depart_destinationId_fkey` FOREIGN KEY (`destinationId`) REFERENCES `Etablissement`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Depart` ADD CONSTRAINT `Depart_signeParId_fkey` FOREIGN KEY (`signeParId`) REFERENCES `Utilisateur`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -149,3 +181,21 @@ ALTER TABLE `Fichier` ADD CONSTRAINT `Fichier_idDepart_fkey` FOREIGN KEY (`idDep
 
 -- AddForeignKey
 ALTER TABLE `Fichier` ADD CONSTRAINT `Fichier_idArrivee_fkey` FOREIGN KEY (`idArrivee`) REFERENCES `Arrivee`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Arrivee` ADD CONSTRAINT `Arrivee_courrierId_fkey` FOREIGN KEY (`courrierId`) REFERENCES `Courrier`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Arrivee` ADD CONSTRAINT `Arrivee_expediteurId_fkey` FOREIGN KEY (`expediteurId`) REFERENCES `Etablissement`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Arrivee` ADD CONSTRAINT `Arrivee_traiteParId_fkey` FOREIGN KEY (`traiteParId`) REFERENCES `Utilisateur`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Envoi` ADD CONSTRAINT `Envoi_expediteurId_fkey` FOREIGN KEY (`expediteurId`) REFERENCES `Utilisateur`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Envoi` ADD CONSTRAINT `Envoi_destinataireId_fkey` FOREIGN KEY (`destinataireId`) REFERENCES `Utilisateur`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Envoi` ADD CONSTRAINT `Envoi_courrierId_fkey` FOREIGN KEY (`courrierId`) REFERENCES `Courrier`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

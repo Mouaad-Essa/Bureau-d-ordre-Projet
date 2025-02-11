@@ -12,29 +12,9 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input"; // Input component for search bar
 import { Button } from "@/components/ui/button"; // Button component
 
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"; // Dropdown menu components
-import DataTable from "react-data-table-component";
 import { useEffect, useState } from "react";
-import { jsPDF } from "jspdf";
-import autoTable from "jspdf-autotable";
-import * as XLSX from "xlsx";
 import { useRouter } from "next/navigation";
 import ReusableAlertDialog from "../../../_components/AlertDialog"; // Import the reusable dialog
-import { fetchPoles, updatePole } from "@/app/actions/polesActions";
-import {
-  Search,
-  Plus,
-  Download,
-  Edit,
-  Trash,
-  Building,
-  Eye,
-} from "lucide-react";
 
 import {
     Select,
@@ -44,74 +24,168 @@ import {
     SelectValue,
   } from "@/components/ui/select"
 
-
-  import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-  } from "@/components/ui/card"
 import { toast, useToast } from "@/hooks/use-toast";
+import { Console } from "console";
+
+
+type Utilisateur = {
+  id: string;
+  nom: string;
+};
+type Fichier = {
+  nom: string;
+  url: string;
+  dateAjout: Date;
+  idArrivee: string;
+};
+type Etablissement = {
+  id: string;
+  nom: string;
+  ville: string;
+  contact: string;
+  fax: number;
+  adresse: string;
+};
+
 
 export default function Page() {
   const router = useRouter();
   const { toast } = useToast();
+  const [users,setUsers] = useState<Utilisateur[]>();
+  const [destinations,setDestinations] = useState<Etablissement[]>();
+  const [files, setFiles] = useState<File[] | null>(null);
 
   const [formData, setFormData] = useState({
-    signePar: "",
-    traitepar: "",
-    numeroOrdre: "",
+    signeParId: "",
+    traiteparId: "",
+    numOrdre: "",
     dateDepart: "",
     objet: "",
-    destination: "",
-    ficher: "",
-    nombreFichiers: "",
-  });
+    destinationId: "",
+    nbrFichier: 0,
 
+  }); 
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch("/api/etablissement");
+      const data = await response.json();
+      setDestinations(data);
+    };
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetch("/api/users");
+      const data = await response.json();
+      setUsers(data);
+    };
+    fetchData();
+  }, []);
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const dateDep = new Date(formData.dateDepart).toISOString();
+    const nbrFichier = parseInt(formData.nbrFichier.toString().valueOf());
+    const updatedFormData = {
+      ...formData,
+      dateDepart: dateDep,
+      nbrFichier: nbrFichier,
+    };
+
     try {
+
+      if(files && (files?.length)!=formData.nbrFichier){
+        toast({
+          title: "Erreur",
+          description: " le nombre de fichiers sélectionnés n'est pas compatible avec le nombre attendu.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      
       const response = await fetch("/api/depart", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(updatedFormData),
       });
-
-      if (response.ok) {
-        toast({
-          title: "Départs ajouté",
-          description: "Le pôle a été ajouté avec succès.",
-        });
-        router.push("/dashboard/departs");
-      } else {
-        throw new Error("Échec de l'ajout du pôle");
+      
+      console.log(updatedFormData);
+      if (!response.ok) {
+        throw new Error("Échec de l'ajout du Départ");
       }
+      else{
+        console.log("Départ ajouté aveec succees");
+      }
+  
+      const data = await response.json();
+      const idDepart = data.data.id; // Capture the new arriveeId
+    
+      // Check if a file is selected before attempting to upload
+      // if (files?.length) {
+      // //   toast({
+      // //     title: "Avertissement",
+      // //     description: "Aucun fichier sélectionné.",
+      // //     variant: "destructive",
+      // //   });
+      //   return;
+      // }
+  
+      // Create FormData for file upload
+      if(files){
+        const formDataFile = new FormData();
+        for(const file of files){
+          formDataFile.append("files", file);
+        }
+          
+          const fileResponse = await fetch("/api/uploadFileDepart", {
+            method: "POST",
+            headers: {
+              "idDepart": idDepart, // Send the arriveeId with the request
+            },
+            body: formDataFile,
+          });
+          const responseText = await fileResponse.text(); // Get response text for debugging
+          console.log(responseText);
+      }
+      // Send file to upload API with arriveeId in headers
+      
+      toast({
+        title: "Succès",
+        description: "Depart a été ajoutés avec succès.",
+      });
+  
+      router.push("/dashboard/departs");
     } catch (error) {
+      console.error("Erreur:", error);
       toast({
         title: "Erreur",
-        description: "Erreur lors de l'ajout du pôle.",
+        description: "Erreur lors de l'ajout de Depart ou du fichier.",
         variant: "destructive",
       });
     }
-  }
+  };
+
+
+ 
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log(value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+ 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const selectedFiles = Array.from(e.target.files);
+      setFiles(selectedFiles);
+    }
+  };
 
-  };
 
   return (
     <>
@@ -136,15 +210,10 @@ export default function Page() {
       </header>
 
 
-<div className="bddepart">
-      <Card className="mycard">
-      <div className="container">
-        <div className="flex flex-col space-y-4 p-4">
-          
-          <CardHeader>
-         
-          </CardHeader>
-          <CardContent>
+      <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
+    <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Ajouter un Départ</h1>
+        </div>
 
 
 
@@ -156,12 +225,25 @@ export default function Page() {
                 <label htmlFor="signePar" className="block text-sm font-medium mb-1">
                   Signé Par * :
                 </label >
-                <select onChange={handleSelectChange} id="small" name="signePar" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="FR">France</option>
-                  <option value="DE">Germany</option>
-                </select>
+                <Select
+                value={formData.signeParId}
+                onValueChange={(value)=>{setFormData((prev) => ({ ...prev, signeParId:value }))}}
+                name="signeParId"
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="-- Signé par --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users?.map((e) => {
+                    return (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nom}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
 
 
               </div>
@@ -173,12 +255,26 @@ export default function Page() {
                   Traité par * :
                 </label>
 
-                <select onChange={handleSelectChange} id="small" name="traitePar" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="FR">France</option>
-                  <option value="DE">Germany</option>
-                </select>
+                <Select
+                value={formData.traiteparId}
+                onValueChange={(value)=>{setFormData((prev) => ({ ...prev, traiteparId:value }))}}
+                name="traiteparId"
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="-- Traité par --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {users?.map((e) => {
+                    return (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nom}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+
 
               </div>
             </div>
@@ -195,9 +291,9 @@ export default function Page() {
                 </label>
                 <Input
                   id=""
-                  name="numeroOrdre"
+                  name="numOrdre"
                   placeholder="Numéro d'ordre"
-                  value={formData.numeroOrdre}
+                  value={formData.numOrdre}
                   onChange={handleInputChange}
                   required
                 />
@@ -248,13 +344,26 @@ export default function Page() {
                   Destination *
                 </label>
 
-                <select onChange={handleSelectChange} id="small" name="destination" className="block w-full p-2 mb-6 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                  <option disabled >Sélectionner une Destination :</option>
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="FR">France</option>
-                  <option value="DE">Germany</option>
-                </select>
+                <Select
+                value={formData.destinationId}
+                onValueChange={(value)=>{setFormData((prev) => ({ ...prev, destinationId:value }))}}
+                name="destinationId"
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="-- Déstination --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {destinations?.map((e) => {
+                    return (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.nom}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+
 
               </div>
             </div>
@@ -271,8 +380,8 @@ export default function Page() {
                   name="ficher"
                   placeholder="Objet"
                   type="file"
-                  value={formData.ficher}
-                  onChange={handleInputChange}
+                  onChange={handleFileChange}
+                  multiple={true}
                   required
                 />
               </div>
@@ -285,13 +394,15 @@ export default function Page() {
                   Nombre de Fichiers *
                 </label>
                 <Input
-                  id="nombreFichiers"
-                  name="nombreFichiers"
+                  id="nbrFichier"
+                  name="nbrFichier"
                   placeholder="Nombre de Fichiers"
                   type="number"
-                  value={formData.nombreFichiers}
+                  min={0}
+                  value={formData.nbrFichier}
                   onChange={handleInputChange}
                   required
+
                 />
               </div>
             </div>
@@ -306,13 +417,9 @@ export default function Page() {
 
             </div>
           </form>
-          </CardContent>
 
         </div>
-      </div>
-
-      </Card>
-      </div>
+     
 
     </>
   );

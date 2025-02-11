@@ -9,43 +9,39 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
-type Arrivee = {
-  id: string;
-  idOrdre: string;
-  dateArv: string;
-  dateOrigin: string;
-  expediteur: Etablissement;
-  objet: string;
-  numero: string;
-  nbrFichier: number;
-  typeSupport: string;
-  typeCourrier: string;
-  traitePar:Utilisateur;
-  fichiers:Fichier[]
-};
-type Utilisateur = {
-  id:string,
-  nom:string
-}
-type Etablissement = {
-  id:string,
-  nom:string
-}
-type Fichier = {
-  id:string,
-  nom:string,
-  url:string
-}
-
 type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
-  Arrivee:Arrivee|null;
-
+  depart: {
+    id: string;
+    signeParId: string;
+    traiteParId: string;
+    numOrdre: string;
+    dateDepart: string;
+    objet: string;
+    destination: Etablissement;
+    fichiers: Fichier[];
+    nbrFichier: Number;
+    traitePar: Utilisateur;
+    signePar: Utilisateur;
+  } | null;
+};
+type Fichier = {
+  id: string;
+  nom: string;
+  url: string;
+};
+type Utilisateur = {
+  id: string;
+  nom: string;
+};
+type Etablissement = {
+  id: string;
+  nom: string;
 };
 
-const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
-  ({ isOpen, onClose, Arrivee }) => {
+const AlertFichierDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
+  ({ isOpen, onClose, depart }) => {
     return (
       <AlertDialog open={isOpen} onOpenChange={onClose}>
         <AlertDialogContent className="rounded-lg bg-white shadow-lg w-[600px] max-h-[800px] flex flex-col">
@@ -57,7 +53,7 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
 
           {/* Conteneur avec scroll */}
           <div className="flex-1 max-h-[600px] overflow-auto p-2 space-y-4">
-            {Arrivee?.fichiers.map((f) => (
+            {depart?.fichiers.map((f) => (
               <iframe
                 key={f.id}
                 src={f.url} // Path to your PDF in the public directory
@@ -84,4 +80,4 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   }
 );
 
-export default AlertDialogDetail;
+export default AlertFichierDialogDetail;

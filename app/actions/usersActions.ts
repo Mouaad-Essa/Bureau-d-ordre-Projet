@@ -471,4 +471,3 @@ export async function fetchUserById(id: string) {
   }
 
 }
-

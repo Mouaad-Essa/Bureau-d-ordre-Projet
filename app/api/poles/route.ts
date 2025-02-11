@@ -53,7 +53,7 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error(error);
     return new Response(
-      JSON.stringify({ error: "Failed to update pole 2" }),
+      JSON.stringify({ error: "Failed to update pole " }),
       { status: 500 }
     );
   }

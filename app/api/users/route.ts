@@ -2,7 +2,6 @@ import {
   fetchUsers,
   deleteUser,
   updateUser,
-  addUser,
 } from "../../actions/usersActions";
 
 // Handle GET request to fetch all Users
@@ -58,21 +57,21 @@ export async function PUT(request: Request) {
 }
 
 // Handle POST request to add a new User
-export async function POST(request: Request) {
-  try {
-    // Parse the new User data from the request body
-    const newUser = await request.json();
+// export async function POST(request: Request) {
+//   try {
+//     // Parse the new User data from the request body
+//     const newUser = await request.json();
 
-    // Call the addUser function from the actions to add the new User
-    const result = await addUser(newUser);
+//     // Call the addUser function from the actions to add the new User
+//     const result = await addUser(newUser);
 
-    // Return the result of the addition
-    return new Response(JSON.stringify(result), { status: 201 });
-  } catch (error) {
-    console.error(error);
-    return new Response(
-      JSON.stringify({ error: "Failed to add user" }),
-      { status: 500 }
-    );
-  }
-}
+//     // Return the result of the addition
+//     return new Response(JSON.stringify(result), { status: 201 });
+//   } catch (error) {
+//     console.error(error);
+//     return new Response(
+//       JSON.stringify({ error: "Failed to add user" }),
+//       { status: 500 }
+//     );
+//   }
+// }

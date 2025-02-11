@@ -45,7 +45,11 @@ export async function fetchPoleById(id: string) {
 }
 
 // Add a new pole
-export async function addPole(newPole: { nom: string; description?: string }) {
+export async function addPole(newPole: {
+  nom: string;
+  description?: string;
+}) {
+
   try {
     const createdPole = await prisma.pole.create({
       data: newPole,

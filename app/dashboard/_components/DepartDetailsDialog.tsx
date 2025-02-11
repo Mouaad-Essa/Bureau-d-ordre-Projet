@@ -12,19 +12,29 @@ import {
 type AlertDialogDetailProps = {
   isOpen: boolean;
   onClose: () => void;
-  depart :{
+  depart: {
     id: string;
-    signePar: string;
-    traitePar: string;
-    numeroOrdre: string;
+    signeParId: string;
+    traiteParId: string;
+    numOrdre: string;
     dateDepart: string;
     objet: string;
-    destination: string;
-    fichier: string;
-    nombreFichiers: string;
-  }| null;
- 
-};
+    destinationId: string;
+    destination: Etablissement;
+    nbrFichier: Number;
+    traitePar:Utilisateur
+    signePar:Utilisateur
+  
+  }|null;
+}
+  type Utilisateur={
+    id:string,
+    nom:string
+  }
+  type Etablissement={
+    id:string,
+    nom:string
+  }
 
 const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   ({ isOpen, onClose, depart }) => {
@@ -38,22 +48,22 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
           </AlertDialogHeader>
           <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
             <span>
-              <strong className="font-medium">Signé par:</strong> {depart?.signePar}
+              <strong className="font-medium">Signé par:</strong> {depart?.signePar.nom}
             </span>
             <span>
-              <strong className="font-medium">Traité par :</strong>{" "}
-              {depart?.traitePar}
+              <strong className="font-medium">Traité par :</strong>
+              {depart?.traitePar.nom}
             </span>
             <span>
-              <strong className="font-medium">Objet:</strong>{" "}
+              <strong className="font-medium">Objet:</strong>
               {depart?.objet}
             </span>
             <span>
               <strong className="font-medium">Date & Heure :</strong> {depart?.dateDepart}
             </span>
             <span>
-              <strong className="font-medium">Destination:</strong>{" "}
-              {depart?.destination}
+              <strong className="font-medium">Destination:</strong>
+              {depart?.destination?.nom}
             </span>
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">
