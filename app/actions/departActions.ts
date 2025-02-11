@@ -46,6 +46,14 @@ export async function addDepart(newDepart: {
   nbrFichier: number;
 
 }) {
+  const courrier={
+    id:newDepart.numOrdre+newDepart.dateDepart.toString()
+  }
+
+  const newCourrier = await prisma.courrier.create({
+    data:courrier
+    })
+  
   try {
     const depart = await prisma.depart.create({
       data: {
@@ -56,6 +64,7 @@ export async function addDepart(newDepart: {
         objet: newDepart.objet,
         destinationId: newDepart.destinationId,
         nbrFichier: newDepart.nbrFichier,
+        courrierId:courrier.id
       }
         
     });

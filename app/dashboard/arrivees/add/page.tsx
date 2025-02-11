@@ -55,7 +55,7 @@ export default function Page() {
 
   const [formData, setFormData] = useState({
     idOrdre: "",
-    traiteParId: "ca7dcfdc-e7cd-11ef-9d4f-3c7c3f5e4801",
+    traiteParId: "a2b06ff0-e7fe-11ef-9d4f-3c7c3f5e4801",
     numero: "", // or whatever value you want to assign, changed to "A001" from "fdf"
     dateArv: "", // Set dateArv value
     dateOrigin: "", // Set dateOrigin value
@@ -85,6 +85,15 @@ export default function Page() {
     };
   
     try {
+      
+      if(files && (files?.length)!=formData.nbrFichier){
+        toast({
+          title: "Erreur",
+          description: " le nombre de fichiers sélectionnés n'est pas compatible avec le nombre attendu.",
+          variant: "destructive",
+        });
+        return;
+      }
       // Send the Arrivee data first
       const response = await fetch("/api/arrivees", {
         method: "POST",
@@ -103,7 +112,7 @@ export default function Page() {
   
       const data = await response.json();
       const newArriveeId = data.data.id; // Capture the new arriveeId
-    
+
       // Check if a file is selected before attempting to upload
       if(files){
         const formDataFile = new FormData();
@@ -122,7 +131,6 @@ export default function Page() {
           console.log(responseText);
       }
       // Send file to upload API with arriveeId in headers
-      
       toast({
         title: "Succès",
         description: "Arrivee a été ajoutés avec succès.",

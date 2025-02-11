@@ -85,6 +85,7 @@ export default function Page() {
     const fetchData = async () => {
       const response = await fetch("/api/arrivees");
       const data = await response.json();
+      console.log(data);
       setArrivees(data);
       setFilteredData(data);
       setLoaded(true);

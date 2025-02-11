@@ -19,23 +19,22 @@ type AlertDialogDetailProps = {
     numOrdre: string;
     dateDepart: string;
     objet: string;
-    destination: string;
-    fichier: Fichier;
+    destinationId: string;
+    destination: Etablissement;
     nbrFichier: Number;
     traitePar:Utilisateur
     signePar:Utilisateur
   
   }|null;
-  
-};
-type Fichier = {
-  id:string,
-  nom:string
 }
-type Utilisateur={
-  id:string,
-  nom:string
-}
+  type Utilisateur={
+    id:string,
+    nom:string
+  }
+  type Etablissement={
+    id:string,
+    nom:string
+  }
 
 const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   ({ isOpen, onClose, depart }) => {
@@ -52,19 +51,19 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
               <strong className="font-medium">Signé par:</strong> {depart?.signePar.nom}
             </span>
             <span>
-              <strong className="font-medium">Traité par :</strong>{" "}
+              <strong className="font-medium">Traité par :</strong>
               {depart?.traitePar.nom}
             </span>
             <span>
-              <strong className="font-medium">Objet:</strong>{" "}
+              <strong className="font-medium">Objet:</strong>
               {depart?.objet}
             </span>
             <span>
               <strong className="font-medium">Date & Heure :</strong> {depart?.dateDepart}
             </span>
             <span>
-              <strong className="font-medium">Destination:</strong>{" "}
-              {depart?.destination}
+              <strong className="font-medium">Destination:</strong>
+              {depart?.destination?.nom}
             </span>
           </AlertDialogDescription>
           <AlertDialogFooter className="mt-4">

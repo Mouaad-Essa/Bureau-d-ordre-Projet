@@ -1,21 +1,29 @@
 import {
     fetchDeparts,
     addDepart,
+    fetchDepartById
   } from "../../actions/departActions";
   
   // Gérer la requête GET pour récupérer tous les départs
-  export async function GET() {
-    try {
+export async function GET(request: Request) {
+  try {
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id"); // Check if 'id' is provided in query params
+
+    if (id) {
+      const depart = await fetchDepartById(id);
+      return new Response(JSON.stringify(depart), { status: 200 });
+    } else {
       return await fetchDeparts(); // Récupération des données via l'action serveur
-    } catch (error) {
-      console.error(error);
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch departs" }),
-        { status: 500 }
-      );
-    }
+}
+  } catch (error) {
+    console.error(error);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch departs" }),
+      { status: 500 }
+    );
   }
-  
+}
 
   // Gérer la requête POST pour ajouter un nouveau départ
   export async function POST(request: Request) {

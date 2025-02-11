@@ -22,54 +22,63 @@ type AlertDialogDetailProps = {
     destination: Etablissement;
     fichiers: Fichier[];
     nbrFichier: Number;
-    traitePar: Utilisateur;
-    signePar: Utilisateur;
-  } | null;
+    traitePar:Utilisateur
+    signePar:Utilisateur
+  
+  }|null;
+  
 };
 type Fichier = {
-  id: string;
-  nom: string;
-  url: string;
-};
-type Utilisateur = {
-  id: string;
-  nom: string;
-};
-type Etablissement = {
-  id: string;
-  nom: string;
-};
+  id:string,
+  nom:string
+}
+type Utilisateur={
+  id:string,
+  nom:string
+}
+type Etablissement={
+  id:string,
+  nom:string
+}
 
 const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
   ({ isOpen, onClose, depart }) => {
     return (
       <AlertDialog open={isOpen} onOpenChange={onClose}>
-        <AlertDialogContent className="rounded-lg bg-white shadow-lg w-[600px] max-h-[800px] flex flex-col">
-          <AlertDialogHeader>
+        <AlertDialogContent className="rounded-lg bg-white shadow-lg p-6">
+          <AlertDialogHeader className="pb-4">
             <AlertDialogTitle className="text-xl font-semibold text-gray-800">
-              Détails Fichier
+              Détails de Départ
             </AlertDialogTitle>
           </AlertDialogHeader>
-
-          {/* Conteneur avec scroll */}
-          <div className="flex-1 max-h-[600px] overflow-auto p-2 space-y-4">
-            {depart?.fichiers.map((f) => (
-              <iframe
-                key={f.id}
-                src={f.url} // Path to your PDF in the public directory
-                width="100%"
-                height="500px"
-                title="Fichier PDF"
-                className="border rounded-lg shadow"
-              />
-            ))}
-          </div>
-
-          {/* Footer fixé en bas */}
-          <AlertDialogFooter className=" bg-white py-3  h-auto">
+          <AlertDialogDescription className="flex flex-col gap-4 text-sm text-gray-700">
+            <span>
+              <strong className="font-medium">Signé par:</strong> {depart?.signePar?.nom}
+            </span>
+            <span>
+              <strong className="font-medium">Traité par :</strong>{" "}
+              {depart?.traitePar?.nom}
+            </span>
+            <span>
+              <strong className="font-medium">Objet:</strong>{" "}
+              {depart?.objet}
+            </span>
+            <span>
+              <strong className="font-medium">Numero Ordre:</strong>{" "}
+              {depart?.numOrdre}
+            </span>
+            <span>
+              <strong className="font-medium">Date & Heure :</strong> {depart?.dateDepart}
+            </span>
+            <span>
+              <strong className="font-medium">Destination:</strong>{" "}
+              {depart?.destination.nom}
+            </span>
+          </AlertDialogDescription>
+          <AlertDialogFooter className="mt-4">
             <AlertDialogCancel
               onClick={onClose}
-              className="px-4 py-2 bg-gray-300 text-gray-800  hover:bg-gray-400 transition"
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
             >
               Fermer
             </AlertDialogCancel>

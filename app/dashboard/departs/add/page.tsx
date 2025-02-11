@@ -96,6 +96,17 @@ export default function Page() {
     };
 
     try {
+
+      if(files && (files?.length)!=formData.nbrFichier){
+        toast({
+          title: "Erreur",
+          description: " le nombre de fichiers sélectionnés n'est pas compatible avec le nombre attendu.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      
       const response = await fetch("/api/depart", {
         method: "POST",
         headers: {

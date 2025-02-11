@@ -14,6 +14,10 @@ import {
   Eye,
   ArrowRightLeft,
   Building,
+  BookText,
+  Ticket,
+  Tickets,
+  File,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -37,6 +41,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import AlertFichierDialogDetail from "@/app/(pages)/_components/detailsFichier";
 
 // Définition du type pour un départ
 type Depart = {
@@ -82,6 +87,7 @@ export default function Page() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedDepart, setSelectedDepart] = useState<Depart | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [isDetailFichierDialogOpen, setIsDetailFichierDialogOpen] = useState(false);
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
 
@@ -152,29 +158,30 @@ export default function Page() {
                <Button
                  variant="see"
                  size="sm"
-                 onClick={() => handleShowDetails(row)}
+                 onClick={() => handleFichierDetails(row)}
                >
-                 <Eye />
+                 <File />
                </Button>
              ) : null}
            </div>
             ),
           },
-    {
-      name: "Actions",
-      cell: (row: Depart) => (
-        <div className="space-x-2 flex">
-      
-          <Button
-            variant="update"
-            size="sm"
-            onClick={() => handleTrasfert(row.id)}
-          >
-            <ArrowRightLeft />
-          </Button>
-        </div>
-      ),
-    },
+   {
+            name: "Actions",
+            cell: (row: Depart) => (
+             <div className="space-x-2 flex">
+             
+               <Button
+                 variant="see"
+                 size="sm"
+                 onClick={() => handleShowDetails(row)}
+               >
+                 <Eye />
+               </Button>
+           </div>
+            ),
+          },
+   
   ];
 
   const exportToPDF = () => {
@@ -220,6 +227,10 @@ export default function Page() {
   const handleShowDetails = (depart: Depart) => {
     setSelectedDepart(depart);
     setIsDetailDialogOpen(true);
+  };
+  const handleFichierDetails = (depart: Depart) => {
+    setSelectedDepart(depart);
+    setIsDetailFichierDialogOpen(true);
   };
 
   const handleAddDepart = () => {
@@ -322,6 +333,11 @@ export default function Page() {
           <AlertDialogDetail
             isOpen={isDetailDialogOpen}
             onClose={() => setIsDetailDialogOpen(false)}
+            depart={selectedDepart}
+          />
+          <AlertFichierDialogDetail
+            isOpen={isDetailFichierDialogOpen}
+            onClose={() => setIsDetailFichierDialogOpen(false)}
             depart={selectedDepart}
           />
         </>

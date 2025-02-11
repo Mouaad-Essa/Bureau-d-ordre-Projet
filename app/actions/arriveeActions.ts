@@ -73,9 +73,20 @@ export async function addArrivee(newArrivee: {//-
   traiteParId?:string
 }) {//-
 
+  const courrier={
+    id:newArrivee.idOrdre+newArrivee.dateArv.toString()
+  }
+  const newCourrier = await prisma.courrier.create({
+    data:courrier
+    })
+  
   try {//-
+
     const arrivee = await prisma.arrivee.create({//-
-      data: newArrivee,//-
+      data: {...
+        newArrivee,
+        courrierId:courrier.id
+      }//-
     });//-
 //-
     return { message: "Arrivée ajoutée avec succès", data: arrivee };//-
@@ -90,14 +101,21 @@ export async function fetchArriveeById(id: string) {//-
   try {//-
     const arrivee = await prisma.arrivee.findUnique({//-
       where: { id },//-
-    });//-
+      include:{
+        expediteur:true,
+        traitePar:true,
+        fichiers:true,
+        courrier:true
+      }
+      
+        });//-
 //-
     if (!arrivee) {//-
       throw new Error("Arrivée non trouvée");//-
     }//-
 //-
     return arrivee;//-
-  } catch (error) {//-
+  } catch (error) {
     console.error("Erreur lors de la récupération de l'arrivée par ID:", error);//-
     throw error;//-
   }//-
