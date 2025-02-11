@@ -130,7 +130,7 @@ model Fichier {
 model Courrier{
   id         String  @id @default(uuid())
 
-  arrivee  Arrivee?
+  arrivee  Arrivee[]
   depart Depart?
   envoi Envoi[]
 
@@ -147,7 +147,7 @@ model Arrivee {
   typeSupport String?
   typeCourrier String?
   traiteParId String?
-  courrierId String?  @unique
+  courrierId String? 
 
   courrier  Courrier? @relation(fields: [courrierId], references: [id])
   expediteur Etablissement? @relation(name : "expediteur_Arrivee",fields: [expediteurId], references: [id])
