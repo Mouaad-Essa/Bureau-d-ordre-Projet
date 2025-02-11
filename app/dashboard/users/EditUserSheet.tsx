@@ -13,30 +13,38 @@ import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface User {
-  id: number;
+  id: string;
   nom: string;
   prenom: string;
   email: string;
   telephone: string;
-  service: string;
+  serviceId: string | null;
+  service: string | null;
+  role: string | null;
+  roleId: string | null;
 }
 
 interface EditUserSheetProps {
   user: User;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (updatedUser: User & { password: string }) => void;
+  onSave: (updatedUser: User) => void;
 }
 
 export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSheetProps) {
+
+  const [services, setServices] = useState<{ id: number; nom: string; description: string; division: number }[]>([]);
+  const [roles, setRoles] = useState<{ id: number; nom: string; description: string; }[]>([]);
 
   const [formData, setFormData] = useState({
     nom: user.nom,
     prenom: user.prenom,
     email: user.email,
     telephone: user.telephone,
-    service: user.service,
-    password: "",
+    service: user.service || "",
+    serviceId: user.serviceId || null,
+    role: user.role || "",
+    roleId: user.roleId || null,
   });
 
   // Sync state with the selected user whenever it changes
@@ -46,10 +54,34 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
       prenom: user.prenom,
       email: user.email,
       telephone: user.telephone,
-      service: user.service,
-      password: "",
+      service: user.service || "",
+      serviceId: user.serviceId || null,
+      role: user.role || "",
+      roleId: user.roleId || null,
     });
-  }, [user]);
+  }, [user && isOpen]);
+
+  //fetch services / roles
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [servicesRes, rolesRes] = await Promise.all([
+          fetch("/api/service"),
+          fetch("/api/role")
+        ]);
+  
+        const servicesData = await servicesRes.json();
+        const rolesData = await rolesRes.json();
+  
+        setServices(servicesData);
+        setRoles(rolesData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+  
+    fetchData();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,7 +90,58 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
   // Handle Select changes
   const handleServiceChange = (value: string) => {
-    setFormData((prev) => ({ ...prev, service: value }));
+    if (!value) {
+      setFormData((prev) => ({
+        ...prev,
+        serviceId: null, // ✅ Allow unselecting a service
+        service: "",   // ✅ Allow unselecting a service
+      }));
+      return;
+    }
+    if (value == "aucun") {
+      setFormData((prev) => ({
+        ...prev,
+        serviceId: null, // ✅ Allow unselecting a service
+        service: "Aucun",   // ✅ Allow unselecting a service
+      }));
+      return;
+    }
+    const selectedService = services.find((service) => service.id.toString() === value);
+    if (selectedService) {
+      setFormData((prev) => ({
+        ...prev,
+        serviceId: selectedService.id.toString(), // ✅ Store as a number
+        service: selectedService.nom, // ✅ Update service name (optional)
+      }));
+    }
+  };
+
+  // Handle Select changes
+  const handleRoleChange = (value: string) => {
+    if (!value) {
+      setFormData((prev) => ({
+        ...prev,
+        roleId: null, // ✅ Allow unselecting a service
+        role: "",   // ✅ Allow unselecting a service
+      }));
+      return;
+    }
+    if(value === "aucun"){
+      setFormData((prev) => ({
+        ...prev,
+        roleId: null, // ✅ Allow unselecting a service
+        role: "Aucun",   // ✅ Allow unselecting a service
+      }));
+      return;
+    }
+    const selectedRole = roles.find((role) => role.id.toString() === value);
+    if (selectedRole) {
+      setFormData((prev) => ({
+        ...prev,
+        roleId: selectedRole.id.toString(), // ✅ Store as a number
+        role: selectedRole.nom, // ✅ Update role name (optional)
+      }));
+    }
   };
 
   const handleSave = () => {
@@ -66,7 +149,6 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
       id: user.id,
       ...formData,
     };
-
     onSave(updatedUser);
     onOpenChange(false); // Close the sheet after saving
   };
@@ -75,7 +157,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent>
+      <SheetContent className="max-h-screen overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Modifier l'utilisateur</SheetTitle>
         </SheetHeader>
@@ -87,7 +169,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="nom"
             placeholder="Nom..."
-            value={formData.nom}
+            value={formData.nom ? formData.nom : ""}
             onChange={handleInputChange}
 
           />
@@ -98,7 +180,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="prenom"
             placeholder="Prénom..."
-            value={formData.prenom}
+            value={formData.prenom ? formData.prenom : ""}
             onChange={handleInputChange}
 
           />
@@ -109,7 +191,7 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="email"
             placeholder="Email..."
-            value={formData.email}
+            value={formData.email ? formData.email : ""}
             onChange={handleInputChange}
 
           />
@@ -120,35 +202,42 @@ export function EditUserSheet({ user, isOpen, onOpenChange, onSave }: EditUserSh
 
             name="telephone"
             placeholder="Téléphone..."
-            value={formData.telephone}
+            value={formData.telephone ? formData.telephone : ""}
             onChange={handleInputChange}
 
           />
           <label htmlFor="service" className="block text-sm font-medium mb-1">
             Service
           </label>
-          <Select value={formData.service} onValueChange={handleServiceChange}>
+          <Select value={formData.serviceId ? formData.serviceId.toString() : ""} onValueChange={handleServiceChange}>
             <SelectTrigger>
               <SelectValue placeholder="-- Séléctionner le service --" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="Informatique">Informatique</SelectItem>
-              <SelectItem value="Recherche">Recherche</SelectItem>
-              <SelectItem value="Ressource humaine">Ressource humaine</SelectItem>
+              <SelectItem key="none" value="aucun">Aucun</SelectItem>
+              {services.map((service) =>{
+                return(
+                  <SelectItem key={service.id} value={service.id.toString()}>{service.nom}</SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
-          <label htmlFor="pass" className="block text-sm font-medium mb-1">
-            Mot de passe
+          <label htmlFor="role" className="block text-sm font-medium mb-1">
+            Rôle
           </label>
-          <Input
-            type="password"
-
-            name="password"
-            placeholder="Mot de passe..."
-            value={formData.password}
-            onChange={handleInputChange}
-
-          />
+          <Select value={formData.roleId ? formData.roleId.toString() : ""} onValueChange={handleRoleChange} >
+            <SelectTrigger>
+              <SelectValue placeholder="-- Séléctionner un rôle --" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem key="none" value="aucun">Aucun</SelectItem>
+              {roles.map((role) =>{
+                return(
+                  <SelectItem key={role.id} value={role.id.toString()}>{role.nom}</SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
         </div>
         <SheetFooter>
           <Button onClick={handleSave}>Modifier</Button>

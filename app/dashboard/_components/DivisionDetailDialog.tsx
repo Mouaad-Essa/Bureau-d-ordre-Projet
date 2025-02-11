@@ -40,7 +40,7 @@ const AlertDialogDetail: React.FC<AlertDialogDetailProps> = React.memo(
               {division?.description}
             </span>
             <span>
-              <strong className="font-medium">Responsable ID:</strong>{" "}
+              <strong className="font-medium">Pole:</strong>{" "}
               {division?.pole.nom}
             </span>
           </AlertDialogDescription>
