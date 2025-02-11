@@ -114,15 +114,43 @@ export default function Page() {
   const [idCourrier,setIdCourrier]=useState("");
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-
+  const [user,setUser] = useState<Utilisateur>();
+  const [error,setError] = useState();
   const [formData,setFormData] = useState({
-    expediteurId:"a2b07ffd-e7fe-11ef-9d4f-3c7c3f5e4801",
+    expediteurId:"",
     destinataireId:"",
     note:"",
     courrierId:"",
     createdAt:new Date(Date.now()).toISOString()
 
   });
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Step 1: Get user ID from the token
+        const response = await fetch("/api/userData");
+        if (!response.ok) {
+          throw new Error("Failed to fetch user ID");
+        }
+        const { user } = await response.json();
+        // setUser(user);
+        setFormData({
+          ...formData,
+          expediteurId: user.id
+      });
+     
+        if (!user || !user.id) {
+          throw new Error("Invalid user data");
+        }
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+        setError(error.message);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/users");

@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { fetchUserById } from "@/app/actions/usersActions";
 
 type Etablissement = {
   id: string;
@@ -38,11 +39,15 @@ type Utilisateur = {
   nom: string;
 };
 
+
 export default function Page() {
   const router = useRouter();
   const [etablissement, setEtablissement] = useState<Etablissement[]>();
   const { toast } = useToast();
+  const [user, setUser] = useState<Utilisateur>();
+  const [error, setError] = useState<string | null>(null);
   
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch("/api/etablissement");
@@ -55,7 +60,7 @@ export default function Page() {
 
   const [formData, setFormData] = useState({
     idOrdre: "",
-    traiteParId: "a2b06ff0-e7fe-11ef-9d4f-3c7c3f5e4801",
+    traiteParId: "",
     numero: "", // or whatever value you want to assign, changed to "A001" from "fdf"
     dateArv: "", // Set dateArv value
     dateOrigin: "", // Set dateOrigin value
@@ -65,11 +70,38 @@ export default function Page() {
     typeSupport: "", // Set typeSupport value
     typeCourrier: "", // Set typeCourrier value
   });
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Step 1: Get user ID from the token
+        const response = await fetch("/api/userData");
+        if (!response.ok) {
+          throw new Error("Failed to fetch user ID");
+        }
+        const { user } = await response.json();
+        // setUser(user);
+        setFormData({
+          ...formData,
+          traiteParId: user.id
+      });
+     
+        if (!user || !user.id) {
+          throw new Error("Invalid user data");
+        }
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+        setError(error.message);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    console.log(formData);
+    
+    // console.log(formData.traiteParId);
   
     // Convert dates to ISO 8601 format
     const dateArv = new Date(formData.dateArv).toISOString();
@@ -127,8 +159,7 @@ export default function Page() {
             },
             body: formDataFile,
           });
-          const responseText = await fileResponse.text(); // Get response text for debugging
-          console.log(responseText);
+          
       }
       // Send file to upload API with arriveeId in headers
       toast({
