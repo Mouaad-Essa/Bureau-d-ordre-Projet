@@ -1,3 +1,4 @@
+"use server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // Ensure your Prisma instance is correctly set up
 
@@ -48,6 +49,7 @@ export async function addPole(newPole: {
   nom: string;
   description?: string;
 }) {
+
   try {
     const createdPole = await prisma.pole.create({
       data: newPole,

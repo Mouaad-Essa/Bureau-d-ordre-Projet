@@ -37,7 +37,6 @@ type Pole={
   description?:string,
 
 }
-
   // Custom French translations for pagination
   const paginationComponentOptions = {
     rowsPerPageText: 'Lignes par page',
@@ -47,8 +46,6 @@ type Pole={
     selectAllRowsItemText: 'Tous',
   };
   
-
-
 export default function Page(){
 
    const [poles, setPoles] = useState<Pole[]>([]);
@@ -82,10 +79,7 @@ export default function Page(){
     const handleEditClick = (pole: any) => {
         setSelectedPole(pole);
     };
-
-
      //Export 
-  
      const exportToPDF = () => {
       const doc = new jsPDF();
 
@@ -101,10 +95,7 @@ export default function Page(){
         head: [["ID", "Nom", "Description"]],
         body: tableData,
       });
-  
-
       doc.save("poles.pdf");
-
     };
   
     const exportToExcel = () => {

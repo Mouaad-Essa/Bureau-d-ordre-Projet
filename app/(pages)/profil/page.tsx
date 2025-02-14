@@ -1,5 +1,5 @@
 "use client";
-
+import jwt from "jsonwebtoken";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,14 +9,15 @@ import { Pencil, Lock, UserPen } from "lucide-react";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 
-// Define types for user data
 interface UserProfile {
   id: string;
   nom: string;
   prenom: string;
-  telephone: string;
   email: string;
-  profilePicture: string;
+  tel?: string;
+  picture?: string;
+  serviceId?: string;
+  roleId?: string;
 }
 
 const ProfilePage = () => {
@@ -24,113 +25,180 @@ const ProfilePage = () => {
     id: "",
     nom: "",
     prenom: "",
-    telephone: "",
     email: "",
-    profilePicture: "/profile.png", // placeholder to fix later
+    tel: "",
+    picture: "/assets/img/profile.png",
   });
   const [isEditable, setIsEditable] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState(user.profilePicture);
+  const [imagePreview, setImagePreview] = useState(user.picture);
   const [passwords, setPasswords] = useState({
-    oldPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
-  const fetchUserData = async (userId: string) => {
-    try {
-      setIsLoading(true);
-      const response = await fetch(
-        `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/users/${userId}`
+  /*
+
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const match = document.cookie.match(
+        new RegExp("(^| )" + name + "=([^;]+)")
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch user data");
-      }
-      const data = await response.json();
-      setUser(data);
-    } catch (error) {
-      if (error instanceof Error) {
-        setError(error.message);
+      if (match) {
+        return decodeURIComponent(match[2]);
       } else {
-        setError("An unknown error occurred");
+        return null;
       }
+    };
+
+    const token = getCookie("token");
+
+    if (token) {
+      try {
+        const decodedToken = jwt.decode(token) as { id: string };
+        if (decodedToken?.id) {
+          // Fetch user data using the decoded user ID
+          fetchUserById(decodedToken.id);
+        } else {
+          setError("No valid user ID found in token");
+          setIsLoading(false);
+        }
+      } catch (error) {
+        setError("Failed to decode token");
+        setIsLoading(false);
+      }
+    } else {
+      setError("No token found in cookies");
+      setIsLoading(false);
+    }
+  }, []);
+  */
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        // Step 1: Get user ID from the token
+        const response = await fetch("/api/userData");
+        if (!response.ok) {
+          throw new Error("Failed to fetch user ID");
+        }
+
+        const { user } = await response.json();
+        if (!user || !user.id) {
+          throw new Error("Invalid user data");
+        }
+
+        // Step 2: Fetch user details using userId
+        await fetchUserById(user.id);
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+        setError(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const fetchUserById = async (userId: string) => {
+    try {
+      const response = await fetch(`/api/users/${userId}`);
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        setError("Failed to fetch user data");
+      }
+    } catch (error) {
+      setError("Error fetching user data");
     } finally {
       setIsLoading(false);
     }
   };
-  // Placeholder for updating user information
+
   const updateUserInfo = async () => {
     try {
-      const response = await fetch(
-        `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/users/${user.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(user),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to update user information");
-      }
-
-      alert("Personal information updated successfully!");
-    } catch (error) {
-      console.error(error);
-      alert("Failed to update personal information");
-    }
-  };
-
-  // Placeholder for updating password
-  const updatePassword = async () => {
-    try {
-      if (passwords.newPassword !== passwords.confirmPassword) {
-        alert("New password and confirmation do not match!");
+      const token = document.cookie.match(/(^| )token=([^;]+)/)?.[2];
+      if (!token) {
+        alert("Token is missing.");
         return;
       }
 
-      const response = await fetch(
-        `https://67978c4fc2c861de0c6d1fb0.mockapi.io/uni/api/users/${user.id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            newPassword: passwords.newPassword,
-          }),
-        }
-      );
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          updateType: "personalInfo", // Indicate that this is a personal info update
+          nom: user.nom,
+          prenom: user.prenom,
+          email: user.email,
+          telephone: user.tel,
+        }),
+      });
 
-      if (!response.ok) {
-        throw new Error("Failed to update password");
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Informations personnelles mises à jour avec succès.");
+      } else {
+        alert(result.error || "Erreur de mise à jour des informations.");
       }
-
-      alert("Password updated successfully!");
     } catch (error) {
-      console.error(error);
-      alert("Failed to update password");
+      console.error("Error updating personal info:", error);
+      alert("Erreur lors de la mise à jour des informations.");
     }
   };
 
-  // Fetch user data when component mounts
-  useEffect(() => {
-    const userId = "2";
-    fetchUserData(userId);
-  }, []);
+  const updatePassword = async () => {
+    try {
+      const token = document.cookie.match(/(^| )token=([^;]+)/)?.[2];
+      if (!token) {
+        alert("Token is missing.");
+        return;
+      }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setUser((prev) => ({ ...prev, [name]: value }));
+      const response = await fetch(`/api/users/${user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          updateType: "password", // Indicate that this is a password update
+          newPassword: passwords.newPassword,
+          confirmPassword: passwords.confirmPassword,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert("Mot de passe mis à jour avec succès.");
+      } else {
+        alert(result.error || "Erreur de mise à jour du mot de passe.");
+      }
+    } catch (error) {
+      console.error("Error updating password:", error);
+      alert("Erreur lors de la mise à jour du mot de passe.");
+    }
   };
 
-  // Handle password input changes
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswords((prev) => ({ ...prev, [name]: value }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string); // Base64 string
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   if (isLoading) {
@@ -141,16 +209,14 @@ const ProfilePage = () => {
     return <div>Error: {error}</div>;
   }
 
-  // Handle Image Change
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setUser((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswords((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -162,10 +228,9 @@ const ProfilePage = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Profile Image */}
         <div className="flex flex-col items-center mb-6 border-b pb-6">
           <Image
-            src={imagePreview}
+            src={imagePreview || "/assets/img/profile.png"}
             alt="Profile Image"
             width={120}
             height={120}
@@ -177,7 +242,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Toggle Edit Mode */}
         <div className="flex justify-between items-center border-b pb-4 mb-4">
           <h2 className="text-lg font-semibold">Informations Personnelles</h2>
           <div className="flex items-center gap-2">
@@ -189,7 +253,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Section Informations Personnelles */}
         <div className="grid grid-cols-2 gap-6 border-b pb-6">
           <div>
             <Label className="text-sm font-medium">Nom</Label>
@@ -214,8 +277,8 @@ const ProfilePage = () => {
           <div>
             <Label className="text-sm font-medium">Téléphone</Label>
             <Input
-              name="telephone"
-              value={user.telephone}
+              name="tel"
+              value={user.tel || ""}
               onChange={handleChange}
               readOnly={!isEditable}
               className="bg-gray-50"
@@ -233,7 +296,6 @@ const ProfilePage = () => {
           </div>
         </div>
 
-        {/* Update Personal Info Button */}
         <div className="mt-6 flex justify-center border-b pb-6">
           <Button
             variant="outline"
@@ -245,7 +307,6 @@ const ProfilePage = () => {
           </Button>
         </div>
 
-        {/* Section Changer le mot de passe */}
         <div className="mt-6 border-b pb-6">
           <h2 className="text-lg font-semibold mb-4">
             Changer le mot de passe
@@ -264,7 +325,7 @@ const ProfilePage = () => {
                 className="bg-gray-50"
               />
             </div>
-            <div className="col-span-2">
+            <div>
               <Label className="text-sm font-medium">
                 Confirmer le mot de passe
               </Label>

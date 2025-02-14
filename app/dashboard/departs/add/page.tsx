@@ -126,17 +126,6 @@ export default function Page() {
       const data = await response.json();
       const idDepart = data.data.id; // Capture the new arriveeId
     
-      // Check if a file is selected before attempting to upload
-      // if (files?.length) {
-      // //   toast({
-      // //     title: "Avertissement",
-      // //     description: "Aucun fichier sélectionné.",
-      // //     variant: "destructive",
-      // //   });
-      //   return;
-      // }
-  
-      // Create FormData for file upload
       if(files){
         const formDataFile = new FormData();
         for(const file of files){
@@ -378,11 +367,9 @@ export default function Page() {
                 <Input
                   id="fichier"
                   name="ficher"
-                  placeholder="Objet"
                   type="file"
                   onChange={handleFileChange}
                   multiple={true}
-                  required
                 />
               </div>
 

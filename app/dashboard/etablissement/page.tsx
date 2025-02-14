@@ -144,13 +144,15 @@ export default function Page() {
 
   const handleEdit = (etablissement: Etablissement) => {
     setSelectedEtablissement(etablissement);
-    setIsEditSheetOpen(true); // Open the edit sheet
+    setIsEditSheetOpen(true);
   };
 
   // update logic
   const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
-      const response = await fetch(`/api/etablissement`, {
+
+      const response = await fetch("/api/etablissement", {
+
         method: "PUT", // Use PUT for updating
         headers: {
           "Content-Type": "application/json",
