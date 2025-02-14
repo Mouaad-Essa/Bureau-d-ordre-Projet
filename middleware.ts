@@ -102,13 +102,13 @@ export async function middleware(request: NextRequest) {
   // 1. Handle requests with token
   if (token) {
     const verifiedToken = await verifyToken(token);
-    
+
     // Invalid token handling
     if (!verifiedToken) {
       // Clear invalid token
       const response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete("token");
-      
+
       // Only redirect if trying to access protected routes
       if (!publicPaths.includes(path)) {
         return response;
@@ -120,7 +120,7 @@ export async function middleware(request: NextRequest) {
 
     // Valid token handling
     const isSuperAdmin = decodedToken.privileges?.includes("isSuperAdmin");
-    
+
     // Redirect away from auth pages when logged in
     if (publicPaths.includes(path)) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
@@ -156,6 +156,6 @@ export const config = {
     "/depart",
     "/etablissement",
     "/statistique",
-    "/"
+    "/",
   ],
 };
