@@ -1,31 +1,57 @@
-// Define the structure of the statistics data
-interface StatisticsData {
-  lettresArrivees: number;
-  lettresDeparts: number;
-  monthlyStats: { month: string; arrivees: number; departs: number }[];
+import { prisma } from "@/lib/prisma"; // Make sure Prisma is properly set up
+
+// Fetch the total count of received and sent mails
+export async function fetchTotalMails() {
+  try {
+    const lettresArrivees = await prisma.arrivee.count();
+    const lettresDeparts = await prisma.depart.count();
+
+    return { lettresArrivees, lettresDeparts };
+  } catch (error) {
+    console.error("Failed to fetch total mails:", error);
+    throw new Error("Failed to fetch total mails");
+  }
 }
 
-const API_URL = "/api/statistics";
-
-// Fetch statistics for a given user
-export async function fetchStatistics(
-  userId: string
-): Promise<StatisticsData | { error: string }> {
+// Fetch monthly statistics (grouped by month)
+export async function fetchMonthlyStats() {
   try {
-    // Fetch statistics from the API
-    const response = await fetch(`${API_URL}?userId=${userId}`);
+    const monthlyStats = await prisma.$queryRaw<
+      { month: string; arrivees: number; departs: number }[]
+    >`
+      SELECT 
+        DATE_FORMAT(dateArv, '%Y-%m') AS month, 
+        COUNT(*) AS arrivees, 
+        (SELECT COUNT(*) FROM Depart WHERE DATE_FORMAT(dateDepart, '%Y-%m') = DATE_FORMAT(A.dateArv, '%Y-%m')) AS departs
+      FROM Arrivee A
+      GROUP BY month, A.dateArv
+      ORDER BY month ASC;
+    `;
 
-    // Check if the response is successful
-    if (!response.ok) {
-      throw new Error("Failed to fetch statistics");
-    }
+    // Convert BigInt values to strings
+    return monthlyStats.map((stat) => ({
+      month: stat.month,
+      arrivees: stat.arrivees.toString(),
+      departs: stat.departs.toString(),
+    }));
+  } catch (error) {
+    console.error("Failed to fetch monthly statistics:", error);
+    throw new Error("Failed to fetch monthly statistics");
+  }
+}
 
-    // Parse and return the JSON response
-    const data: StatisticsData = await response.json();
-    return data; // Just return the data
+// Main function to fetch both total counts and monthly stats
+export async function fetchStatistics() {
+  try {
+    const totalMails = await fetchTotalMails();
+    const monthlyStats = await fetchMonthlyStats();
+
+    return {
+      ...totalMails,
+      monthlyStats,
+    };
   } catch (error) {
     console.error("Error fetching statistics:", error);
-    // Return a consistent error structure
-    return { error: "Failed to fetch statistics" };
+    throw new Error("Failed to fetch statistics");
   }
 }
