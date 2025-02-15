@@ -1,5 +1,5 @@
 "use client";
-import jwt from "jsonwebtoken";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import { Pencil, Lock, UserPen } from "lucide-react";
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
-
+import { toast } from "@/hooks/use-toast";
 interface UserProfile {
   id: string;
   nom: string;
@@ -37,43 +37,6 @@ const ProfilePage = () => {
     newPassword: "",
     confirmPassword: "",
   });
-
-  /*
-
-  useEffect(() => {
-    const getCookie = (name: string) => {
-      const match = document.cookie.match(
-        new RegExp("(^| )" + name + "=([^;]+)")
-      );
-      if (match) {
-        return decodeURIComponent(match[2]);
-      } else {
-        return null;
-      }
-    };
-
-    const token = getCookie("token");
-
-    if (token) {
-      try {
-        const decodedToken = jwt.decode(token) as { id: string };
-        if (decodedToken?.id) {
-          // Fetch user data using the decoded user ID
-          fetchUserById(decodedToken.id);
-        } else {
-          setError("No valid user ID found in token");
-          setIsLoading(false);
-        }
-      } catch (error) {
-        setError("Failed to decode token");
-        setIsLoading(false);
-      }
-    } else {
-      setError("No token found in cookies");
-      setIsLoading(false);
-    }
-  }, []);
-  */
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -122,7 +85,10 @@ const ProfilePage = () => {
     try {
       const token = document.cookie.match(/(^| )token=([^;]+)/)?.[2];
       if (!token) {
-        alert("Token is missing.");
+        toast({
+          variant: "destructive",
+          description: "missing token",
+        });
         return;
       }
 
@@ -145,13 +111,22 @@ const ProfilePage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Informations personnelles mises à jour avec succès.");
+        toast({
+          description: "Informations personnelles mises à jour avec succès.",
+        });
       } else {
-        alert(result.error || "Erreur de mise à jour des informations.");
+        console.log(result.error || "Erreur de mise à jour des informations.");
+        toast({
+          variant: "destructive",
+          description: "Erreur de mise à jour des informations.",
+        });
       }
     } catch (error) {
       console.error("Error updating personal info:", error);
-      alert("Erreur lors de la mise à jour des informations.");
+      toast({
+        variant: "destructive",
+        description: "Erreur lors de la mise à jour des informations.",
+      });
     }
   };
 
@@ -159,7 +134,10 @@ const ProfilePage = () => {
     try {
       const token = document.cookie.match(/(^| )token=([^;]+)/)?.[2];
       if (!token) {
-        alert("Token is missing.");
+        toast({
+          title: "Token is missing.",
+          description: "Token is missing.",
+        });
         return;
       }
 
@@ -180,13 +158,21 @@ const ProfilePage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        alert("Mot de passe mis à jour avec succès.");
+        toast({
+          description: "Mot de passe mis à jour avec succès.",
+        });
       } else {
-        alert(result.error || "Erreur de mise à jour du mot de passe.");
+        toast({
+          variant: "destructive",
+          description: "Erreur de mise à jour du mot de passe.",
+        });
       }
     } catch (error) {
       console.error("Error updating password:", error);
-      alert("Erreur lors de la mise à jour du mot de passe.");
+      toast({
+        variant: "destructive",
+        description: "Erreur lors de la mise à jour du mot de passe.",
+      });
     }
   };
 
