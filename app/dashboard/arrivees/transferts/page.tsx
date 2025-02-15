@@ -10,6 +10,8 @@ import {
   Eye,
   ArrowRightLeft,
   Download,
+  ArrowBigRight,
+  ArrowLeftRightIcon,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -22,7 +24,7 @@ import {
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
-import AlertDialogDetail from "../_components/arriveeDetailsDialog";
+// import AlertDialogDetail from "../../_components/arriveeDetailsDialog";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -34,6 +36,23 @@ import autoTable, { Row } from "jspdf-autotable";
 import jsPDF from "jspdf";
 
 // Définition du type pour une arrivée
+type Envoi = {
+  id: string;
+  expediteurId: string;
+  destinataireId: string;
+  note: string;
+  courrierId: string;
+  createdAt: string;
+  expediteur: Utilisateur;
+  destinataire: Utilisateur;
+  courrier: Courrier;  
+
+};
+type Courrier={
+  id:string,
+  arrivee:Arrivee;
+
+}
 type Arrivee = {
   id: string;
   idOrdre: string;
@@ -51,7 +70,9 @@ type Arrivee = {
 };
 type Utilisateur = {
   id:string,
-  nom:string
+  nom:string,
+  prenom:string,
+  email:string
 }
 type Etablissement = {
   id:string,
@@ -72,116 +93,93 @@ const paginationComponentOptions = {
 };
 
 export default function Page() {
-  const [arrivees, setArrivees] = useState<Arrivee[]>([]);
-  const [filteredData, setFilteredData] = useState<Arrivee[]>([]);
+  const [envois, setEnvois] = useState<Envoi[]>([]);
+  const [filteredData, setFilteredData] = useState<Envoi[]>([]);
   const [searchText, setSearchText] = useState("");
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [selectedArrivee, setSelectedArrivee] = useState<Arrivee | null>(null);
+  const [arrivees, setArrivees] = useState<Arrivee>();
+  const [selectedEnvoi, setSelectedEnvoi] = useState<Envoi | null>(null);
   const router = useRouter();
   const [loaded, setLoaded] = useState(false);
   const [showFile,setShowFile] = useState(false);
   const[file,setFile] = useState<Fichier>();
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch("/api/arrivees");
+      const response = await fetch("/api/envoi");
       const data = await response.json();
       console.log(data);
-      setArrivees(data);
+      setEnvois(data);
       setFilteredData(data);
       setLoaded(true);
     };
-    fetchData();
-  }, []);
 
+    fetchData();
+    
+  }, []);
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchValue = e.target.value.toLowerCase();
     setSearchText(searchValue);
-    const filtered = arrivees.filter(
+    const filtered = envois.filter(
       (item) =>
         item.expediteur.nom.toLowerCase().includes(searchValue) ||
-        item.objet.toLowerCase().includes(searchValue) ||
-        item.numero.toLowerCase().includes(searchValue)
+        item.destinataire.nom.toLowerCase().includes(searchValue) 
+        // item.courrier.objet.toLowerCase().includes(searchValue)
     );
     setFilteredData(filtered);
   };
 
-  const columns = [
+  const columnsTableExpediteur = [
     {
-      name: "Date d'Arrivée",
-      selector: (row: Arrivee) => new Date(row.dateArv).toLocaleString(),
+      name: "Id Courrier",
+      selector: (row: Envoi) => row?.courrierId,
+      sortable: true,
+    },
+    { name: "Objet", selector: (row: Envoi) => row?.courrier?.arrivee?.objet, sortable: true },
+    { name: "Expediteur", selector: (row: Envoi) => row?.courrier?.arrivee?.expediteur.nom, sortable: true },
+    {
+      name: "Transféré Par : ",
+      selector: (row: Envoi) => row?.expediteur.nom,
       sortable: true,
     },
     {
-      name: "Expéditeur",
-      selector: (row: Arrivee) => row.expediteur.nom,
+      name: "À",
+      selector: (row: Envoi) => row?.destinataire.nom,
+      sortable: true,
+    },   
+    {
+      name: "Note",
+      selector: (row: Envoi) =>row.note,
       sortable: true,
     },
-    { name: "Objet", selector: (row: Arrivee) => row.objet, sortable: true },
+  
    
-    {
-      name: "Trier Par",
-      selector: (row: Arrivee) => row.traitePar.nom,
-      sortable: true,
-    },
-       {
-         name: "Fichier",
-         cell: (row: Arrivee) => (
-          <div className="space-x-2 flex">
-          {row?.fichiers?.length>0 ? (
-            <Button
-              variant="see"
-              size="sm"
-              onClick={() => handleShowDetails(row)}
-            >
-              <Eye />
-            </Button>
-          ) : null}
-        </div>
-         ),
-       },
-       {
-         name: "Actions",
-         cell: (row: Arrivee) => (
-           <div className="space-x-2 flex">
-             <Button
-               variant="update"
-               size="sm"
-               onClick={() => handleTransfer(row.id)}
-             >
-               <ArrowRightLeft />
-             </Button>
-           </div>
-         ),
-       },
-       { name: "Type", selector: (row: Arrivee) => row.typeCourrier, sortable: true },
 
   ];
-
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.text("Liste des arrivées", 10, 10);
 
     const tableData = filteredData.map((row) => [
-      row.dateArv,
+      row.courrierId,
       row.expediteur.nom,
-      row.objet,
-      row.traitePar.nom
+      row.destinataire.nom,
       
-    
+
     ]);
 
     autoTable(doc, {
       head: [
         [
-          "Date ",
-          "Expéditeur",
+          "Id Courrier ",
+          "Date du transfert",
           "Objet",
-          "Trier Par",
-          "Expediteur",
+          "Expéditeur",
+          "Destinataire",
         ],
       ],
       body: tableData,
     });
+
     doc.save("Arrivées.pdf");
   };
 
@@ -190,10 +188,11 @@ export default function Page() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Arrivees");
     XLSX.writeFile(workbook, "Arrivées.xlsx");
+
   };
 
-  const handleShowDetails = (arrivee: Arrivee) => {
-    setSelectedArrivee(arrivee);
+  const handleShowDetails = (envoi: Envoi) => {
+    setSelectedEnvoi(envoi);
     setIsDetailDialogOpen(true);
   };
 
@@ -206,6 +205,9 @@ export default function Page() {
     router.push("/dashboard/arrivees/" + id);
   };
 
+  const handleShowFile2 = ()=>{
+    window.open('/dashboard/arrivees');
+  }
 
   return (
     <>
@@ -244,7 +246,7 @@ export default function Page() {
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Liste des Arrivées</BreadcrumbPage>
+                    <BreadcrumbPage>Courriers Transférés</BreadcrumbPage>
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
@@ -267,12 +269,7 @@ export default function Page() {
                   />
                 </div>
 
-                <Button
-                  onClick={handleAddArrivee}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Plus className="mr-2 h-4 w-4" /> Ajouter
-                </Button>
+             
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -288,23 +285,24 @@ export default function Page() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <div className="flex space-x-40">
+
             <div className="w-full">
               <DataTable
-                columns={columns}
+                columns={columnsTableExpediteur}
                 data={filteredData}
                 pagination
                 highlightOnHover
                 defaultSortFieldId={1}
                 paginationComponentOptions={paginationComponentOptions}
-              />
+                />
             </div>
+            <div className="">
+            <ArrowLeftRightIcon/>
+            </div>
+          
+                </div>
           </div>
-          <AlertDialogDetail
-            isOpen={isDetailDialogOpen}
-            onClose={() => setIsDetailDialogOpen(false)}
-            Arrivee={selectedArrivee}
-          />
-    
         </>
       )}
     </>

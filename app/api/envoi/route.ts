@@ -2,12 +2,23 @@ import { Result } from "postcss";
 import {
     
     addEnvoi,
+    fetchEnvois,
   } from "../../actions/envoiActions";
   
 
   
 
- 
+ export async function GET() {
+   try {
+     return await fetchEnvois(); // Fetch data using the server action
+   } catch (error) {
+     console.error(error);
+     return new Response(
+       JSON.stringify({ error: "Failed to fetch envois" }),
+       { status: 500 }
+     );
+   }
+ }
   
   // Gérer la requête POST pour ajouter une nouvelle arrivée
   export async function POST(request: Request) {

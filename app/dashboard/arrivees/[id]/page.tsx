@@ -36,7 +36,7 @@ import {
 
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { useParams, useRouter, useSearchParams } from "next/navigation"; 
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -54,8 +54,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
-
-
+import AlertDialogDetail from "../../_components/arriveeDetailsDialog";
 
 // Définition du type pour un départ
 type Arrivee = {
@@ -69,34 +68,34 @@ type Arrivee = {
   nbrFichier: number;
   typeSupport: string;
   typeCourrier: string;
-  traitePar:Utilisateur;
-  fichiers:Fichier[]
-  courrierId?:string;
-  courrier?:Courrier
+  traitePar: Utilisateur;
+  fichiers: Fichier[];
+  courrierId?: string;
+  courrier?: Courrier;
 };
 type Utilisateur = {
-  id:string,
-  nom:string
-}
+  id: string;
+  nom: string;
+};
 type Etablissement = {
-  id:string,
-  nom:string
-}
+  id: string;
+  nom: string;
+};
 type Fichier = {
-id:string,
-nom:string,
-url:string
-}
-type Courrier={
-  id:string,
-}
-type Envoi={
-  expediteurId:string,
-  destinataireId:string,
-  note?:string,
-  courrierId?:string,
-  createdAt?:string
-}
+  id: string;
+  nom: string;
+  url: string;
+};
+type Courrier = {
+  id: string;
+};
+type Envoi = {
+  expediteurId: string;
+  destinataireId: string;
+  note?: string;
+  courrierId?: string;
+  createdAt?: string;
+};
 
 const paginationComponentOptions = {
   rowsPerPageText: "Lignes par page",
@@ -107,22 +106,23 @@ const paginationComponentOptions = {
 };
 
 export default function Page() {
-  const [arrivee,setArrivee]=useState<Arrivee>();
-  const [envoi,setEnvoi]=useState<Envoi>();
-  const [utilisateurs,setUtilisateurs]=useState<Utilisateur[]>();
+  const [arrivee, setArrivee] = useState<Arrivee | null>(null);
+  const [envoi, setEnvoi] = useState<Envoi>();
+  const [utilisateurs, setUtilisateurs] = useState<Utilisateur[]>();
   const [loaded, setLoaded] = useState(false);
-  const [idCourrier,setIdCourrier]=useState("");
+  const [idCourrier, setIdCourrier] = useState("");
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [user,setUser] = useState<Utilisateur>();
-  const [error,setError] = useState();
-  const [formData,setFormData] = useState({
-    expediteurId:"",
-    destinataireId:"",
-    note:"",
-    courrierId:"",
-    createdAt:new Date(Date.now()).toISOString()
-
+  const [user, setUser] = useState<Utilisateur>();
+  const [error, setError] = useState();
+  const [formData, setFormData] = useState({
+    expediteurId: "",
+    destinataireId: "",
+    note: "",
+    courrierId: "",
+    createdAt: new Date(Date.now()).toISOString(),
   });
   useEffect(() => {
     const fetchUserData = async () => {
@@ -136,9 +136,9 @@ export default function Page() {
         // setUser(user);
         setFormData({
           ...formData,
-          expediteurId: user.id
-      });
-     
+          expediteurId: user.id,
+        });
+
         if (!user || !user.id) {
           throw new Error("Invalid user data");
         }
@@ -159,7 +159,7 @@ export default function Page() {
     };
     fetchData();
   }, []);
-  
+
   useEffect(() => {
     if (id) {
       const fetchData = async () => {
@@ -167,31 +167,26 @@ export default function Page() {
         const data = await response.json();
         setLoaded(true);
         setArrivee(data);
-        
       };
       fetchData();
     }
-   
   }, [id]);
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleShowDetails = (arrivee: Arrivee) => {
-    // setIsDetailDialogOpen(true);
-  };
   useEffect(() => {
     if (arrivee?.courrier?.id) {
-        setFormData({
-            ...formData,
-            courrierId: arrivee.courrier.id
-        });
+      setFormData({
+        ...formData,
+        courrierId: arrivee.courrier.id,
+      });
     }
-}, [arrivee]);
+  }, [arrivee]);
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();    
+    e.preventDefault();
     console.log(formData);
     try {
       const response = await fetch("/api/envoi", {
@@ -217,8 +212,6 @@ export default function Page() {
         variant: "destructive",
       });
     }
-
-   
   };
 
   // Handle cancel button click
@@ -226,8 +219,22 @@ export default function Page() {
     router.push("/dashboard/arrivees");
   };
 
-
-
+  const exportFiles = () => {
+    if (arrivee?.fichiers) {
+      for (let f of arrivee?.fichiers) {
+        const fileUrl = f.url; // Chemin relatif au dossier public
+        const link = document.createElement("a");
+        link.href = fileUrl;
+        link.setAttribute("download", f.nom); // Nom du fichier téléchargé
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  };
+  const handleShowDetails = () => {
+    setIsDetailDialogOpen(true);
+  };
 
   return (
     <>
@@ -255,163 +262,186 @@ export default function Page() {
         </div>
       ) : (
         <>
-      <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-        <div className="flex items-center gap-2 px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">Bureau d'ordre</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Transferrer</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-      </header>
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+            <div className="flex items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden md:block">
+                    <BreadcrumbLink href="#">Bureau d'ordre</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Transferrer</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            </div>
+          </header>
 
-      <div className="container">
-        <div className="flex flex-col space-y-4 p-4">
-          <div className="flex items-center justify-center mt-10">
-            <Card className="w-[450px] ">
-              <CardHeader>
-                <CardTitle>Transferrer le courrier</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSubmit} >
-                  <div className="grid w-full items-center gap-4">
-                    <div className="flex flex-col space-y-1.5">
-                      <div className="flex space-x-2 pb-2">
-                        <User /> <Label htmlFor="name"> Destiné à :</Label>
+          <div className="container">
+            <div className="flex flex-col space-y-4 p-4">
+              <div className="flex items-center justify-center mt-10">
+                <Card className="w-[450px] ">
+                  <CardHeader>
+                    <CardTitle>Transferrer le courrier</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <form onSubmit={handleSubmit}>
+                      <div className="grid w-full items-center gap-4">
+                        <div className="flex flex-col space-y-1.5">
+                          <div className="flex space-x-2 pb-2">
+                            <User /> <Label htmlFor="name"> Destiné à :</Label>
+                          </div>
+                          <Select
+                            value={envoi?.destinataireId}
+                            onValueChange={(value) => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                destinataireId: value,
+                              }));
+                            }}
+                            name="destinationId"
+                            required={true}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="-- Destination --" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {utilisateurs?.map((e) => {
+                                return (
+                                  <SelectItem key={e.id} value={e.id}>
+                                    {e.nom}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="flex flex-col space-y-1.5">
+                          <div className="flex space-x-2 pb-2">
+                            <MessageSquareQuoteIcon />
+                            <Label htmlFor="framework">Note </Label>
+                          </div>
+                          <Input
+                            id="name"
+                            name="note"
+                            placeholder="note"
+                            value={formData?.note}
+                            onChange={handleInputChange}
+                          />
+                        </div>
                       </div>
-                      <Select
-                value={envoi?.destinataireId}
-                onValueChange={(value)=>{setFormData((prev) => ({ ...prev, destinataireId:value }))}}
-                name="destinationId"
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="-- Destination --" />
-                </SelectTrigger>
-                <SelectContent>
-                  {utilisateurs?.map((e) => {
-                    return (
-                      <SelectItem key={e.id} value={e.id}>
-                        {e.nom}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-                    </div>
+                    </form>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Button onClick={handleCancel} variant="outline">
+                      Fermer
+                    </Button>
+                    <Button onClick={handleSubmit} type="submit">
+                      Transferrer
+                    </Button>
+                  </CardFooter>
+                </Card>
+                <Card className="w-[450px] ">
+                  <CardHeader className="bg-sky-400">
+                    <div className="flex mr-px">
+                      <Mail className="mr-4" />
 
-                    <div className="flex flex-col space-y-1.5">
-                      <div className="flex space-x-2 pb-2">
-                        <MessageSquareQuoteIcon />
-                        <Label htmlFor="framework">Note </Label>
+                      <CardTitle>Détails du courrier</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="mt-4">
+                    <div className="grid w-full items-center gap-4">
+                      <div className="flex flex-col space-y-1.5">
+                        <div className="flex space-x-2 pb-2">
+                          <Calendar />{" "}
+                          <p>
+                            <b> ID et Année: </b>
+                            {arrivee?.idOrdre}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 pb-2">
+                          <CalendarDays />
+                          <p>
+                            <b> Date : </b>
+                            {arrivee?.dateOrigin}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 pb-2">
+                          <User />
+                          <p>
+                            <b> Éxpediteur : </b>
+                            {arrivee?.expediteur.nom}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 pb-2">
+                          <Newspaper />
+                          <p>
+                            <b> Objet : </b>
+                            {arrivee?.objet}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 pb-2">
+                          <Paperclip />
+                          <p>
+                            <b> Type de support : </b>
+                            {arrivee?.typeSupport}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 pb-2">
+                          <FileType2 />
+                          <p>
+                            <b> Type de courrier : </b>
+                            {arrivee?.typeCourrier}
+                          </p>
+                        </div>
+                        <div className="flex space-x-2 pb-2">
+                          <File />
+                          <p>
+                            <b> Fiche : </b>
+                            {arrivee?.fichiers.at(0) ? (
+                              <Button
+                                className="mr-2"
+                                variant="see"
+                                size="sm"
+                                onClick={() => handleShowDetails()}
+                              >
+                                <Eye />
+                              </Button>
+                            ) : null}
+                            {arrivee?.fichiers.at(0) ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => exportFiles()}
+                              >
+                                <DownloadIcon />
+                              </Button>
+                            ) : null}
+                          </p>
+                        </div>
                       </div>
-                      <Input id="name" name="note" placeholder="note" value={formData?.note} onChange={handleInputChange}/>
                     </div>
-                   
-                  </div>
-                </form>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button onClick={handleCancel} variant="outline">Fermer</Button>
-                <Button onClick={handleSubmit} type="submit">Transferrer</Button>
-              </CardFooter>
-            </Card>
-            <Card className="w-[450px] ">
-              <CardHeader className="bg-sky-400">
-                <div className="flex mr-px">
-                  <Mail className="mr-4" />
-
-                  <CardTitle>Détails du courrier</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent className="mt-4">
-                <div className="grid w-full items-center gap-4">
-                  <div className="flex flex-col space-y-1.5">
-                    <div className="flex space-x-2 pb-2">
-                      <Calendar />{" "}
-                      <p>
-                        <b> ID et Année: </b>
-                        {arrivee?.idOrdre}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2 pb-2">
-                      <CalendarDays />
-                      <p>
-                        <b> Date : </b>
-                        {arrivee?.dateOrigin}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2 pb-2">
-                      <User />
-                      <p>
-                        <b> Éxpediteur : </b>
-                       {arrivee?.expediteur.nom}
-
-
-                      </p>
-                    </div>
-                    <div className="flex space-x-2 pb-2">
-                      <Newspaper />
-                      <p>
-                        <b> Objet : </b>
-                        {arrivee?.objet}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2 pb-2">
-                      <Paperclip />
-                      <p>
-                        <b> Type de support : </b>
-                        {arrivee?.typeSupport}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2 pb-2">
-                      <FileType2 />
-                      <p>
-                        <b> Type de courrier : </b>
-                        {arrivee?.typeCourrier}
-                      </p>
-                    </div>
-                    <div className="flex space-x-2 pb-2">
-                      <File />
-                      <p>
-                        <b> Fiche : </b>
-                        <Button
-                          className="mr-2"
-                          variant="see"
-                          size="sm"
-                          // onClick={() => handleShowDetails()}
-                        >
-                          <Eye />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          // onClick={() => handleShowDetails()}
-                        >
-                          <DownloadIcon />
-                        </Button>{" "}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button onClick={handleCancel} variant="outline">retour à la liste</Button>
-              </CardFooter>
-            </Card>
+                  </CardContent>
+                  <CardFooter className="flex justify-between">
+                    <Button onClick={handleCancel} variant="outline">
+                      retour à la liste
+                    </Button>
+                  </CardFooter>
+                </Card>
+                <AlertDialogDetail
+                  isOpen={isDetailDialogOpen}
+                  onClose={() => setIsDetailDialogOpen(false)}
+                  Arrivee={arrivee}
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </>
-  )}
-  </>
-);
+  );
 }

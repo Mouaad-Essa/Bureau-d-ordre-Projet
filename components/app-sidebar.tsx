@@ -177,6 +177,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: "Créer une Arrivée",
             url: "/dashboard/arrivees/add",
           },
+          {
+            title: "Courriers Transférés",
+            url: "/dashboard/arrivees/transferts",
+          },
         ],
       },
       {
