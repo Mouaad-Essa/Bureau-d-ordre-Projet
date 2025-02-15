@@ -138,12 +138,12 @@ export default function Page() {
     { name: "Expediteur", selector: (row: Envoi) => row?.courrier?.arrivee?.expediteur.nom, sortable: true },
     {
       name: "Transféré Par : ",
-      selector: (row: Envoi) => row?.expediteur.nom,
+      selector: (row: Envoi) => row?.expediteur?.nom,
       sortable: true,
     },
     {
       name: "À",
-      selector: (row: Envoi) => row?.destinataire.nom,
+      selector: (row: Envoi) => row?.destinataire?.nom,
       sortable: true,
     },   
     {
@@ -180,14 +180,14 @@ export default function Page() {
       body: tableData,
     });
 
-    doc.save("Arrivées.pdf");
+    doc.save("CourriersTransfere.pdf");
   };
 
   const exportToExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Arrivees");
-    XLSX.writeFile(workbook, "Arrivées.xlsx");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "CourriersTransfere");
+    XLSX.writeFile(workbook, "CourriersTransfere.xlsx");
 
   };
 
@@ -196,18 +196,6 @@ export default function Page() {
     setIsDetailDialogOpen(true);
   };
 
-
-  const handleAddArrivee = () => {
-    router.push("/dashboard/arrivees/add");
-  };
-
-  const handleTransfer = (id: string) => {
-    router.push("/dashboard/arrivees/" + id);
-  };
-
-  const handleShowFile2 = ()=>{
-    window.open('/dashboard/arrivees');
-  }
 
   return (
     <>
