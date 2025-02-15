@@ -1,6 +1,13 @@
 "use client";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+  BreadcrumbPage,
+} from "@/components/ui/breadcrumb";
 import { useEffect, useState } from "react";
 import { ChartNoAxesCombined, TrendingUp } from "lucide-react";
 import {
@@ -34,41 +41,39 @@ import {
 import { fetchStatistics } from "../../actions/statisticsActions"; // Import the fetchStatistics function
 
 export default function Page() {
+  interface StatisticsData {
+    lettresArrivees: number;
+    lettresDeparts: number;
+    monthlyStats: { month: string; arrivees: number; departs: number }[] | null;
+  }
 
-const [chartData, setChartData] = useState<
-{ month: string; arrivees: number; departs: number }[]
-  >([]);
+  const [loaded, setLoaded] = useState(false);
+  const [chartData, setChartData] = useState<
+    { month: string; arrivees: number; departs: number }[] | null
+  >(null);
   const [totalLetters, setTotalLetters] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userId = "fakeUserId"; // Replace with a real userId if available
-        const data = await fetchStatistics(userId);
-
-        // Handle error message if exists
-        if ("error" in data) {
-          setError(data.error); // Set error message
-          return;
+        const response = await fetch("/api/statistics");
+        const data: StatisticsData = await response.json();
+        console.log(data);
+        setLoaded(true);
+        if (!data.monthlyStats) {
+          throw new Error("No monthly statistics found");
         }
 
-        // Format monthly data
-        const formattedData = data.monthlyStats.map((item) => ({
-          month: item.month,
-          arrivees: item.arrivees,
-          departs: item.departs,
-        }));
-
-        setChartData(formattedData);
+        setChartData(data.monthlyStats);
         setTotalLetters(data.lettresArrivees + data.lettresDeparts);
-        setLoaded(true);
-      } catch (error) {
-        console.error("Error fetching statistics:", error);
-        setError("An unexpected error occurred while fetching statistics.");
+      } catch (error: any) {
+        setError(
+          error.message || "An error occurred while fetching statistics."
+        );
       }
     };
+
     fetchData();
   }, []);
 
@@ -82,9 +87,12 @@ const [chartData, setChartData] = useState<
       color: "#2973B2", // Red color for departures
     },
   };
+  // Check if chartData is null or not
+  const totalArrivees =
+    chartData?.reduce((acc, curr) => acc + Number(curr.arrivees), 0) || 0;
 
-  const totalArrivees = chartData.reduce((acc, curr) => acc + curr.arrivees, 0);
-  const totalDeparts = chartData.reduce((acc, curr) => acc + curr.departs, 0);
+  const totalDeparts =
+    chartData?.reduce((acc, curr) => acc + Number(curr.departs), 0) || 0;
 
   return (
     <>
@@ -111,153 +119,158 @@ const [chartData, setChartData] = useState<
           </div>
         </div>
       ) : (
-      <>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <>
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
             <div className="flex items-center gap-2 px-4">
-                <SidebarTrigger className="-ml-1" />
-                <Breadcrumb>
-                    <BreadcrumbList>
-                    <BreadcrumbItem className="hidden md:block">
-                        <BreadcrumbLink href="#">
-                            Bureau d'ordre
-                        </BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                        <BreadcrumbPage>Statistiques</BreadcrumbPage>
-                    </BreadcrumbItem>
-                    </BreadcrumbList>
-                </Breadcrumb>
+              <SidebarTrigger className="-ml-1" />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  <BreadcrumbItem className="hidden md:block">
+                    <BreadcrumbLink href="#">Bureau d'ordre</BreadcrumbLink>
+                  </BreadcrumbItem>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Statistiques</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
             </div>
-        </header>
-        <div className="container flex gap-4 flex-col">
-            {" "}
-            <h1
-                className=" rounded-lg w-fit self-center bg-gradient-to-r from-gray-200 
-        from-40% to-blue-500 text-gray-900 text-2xl 
-        font-semibold p-3 flex items-center justify-center"
-            >
-                <span>Statistiques des courriers</span>
-            </h1>
-            <div className="flex flex-row  gap-6">
-                {/* Handle errors */}
-                {error && <div className="text-red-500">{error}</div>}
+          </header>
 
-                {/* Bar Chart with Monthly Stats */}
-                <Card className="flex-1">
+          <div className="container flex gap-4 flex-col">
+            <div className="flex flex-row gap-6">
+              {/* Handle errors */}
+              {error && <div className="text-red-500">{error}</div>}
+
+              {/* Bar Chart - Monthly Stats */}
+              <Card className="flex-1">
                 <CardHeader>
-                    <CardTitle>Statistiques Mensuelles des courriers</CardTitle>
-                    <CardDescription>Arrivées vs Départs par mois</CardDescription>
+                  <CardTitle>Statistiques Mensuelles des Courriers</CardTitle>
+                  <CardDescription>
+                    Arrivées vs Départs par mois
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ChartContainer config={chartConfig}>
-                    <BarChart data={chartData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" tick={{ fill: "gray" }} />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar
+                  <ChartContainer config={chartConfig}>
+                    <BarChart data={chartData || []}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" tick={{ fill: "gray" }} />
+                      <YAxis />
+                      <Tooltip />
+                      <Legend />
+                      <Bar
                         dataKey="arrivees"
                         fill={chartConfig.arrivee.color}
                         name={chartConfig.arrivee.label}
-                        />
-                        <Bar
+                      />
+                      <Bar
                         dataKey="departs"
                         fill={chartConfig.depart.color}
                         name={chartConfig.depart.label}
-                        />
+                      />
                     </BarChart>
-                    </ChartContainer>
+                  </ChartContainer>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 text-sm">
-                    <div className="leading-none text-muted-foreground">
+                  <div className="leading-none text-muted-foreground">
                     Nombre total de courriers : {totalLetters}
-                    </div>
+                  </div>
                 </CardFooter>
-                </Card>
+              </Card>
 
-                {/* Radial Donut Chart */}
-                <Card className="flex-1">
+              {/* Radial Donut Chart */}
+              <Card className="flex-1">
                 <CardHeader>
-                    <CardTitle>Répartition des courriers</CardTitle>
-                    <CardDescription>Arrivées vs Départs</CardDescription>
+                  <CardTitle>Répartition des Courriers</CardTitle>
+                  <CardDescription>Arrivées vs Départs</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <ChartContainer
+                  <ChartContainer
                     config={chartConfig}
                     className="mx-auto aspect-square max-w-[250px]"
-                    >
+                  >
                     <RadialBarChart
-                        data={[{ arrivees: totalArrivees, departs: totalDeparts }]}
-                        endAngle={180}
-                        innerRadius={80}
-                        outerRadius={130}
+                      data={[
+                        {
+                          name: "Courriers",
+                          arrivees: totalArrivees,
+                          departs: totalDeparts,
+                        },
+                      ]}
+                      endAngle={180}
+                      innerRadius={80}
+                      outerRadius={130}
                     >
-                        <ChartTooltip
+                      <ChartTooltip
                         cursor={false}
                         content={<ChartTooltipContent hideLabel />}
-                        />
-                        <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+                      />
+                      <PolarRadiusAxis
+                        tick={false}
+                        tickLine={false}
+                        axisLine={false}
+                      >
                         <Label
-                            content={({ viewBox }) => {
+                          content={({ viewBox }) => {
                             if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                return (
+                              return (
                                 <text
-                                    x={viewBox.cx}
-                                    y={viewBox.cy}
-                                    textAnchor="middle"
+                                  x={viewBox.cx}
+                                  y={viewBox.cy}
+                                  textAnchor="middle"
                                 >
-                                    <tspan
+                                  <tspan
                                     x={viewBox.cx}
                                     y={(viewBox.cy || 0) - 16}
                                     className="fill-foreground text-2xl font-bold"
-                                    >
+                                  >
                                     {totalLetters.toLocaleString()}
-                                    </tspan>
-                                    <tspan
+                                  </tspan>
+                                  <tspan
                                     x={viewBox.cx}
                                     y={(viewBox.cy || 0) + 4}
                                     className="fill-muted-foreground"
-                                    >
+                                  >
                                     Courriers
-                                    </tspan>
+                                  </tspan>
                                 </text>
-                                );
+                              );
                             }
-                            }}
+                          }}
                         />
-                        </PolarRadiusAxis>
-                        <RadialBar
+                      </PolarRadiusAxis>
+                      <RadialBar
                         dataKey="arrivees"
                         stackId="a"
                         cornerRadius={5}
                         fill={chartConfig.arrivee.color}
                         className="stroke-transparent stroke-2"
-                        />
-                        <RadialBar
+                      />
+                      <RadialBar
                         dataKey="departs"
                         stackId="a"
                         cornerRadius={5}
                         fill={chartConfig.depart.color}
                         className="stroke-transparent stroke-2"
-                        />
+                      />
                     </RadialBarChart>
-                    </ChartContainer>
+                  </ChartContainer>
                 </CardContent>
                 <CardFooter className="flex-col items-start gap-2 text-sm">
-                    <div className="flex gap-2 font-medium leading-none">
-                    En hausse de 5,2 % ce mois-ci <TrendingUp className="h-4 w-4" />
-                    </div>
-                    <div className="leading-none text-muted-foreground">
+                  <div className="flex gap-2 font-medium leading-none">
+                    En hausse de 5,2 % ce mois-ci{" "}
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
+                  <div className="leading-none text-muted-foreground">
                     Nombre total de courriers : {totalLetters}
-                    </div>
+                  </div>
                 </CardFooter>
-                </Card>
+              </Card>
             </div>
-            </div>
+          </div>
         </>
-        )};
+      )}
+      ;
     </>
   );
 }

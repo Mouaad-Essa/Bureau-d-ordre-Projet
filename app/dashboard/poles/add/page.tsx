@@ -12,7 +12,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+} from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -20,13 +20,12 @@ import { Building } from "lucide-react";
 export default function AddPolePage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [loaded,setLoaded]=useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   // State to manage form inputs
   const [formData, setFormData] = useState({
     nom: "",
     description: "",
-    
   });
 
   // Handle input changes
@@ -68,8 +67,7 @@ export default function AddPolePage() {
     // Reset the form after submission
     setFormData({
       nom: "",
-      description: ""
-      
+      description: "",
     });
   };
 
@@ -78,24 +76,22 @@ export default function AddPolePage() {
     router.push("/dashboard/poles");
   };
 
-
   return (
     <>
+
     
 <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <Breadcrumb>
                 <BreadcrumbList>
                   <BreadcrumbItem className="hidden md:block">
-                    <BreadcrumbLink href="#">
-                      Bureau d'ordre
-                    </BreadcrumbLink>
+                    <BreadcrumbLink href="#">Bureau d'ordre</BreadcrumbLink>
                   </BreadcrumbItem>
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
-
                     <BreadcrumbLink href="/dashboard/poles">
                       Pôles
                     </BreadcrumbLink>
@@ -103,12 +99,12 @@ export default function AddPolePage() {
                   <BreadcrumbSeparator className="hidden md:block" />
                   <BreadcrumbItem>
                     <BreadcrumbPage>Ajouter</BreadcrumbPage>
-
                   </BreadcrumbItem>
                 </BreadcrumbList>
               </Breadcrumb>
             </div>
           </header>
+
 
     
     <div className="flex flex-col space-y-4 p-4 w-full max-w-screen-lg mx-auto">
@@ -173,6 +169,7 @@ export default function AddPolePage() {
         </div>
       </form>
     </div>
+
     </>
   );
 }
