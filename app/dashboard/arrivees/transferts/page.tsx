@@ -135,7 +135,7 @@ export default function Page() {
       sortable: true,
     },
     { name: "Objet", selector: (row: Envoi) => row?.courrier?.arrivee?.objet, sortable: true },
-    { name: "Expediteur", selector: (row: Envoi) => row?.courrier?.arrivee?.expediteur.nom, sortable: true },
+    { name: "Expediteur", selector: (row: Envoi) => row?.courrier?.arrivee?.expediteur?.nom, sortable: true },
     {
       name: "Transféré Par : ",
       selector: (row: Envoi) => row?.expediteur?.nom,
