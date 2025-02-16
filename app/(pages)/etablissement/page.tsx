@@ -57,9 +57,31 @@ export default function Page() {
   const [selectedEtablissement, setSelectedEtablissement] =
     useState<Etablissement | null>(null);
 
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false); // State for detail dialog
-
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+  const [hasEditPrivilege, setHasEditPrivilege] = useState(false);
   const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("/api/userData");
+        if (!response.ok) {
+          throw new Error("Failed to fetch user ID");
+        }
+
+        const { user } = await response.json();
+        setHasEditPrivilege(user.privileges.includes("canEditEstablishment"));
+        if (!user || !user.id) {
+          throw new Error("Invalid user data");
+        }
+      } catch (error: any) {
+        console.error("Error fetching user data:", error);
+      } finally {
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   //fetch logic
   useEffect(() => {
@@ -227,19 +249,24 @@ export default function Page() {
       name: "Actions",
       cell: (row: Etablissement) => (
         <div className="space-x-2 flex">
-          <Button variant="update" size="sm" onClick={() => handleEdit(row)}>
-            <Edit />
-          </Button>
-          <Button
-            size="sm"
-            variant="delete"
-            onClick={() => {
-              setSelectedEtablissementId(row.id);
-              setIsDeleteDialogOpen(true);
-            }}
-          >
-            <Trash />
-          </Button>
+          {hasEditPrivilege && (
+            <>
+              <Button
+                variant="update"
+                size="sm"
+                onClick={() => setIsEditSheetOpen(true)}
+              >
+                <Edit />
+              </Button>
+              <Button
+                size="sm"
+                variant="delete"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash />
+              </Button>
+            </>
+          )}
           <Button
             size="sm"
             variant="see"
