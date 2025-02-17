@@ -19,6 +19,7 @@ export async function GET() {
 }
 
 // Handle DELETE request to delete an etablissement by ID
+
 export async function DELETE(request: Request) {
   try {
     // Read the ID from the request body

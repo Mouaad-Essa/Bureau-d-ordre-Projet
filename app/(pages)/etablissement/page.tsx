@@ -254,14 +254,17 @@ export default function Page() {
               <Button
                 variant="update"
                 size="sm"
-                onClick={() => setIsEditSheetOpen(true)}
+                onClick={() => handleEdit(row)}
               >
                 <Edit />
               </Button>
               <Button
                 size="sm"
                 variant="delete"
-                onClick={() => setIsDeleteDialogOpen(true)}
+                onClick={() => {
+                  setSelectedEtablissementId(row.id);
+                  setIsDeleteDialogOpen(true);
+                }}
               >
                 <Trash />
               </Button>
@@ -309,12 +312,14 @@ export default function Page() {
                 className="pl-8 w-full md:w-[300px]"
               />
             </div>
-            <Button
-              onClick={handleClick}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Ajouter
-            </Button>
+            {hasEditPrivilege && (
+              <Button
+                onClick={handleClick}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Plus className="mr-2 h-4 w-4" /> Ajouter
+              </Button>
+            )}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
