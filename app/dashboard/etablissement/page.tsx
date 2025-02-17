@@ -150,9 +150,7 @@ export default function Page() {
   // update logic
   const handleSave = async (updatedEtablissement: Etablissement) => {
     try {
-
       const response = await fetch("/api/etablissement", {
-
         method: "PUT", // Use PUT for updating
         headers: {
           "Content-Type": "application/json",
