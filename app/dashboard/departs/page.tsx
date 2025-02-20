@@ -99,7 +99,6 @@ export default function Page() {
       setFilteredData(data);
       setLoaded(true);
     };
-
     fetchData();
   }, []);
 

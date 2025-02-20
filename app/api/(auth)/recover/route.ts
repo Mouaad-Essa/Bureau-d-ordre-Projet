@@ -25,14 +25,11 @@ export async function POST(req: Request) {
     if (!email) {
       return NextResponse.json({ error: "L'email est requis." }, { status: 400 });
     }
-
     // Find the user by email
     const user = await prisma.utilisateur.findUnique({
-
         where: { email },
         
     });
-
     if (!user) {
       return NextResponse.json({ error: "Utilisateur introuvable." }, { status: 404 });
     }

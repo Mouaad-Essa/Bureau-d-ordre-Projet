@@ -66,7 +66,6 @@ type Arrivee = {
   typeCourrier: string;
   traitePar:Utilisateur;
   fichiers:Fichier[]
-  
 };
 type Utilisateur = {
   id:string,
@@ -96,12 +95,10 @@ export default function Page() {
   const [envois, setEnvois] = useState<Envoi[]>([]);
   const [filteredData, setFilteredData] = useState<Envoi[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [arrivees, setArrivees] = useState<Arrivee>();
-  const [selectedEnvoi, setSelectedEnvoi] = useState<Envoi | null>(null);
-  const router = useRouter();
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
   const [loaded, setLoaded] = useState(false);
-  const [showFile,setShowFile] = useState(false);
+  const [searchDateNotValid, setSearchDateNotValid] = useState(false);
   const[file,setFile] = useState<Fichier>();
   useEffect(() => {
     const fetchData = async () => {
@@ -122,28 +119,53 @@ export default function Page() {
     const filtered = envois.filter(
       (item) =>
         item.expediteur.nom.toLowerCase().includes(searchValue) ||
-        item.destinataire.nom.toLowerCase().includes(searchValue) 
-        // item.courrier.objet.toLowerCase().includes(searchValue)
+        item.destinataire.nom.toLowerCase().includes(searchValue) ||
+        item.courrier.arrivee.objet.toLowerCase().includes(searchValue)
     );
     setFilteredData(filtered);
   };
+  const handleSearchByDate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if(e.target.name==='dateDebut')
+      setDateDebut(e.target.value);
+    else
+      setDateFin(e.target.value);
+    
+
+  };
+
+  useEffect(()=>{
+    if(dateDebut&&dateFin){
+      if(dateFin>dateDebut){
+        setSearchDateNotValid(false)
+        const filtered = envois.filter(item=>
+          (item.createdAt>=dateDebut && item.createdAt<= dateFin)
+        )
+        setFilteredData(filtered);
+        console.log(filtered);
+      }
+      else{
+        setSearchDateNotValid(true)
+      }
+    }
+
+  },[dateDebut,dateFin])
+
+
+
 
   const columnsTableExpediteur = [
-    {
-      name: "Id Courrier",
-      selector: (row: Envoi) => row?.courrierId,
-      sortable: true,
-    },
+   
+    { name: "Date de Transfert", selector: (row: Envoi) => new Date(row?.createdAt).toLocaleDateString(), sortable: true },
     { name: "Objet", selector: (row: Envoi) => row?.courrier?.arrivee?.objet, sortable: true },
-    { name: "Expediteur", selector: (row: Envoi) => row?.courrier?.arrivee?.expediteur?.nom, sortable: true },
+    { name: "Expediteur", selector: (row: Envoi) => (row?.courrier?.arrivee?.expediteur?.nom) , sortable: true },
     {
       name: "Transféré Par : ",
-      selector: (row: Envoi) => row?.expediteur?.nom,
+      selector: (row: Envoi) => row?.expediteur?.nom +" "+row?.expediteur?.prenom,
       sortable: true,
     },
     {
       name: "À",
-      selector: (row: Envoi) => row?.destinataire?.nom,
+      selector: (row: Envoi) => row?.destinataire?.nom +" "+row?.destinataire?.prenom,
       sortable: true,
     },   
     {
@@ -161,10 +183,11 @@ export default function Page() {
 
     const tableData = filteredData.map((row) => [
       row.courrierId,
-      row.expediteur.nom,
-      row.destinataire.nom,
-      
-
+      row.createdAt,
+      row.courrier.arrivee.objet,
+      row?.courrier?.arrivee?.expediteur?.nom,
+      row?.expediteur?.nom +" "+row?.expediteur?.prenom,
+      row?.destinataire?.nom +" "+row?.destinataire?.prenom
     ]);
 
     autoTable(doc, {
@@ -174,7 +197,8 @@ export default function Page() {
           "Date du transfert",
           "Objet",
           "Expéditeur",
-          "Destinataire",
+          "Transferé par",
+          "À",
         ],
       ],
       body: tableData,
@@ -189,11 +213,6 @@ export default function Page() {
     XLSX.utils.book_append_sheet(workbook, worksheet, "CourriersTransfere");
     XLSX.writeFile(workbook, "CourriersTransfere.xlsx");
 
-  };
-
-  const handleShowDetails = (envoi: Envoi) => {
-    setSelectedEnvoi(envoi);
-    setIsDetailDialogOpen(true);
   };
 
 
@@ -256,7 +275,32 @@ export default function Page() {
                     className="pl-8 w-full md:w-[300px]" // Adjust width as needed
                   />
                 </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="date"
+                    name="dateDebut"
+                    value={dateDebut}
+                    onChange={handleSearchByDate}
+                    className="pl-8 w-full md:w-[300px]" // Adjust width as needed
+                  />
+                </div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                  name="dateFin"
+                    type="date"
+                    value={dateFin}
+                    onChange={handleSearchByDate} 
+                    className="pl-8 w-full md:w-[300px]" // Adjust width as needed
+                  />
+                </div>
+                {
+                  searchDateNotValid?(
 
+                    <p className="text-red-600">Veuillez sélectionner une plage de dates valide</p>
+                  ):null
+                }
              
               </div>
               <DropdownMenu>
